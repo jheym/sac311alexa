@@ -1,0 +1,6 @@
+ask-resources.json
+.ask
+.vscode
+lambda/node_modules
+lambda/package.json
+lambda/package-lock.json
