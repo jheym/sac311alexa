@@ -4,3 +4,5 @@ ask-resources.json
 lambda/node_modules
 lambda/package.json
 lambda/package-lock.json
+lambda/local-debugger.js
+lambda/util.js
