@@ -29,6 +29,24 @@
           ]
         },
         {
+          "name": "AbandonedVehicleIntent",
+          "slots": [
+            {
+              "name": "primaryCategory",
+              "type": "PRIMARY_SLOT"
+            }
+          ],
+          "samples": [
+            "abandoned vehicle",
+            "there's an abandoned vehicle",
+            "there is an abandoned vehicle",
+            "abandoned car",
+            "there is an abandoned car",
+            "there's an abandoned car",
+            "abandoned automobile"
+          ]
+        },
+        {
           "name": "AMAZON.NavigateHomeIntent",
           "samples": []
         }
@@ -36,5 +54,5 @@
       "types": []
     }
   },
-  "version": "1"
+  "version": "2"
 }
