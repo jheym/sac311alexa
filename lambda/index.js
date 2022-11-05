@@ -30,7 +30,8 @@ const ticketCategoryIntentHandler = {
     const request = handlerInput.requestEnvelope.request
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      request.intentName === "ticketCategoryIntent"
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "ticketCategoryIntent"
     )
   },
   handle(handlerInput) {
