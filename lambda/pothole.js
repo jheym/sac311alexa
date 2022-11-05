@@ -8,11 +8,11 @@ const PotHoleRequestHandler = {
         )
         },
         handle(handlerInput){
-            const speechText =  'Thank you for reporting the pot hole.'
+            const speechText =  "Thank you for reporting the pot hole"
             return handlerInput.responseBuilder
             .speak(speechText)
             .reprompt(speechText)
-            .withSimpleCard('Thank you for reporting the pot hole.')
+            .withSimpleCard("Thank you for reporting the pot hole.")
             
         
         .getResponse()
