@@ -5,7 +5,7 @@
  * */
 const Alexa = require("ask-sdk-core")
 
-const abandonedVehicle = require("./abandoned-vehicle.js")
+// const abandonedVehicle = require("./abandoned-vehicle.js")
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -15,7 +15,7 @@ const LaunchRequestHandler = {
   },
   handle(handlerInput) {
     const speakOutput =
-      "Welcome to the Sacramento 311 App. You can say Hello or Help. Which would you like to try?"
+      "Welcome to the Sacramento 311 App. In a few words, can you please describe your issue?"
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -24,24 +24,47 @@ const LaunchRequestHandler = {
   },
 }
 
-const HelloWorldIntentHandler = {
+const ticketCategoryIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) === "HelloWorldIntent"
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "ticketCategoryIntent"
     )
   },
   handle(handlerInput) {
-    const speakOutput = "Hello World!"
+    const slotValue = Alexa.getSlotValue(
+      handlerInput.requestEnvelope,
+      "ticketCategoryType"
+    )
+    const speakOutput = "Your issue is " + slotValue
 
     return (
       handlerInput.responseBuilder
         .speak(speakOutput)
-        //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+        // .reprompt()
         .getResponse()
     )
   },
 }
+// const HelloWorldIntentHandler = {
+//   canHandle(handlerInput) {
+//     return (
+//       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+//       Alexa.getIntentName(handlerInput.requestEnvelope) === "HelloWorldIntent"
+//     )
+//   },
+//   handle(handlerInput) {
+//     const speakOutput = "Hello World!"
+
+//     return (
+//       handlerInput.responseBuilder
+//         .speak(speakOutput)
+//         //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+//         .getResponse()
+//     )
+//   },
+// }
 
 const HelpIntentHandler = {
   canHandle(handlerInput) {
@@ -170,8 +193,9 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
-    HelloWorldIntentHandler,
-    abandonedVehicle.AbandonedVehicleIntentHandler,
+    ticketCategoryIntentHandler,
+    // HelloWorldIntentHandler,
+    // abandonedVehicle.AbandonedVehicleIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,

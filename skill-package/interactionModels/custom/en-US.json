@@ -41,10 +41,10 @@
               "samples": [
                 "I have found a {ticketCategoryType}",
                 "There is a {ticketCategoryType}",
-                "I\u0027ve found a {ticketCategoryType}",
+                "I've found a {ticketCategoryType}",
                 "{ticketCategoryType}",
                 "Report a {ticketCategoryType}",
-                "There\u0027s a {ticketCategoryType}"
+                "There's a {ticketCategoryType}"
               ]
             }
           ],
@@ -54,9 +54,24 @@
             "Report an {ticketCategoryType}",
             "Report a {ticketCategoryType}",
             "There is an {ticketCategoryType}",
-            "There\u0027s an {ticketCategoryType}",
+            "There's an {ticketCategoryType}",
             "There is a {ticketCategoryType}",
-            "There\u0027s a {ticketCategoryType}"
+            "There's a {ticketCategoryType}"
+          ]
+        },
+        {
+          "name": "PotHoleIntent",
+          "slots": [
+            {
+              "name": "location",
+              "type": "AMAZON.PostalAddress"
+            }
+          ],
+          "samples": [
+            "I would like to report a pothole",
+            "there is a pothole on {location}",
+            "pothole",
+            "there is a pothole"
           ]
         }
       ],
@@ -66,28 +81,19 @@
             {
               "name": {
                 "value": "fallen tree",
-                "synonyms": [
-                  "tree has fallen",
-                  "tree fell"
-                ]
+                "synonyms": ["tree has fallen", "tree fell"]
               }
             },
             {
               "name": {
                 "value": "lost animal",
-                "synonyms": [
-                  "lost cat",
-                  "lost dog"
-                ]
+                "synonyms": ["lost cat", "lost dog"]
               }
             },
             {
               "name": {
                 "value": "abandoned vehicle",
-                "synonyms": [
-                  "abandoned automobile",
-                  "abandoned car"
-                ]
+                "synonyms": ["abandoned automobile", "abandoned car"]
               }
             }
           ],
@@ -123,7 +129,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Let\u0027s try to narrow this down. In as few words as possible, please describe what you\u0027d like to report. You can say things like lost dog, fallen tree, or abandoned vehicle."
+            "value": "Let's try to narrow this down. In as few words as possible, please describe what you'd like to report. You can say things like lost dog, fallen tree, or abandoned vehicle."
           }
         ]
       },
@@ -132,11 +138,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you\u0027d like to report a {ticketCategoryType} . Is that correct?"
+            "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
           }
         ]
       }
     ]
   },
-  "version": "5"
+  "version": "6"
 }

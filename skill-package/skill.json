@@ -25,6 +25,7 @@
         }
       }
     },
+    "permissions": [],
     "publishingInformation": {
       "locales": {
         "en-US": {
