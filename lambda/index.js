@@ -5,8 +5,8 @@
  * */
 const Alexa = require("ask-sdk-core")
 
-// const abandonedVehicle = require("./abandoned-vehicle.js")
-// const potHole = require("./pothole.js")
+const abandonedVehicle = require("./abandoned-vehicle.js")
+const potHole = require("./pothole.js")
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -22,6 +22,7 @@ const LaunchRequestHandler = {
       .speak(speakOutput)
       .reprompt(speakOutput)
       .getResponse()
+    // .delegate()
   },
 }
 
@@ -195,10 +196,10 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
+    abandonedVehicle.AbandonedVehicleIntentHandler,
     ticketCategoryIntentHandler,
     // HelloWorldIntentHandler,
-    // abandonedVehicle.AbandonedVehicleIntentHandler,
-    // potHole.PotHoleRequestHandler,
+    potHole.PotHoleRequestHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
@@ -206,5 +207,5 @@ exports.handler = Alexa.SkillBuilders.custom()
     IntentReflectorHandler
   )
   .addErrorHandlers(ErrorHandler)
-  .withCustomUserAgent("lilDinosaurboi")
+  .withCustomUserAgent("lilDinosaurBoi")
   .lambda()

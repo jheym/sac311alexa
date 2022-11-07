@@ -62,17 +62,27 @@
         },
         {
           "name": "PotHoleIntent",
+          "slots": [],
+          "samples": [
+            "I would like to report a pothole",
+            "there is a pot hole on the street",
+            "pothole",
+            "there is a pothole"
+          ]
+        },
+        {
+          "name": "AbandonedVehicleIntent",
           "slots": [
             {
-              "name": "address",
-              "type": "AMAZON.StreetName"
+              "name": "vehicle",
+              "type": "vehicleCategoryType"
             }
           ],
           "samples": [
-            "I would like to report a pothole",
-            "there is a pot hole on {address}",
-            "pothole",
-            "there is a pothole"
+            "Abandoned {vehicle}",
+            "Report an abandoned {vehicle}",
+            "There is an abandoned {vehicle}",
+            "There\u0027s an abandoned {vehicle}"
           ]
         }
       ],
@@ -108,6 +118,21 @@
             }
           ],
           "name": "ticketCategoryType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "vehicle",
+                "synonyms": [
+                  "motor vehicle",
+                  "automobile",
+                  "car"
+                ]
+              }
+            }
+          ],
+          "name": "vehicleCategoryType"
         }
       ]
     },
@@ -126,6 +151,20 @@
               "prompts": {
                 "elicitation": "Elicit.Slot.154427404203.1012344692963"
               }
+            }
+          ]
+        },
+        {
+          "name": "AbandonedVehicleIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "vehicle",
+              "type": "vehicleCategoryType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
             }
           ]
         }
@@ -153,5 +192,5 @@
       }
     ]
   },
-  "version": "11"
+  "version": "12"
 }
