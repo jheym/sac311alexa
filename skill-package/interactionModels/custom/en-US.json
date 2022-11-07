@@ -62,10 +62,15 @@
         },
         {
           "name": "PotHoleIntent",
-          "slots": [],
+          "slots": [
+            {
+              "name": "address",
+              "type": "AMAZON.StreetName"
+            }
+          ],
           "samples": [
             "I would like to report a pothole",
-            "there is a pot hole on the street",
+            "there is a pot hole on {address}",
             "pothole",
             "there is a pothole"
           ]
@@ -117,16 +122,15 @@
               "name": "ticketCategoryType",
               "type": "ticketCategoryType",
               "elicitationRequired": true,
-              "confirmationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
-                "confirmation": "Confirm.Slot.154427404203.1012344692963",
                 "elicitation": "Elicit.Slot.154427404203.1012344692963"
               }
             }
           ]
         }
       ],
-      "delegationStrategy": "ALWAYS"
+      "delegationStrategy": "SKILL_RESPONSE"
     },
     "prompts": [
       {
@@ -149,5 +153,5 @@
       }
     ]
   },
-  "version": "7"
+  "version": "11"
 }
