@@ -33,92 +33,100 @@
           "samples": []
         },
         {
-          "name": "ticketCategoryIntent",
+          "name": "PotHoleIntent",
           "slots": [
             {
-              "name": "ticketCategoryType",
-              "type": "ticketCategoryType",
+              "name": "address",
+              "type": "AMAZON.StreetAddress",
               "samples": [
-                "I have found a {ticketCategoryType}",
-                "There is a {ticketCategoryType}",
-                "I\u0027ve found a {ticketCategoryType}",
-                "{ticketCategoryType}",
-                "Report a {ticketCategoryType}",
-                "There\u0027s a {ticketCategoryType}"
+                "Its on {address}",
+                "{address}"
               ]
             }
           ],
           "samples": [
-            "{ticketCategoryType}",
-            "I want to report an {ticketCategoryType}",
-            "I want to report a {ticketCategoryType}",
-            "Report an {ticketCategoryType}",
-            "Report a {ticketCategoryType}",
-            "There is an {ticketCategoryType}",
-            "There\u0027s an {ticketCategoryType}",
-            "There is a {ticketCategoryType}",
-            "There\u0027s a {ticketCategoryType}"
-          ]
-        },
-        {
-          "name": "PotHoleIntent",
-          "slots": [],
-          "samples": [
+            "I would like to report a pothole on {address}",
             "I would like to report a pothole",
-            "there is a pot hole on the street",
-            "pothole",
-            "there is a pothole"
+            "There is a pothole {address}",
+            "Pothole",
+            "There is a pothole"
           ]
         },
         {
           "name": "AbandonedVehicleIntent",
           "slots": [
             {
+              "name": "make",
+              "type": "vehicleMakeType",
+              "samples": [
+                "{make} is the make",
+                "a {make}",
+                "{make}",
+                "It's a {make}"
+              ]
+            },
+            {
+              "name": "model",
+              "type": "vehicleModelType",
+              "samples": [
+                "It's a {color} {make} {model}",
+                "It's a {model}",
+                "It's a {make} {model}",
+                "{model}"
+              ]
+            },
+            {
               "name": "vehicle",
-              "type": "vehicleCategoryType"
+              "type": "vehicleSynonymsType"
+            },
+            {
+              "name": "abandoned",
+              "type": "abandonedSynonymsType"
+            },
+            {
+              "name": "color",
+              "type": "colorType",
+              "samples": [
+                "the {vehicle} is {color}",
+                "It's {color}",
+                "{color}"
+              ]
             }
           ],
           "samples": [
-            "Abandoned {vehicle}",
-            "Report an abandoned {vehicle}",
-            "There is an abandoned {vehicle}",
-            "There\u0027s an abandoned {vehicle}"
+            "There's an {abandoned} {vehicle}",
+            "There's a {abandoned} {model}",
+            "There's a {abandoned} {color} {model}",
+            "someone {abandoned} their {vehicle} ",
+            "{make} {model}",
+            "A {vehicle} has no owner",
+            "{color} {abandoned} {vehicle}",
+            "{abandoned} {color} {make} {model}",
+            "{color} {abandoned} {make} {model}",
+            "{color} {abandoned} {model}",
+            "{abandoned} {color} {model}",
+            "{abandoned} {color} {vehicle}",
+            "{abandoned} {make} {model}",
+            "{abandoned} {model}",
+            "{abandoned} {make}",
+            "{abandoned} {vehicle}"
+          ]
+        },
+        {
+          "name": "petcomplaintIntent",
+          "slots": [
+            {
+              "name": "animal",
+              "type": "AMAZON.Animal"
+            }
+          ],
+          "samples": [
+            "How many {animal} are there",
+            "What's the type of {animal}"
           ]
         }
       ],
       "types": [
-        {
-          "values": [
-            {
-              "name": {
-                "value": "fallen tree",
-                "synonyms": [
-                  "tree has fallen",
-                  "tree fell"
-                ]
-              }
-            },
-            {
-              "name": {
-                "value": "lost animal",
-                "synonyms": [
-                  "lost cat",
-                  "lost dog"
-                ]
-              }
-            },
-            {
-              "name": {
-                "value": "abandoned vehicle",
-                "synonyms": [
-                  "abandoned automobile",
-                  "abandoned car"
-                ]
-              }
-            }
-          ],
-          "name": "ticketCategoryType"
-        },
         {
           "values": [
             {
@@ -132,65 +140,355 @@
               }
             }
           ],
-          "name": "vehicleCategoryType"
+          "name": "vehicleSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "Honda"
+              }
+            },
+            {
+              "name": {
+                "value": "Ford"
+              }
+            },
+            {
+              "name": {
+                "value": "Saturn"
+              }
+            },
+            {
+              "name": {
+                "value": "Mazda"
+              }
+            },
+            {
+              "name": {
+                "value": "Dodge"
+              }
+            },
+            {
+              "name": {
+                "value": "Toyota"
+              }
+            }
+          ],
+          "name": "vehicleMakeType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "Malibu"
+              }
+            },
+            {
+              "name": {
+                "value": "Civic"
+              }
+            },
+            {
+              "name": {
+                "value": "Corrolla"
+              }
+            },
+            {
+              "name": {
+                "value": "Camry"
+              }
+            },
+            {
+              "name": {
+                "value": "Tahoe"
+              }
+            },
+            {
+              "name": {
+                "value": "Accord"
+              }
+            }
+          ],
+          "name": "vehicleModelType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "abandoned",
+                "synonyms": [
+                  "neglected",
+                  "unused",
+                  "uninhabited",
+                  "forsaken",
+                  "dumped",
+                  "ditched",
+                  "deserted"
+                ]
+              }
+            }
+          ],
+          "name": "abandonedSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "pink"
+              }
+            },
+            {
+              "name": {
+                "value": "silver"
+              }
+            },
+            {
+              "name": {
+                "value": "brown"
+              }
+            },
+            {
+              "name": {
+                "value": "teal"
+              }
+            },
+            {
+              "name": {
+                "value": "gray",
+                "synonyms": [
+                  "grey"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "burgundy",
+                "synonyms": [
+                  "maroon"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "purple",
+                "synonyms": [
+                  "violet"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "orange"
+              }
+            },
+            {
+              "name": {
+                "value": "white"
+              }
+            },
+            {
+              "name": {
+                "value": "black"
+              }
+            },
+            {
+              "name": {
+                "value": "yellow"
+              }
+            },
+            {
+              "name": {
+                "value": "green"
+              }
+            },
+            {
+              "name": {
+                "value": "blue"
+              }
+            },
+            {
+              "name": {
+                "value": "red"
+              }
+            }
+          ],
+          "name": "colorType"
         }
       ]
     },
     "dialog": {
       "intents": [
         {
-          "name": "ticketCategoryIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "ticketCategoryType",
-              "type": "ticketCategoryType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.154427404203.1012344692963"
-              }
-            }
-          ]
-        },
-        {
           "name": "AbandonedVehicleIntent",
           "confirmationRequired": false,
           "prompts": {},
           "slots": [
             {
+              "name": "make",
+              "type": "vehicleMakeType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.537774412930.108680342923"
+              }
+            },
+            {
+              "name": "model",
+              "type": "vehicleModelType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.347766119927.878483551565"
+              }
+            },
+            {
               "name": "vehicle",
-              "type": "vehicleCategoryType",
+              "type": "vehicleSynonymsType",
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
+            },
+            {
+              "name": "abandoned",
+              "type": "abandonedSynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "color",
+              "type": "colorType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.486647140061.760696688304"
+              }
             }
-          ]
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "PotHoleIntent",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.816362722612"
+          },
+          "slots": [
+            {
+              "name": "address",
+              "type": "AMAZON.StreetAddress",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.816362722612.1301769605493"
+              }
+            }
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
     },
     "prompts": [
       {
-        "id": "Elicit.Slot.154427404203.1012344692963",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "Let\u0027s try to narrow this down. In as few words as possible, please describe what you\u0027d like to report. You can say things like lost dog, fallen tree, or abandoned vehicle."
-          }
-        ]
-      },
-      {
         "id": "Confirm.Slot.154427404203.1012344692963",
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you\u0027d like to report a {ticketCategoryType} . Is that correct?"
+            "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.537774412930.108680342923",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the make of the {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the vehicle make or manufacturer name?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the make of the vehicle?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1305732446753.1509393653544",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "In a few words, can you describe the issue you're reporting?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.635431382682",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, is your issue {ticketCategory} ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.816362722612",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Did you say the pothole was located on {address} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.816362722612.1301769605493",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What street is it located on?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the address?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.347766119927",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, you're reporting an abandoned {color} {make} {model} , is that right?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.347766119927.878483551565",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the model of the {make} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the model of the {vehicle} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.486647140061.760696688304",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the color of the {vehicle} ?"
           }
         ]
       }
     ]
   },
-  "version": "12"
+  "version": "59"
 }
