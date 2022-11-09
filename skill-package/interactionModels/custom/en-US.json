@@ -62,17 +62,28 @@
                 "{make} is the make",
                 "a {make}",
                 "{make}",
-                "It's a {make}"
+                "It\u0027s a {make}"
               ]
             },
             {
               "name": "model",
               "type": "vehicleModelType",
               "samples": [
-                "It's a {color} {make} {model}",
-                "It's a {model}",
-                "It's a {make} {model}",
+                "It\u0027s a {color} {make} {model}",
+                "It\u0027s a {model}",
+                "It\u0027s a {make} {model}",
                 "{model}"
+              ]
+            },
+            {
+              "name": "color",
+              "type": "AMAZON.Color",
+              "samples": [
+                "{color} is the color",
+                "It is {color}",
+                "{color}",
+                "The color is {color}",
+                "It\u0027s {color}"
               ]
             },
             {
@@ -82,21 +93,12 @@
             {
               "name": "abandoned",
               "type": "abandonedSynonymsType"
-            },
-            {
-              "name": "color",
-              "type": "colorType",
-              "samples": [
-                "the {vehicle} is {color}",
-                "It's {color}",
-                "{color}"
-              ]
             }
           ],
           "samples": [
-            "There's an {abandoned} {vehicle}",
-            "There's a {abandoned} {model}",
-            "There's a {abandoned} {color} {model}",
+            "There\u0027s an {abandoned} {vehicle}",
+            "There\u0027s a {abandoned} {model}",
+            "There\u0027s a {abandoned} {color} {model}",
             "someone {abandoned} their {vehicle} ",
             "{make} {model}",
             "A {vehicle} has no owner",
@@ -121,8 +123,10 @@
             }
           ],
           "samples": [
+            "There\u0027s an {animal} complaint I want to report",
+            "I want to report an {animal} complaint",
             "How many {animal} are there",
-            "What's the type of {animal}"
+            "What\u0027s the type of {animal}"
           ]
         }
       ],
@@ -230,90 +234,6 @@
             }
           ],
           "name": "abandonedSynonymsType"
-        },
-        {
-          "values": [
-            {
-              "name": {
-                "value": "pink"
-              }
-            },
-            {
-              "name": {
-                "value": "silver"
-              }
-            },
-            {
-              "name": {
-                "value": "brown"
-              }
-            },
-            {
-              "name": {
-                "value": "teal"
-              }
-            },
-            {
-              "name": {
-                "value": "gray",
-                "synonyms": [
-                  "grey"
-                ]
-              }
-            },
-            {
-              "name": {
-                "value": "burgundy",
-                "synonyms": [
-                  "maroon"
-                ]
-              }
-            },
-            {
-              "name": {
-                "value": "purple",
-                "synonyms": [
-                  "violet"
-                ]
-              }
-            },
-            {
-              "name": {
-                "value": "orange"
-              }
-            },
-            {
-              "name": {
-                "value": "white"
-              }
-            },
-            {
-              "name": {
-                "value": "black"
-              }
-            },
-            {
-              "name": {
-                "value": "yellow"
-              }
-            },
-            {
-              "name": {
-                "value": "green"
-              }
-            },
-            {
-              "name": {
-                "value": "blue"
-              }
-            },
-            {
-              "name": {
-                "value": "red"
-              }
-            }
-          ],
-          "name": "colorType"
         }
       ]
     },
@@ -343,6 +263,15 @@
               }
             },
             {
+              "name": "color",
+              "type": "AMAZON.Color",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.74882127809.1441847898870"
+              }
+            },
+            {
               "name": "vehicle",
               "type": "vehicleSynonymsType",
               "elicitationRequired": false,
@@ -355,15 +284,6 @@
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
-            },
-            {
-              "name": "color",
-              "type": "colorType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.486647140061.760696688304"
-              }
             }
           ],
           "delegationStrategy": "SKILL_RESPONSE"
@@ -396,7 +316,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
+            "value": "Just to confirm, you\u0027d like to report a {ticketCategoryType} . Is that correct?"
           }
         ]
       },
@@ -413,7 +333,16 @@
           },
           {
             "type": "PlainText",
-            "value": "What's the make of the vehicle?"
+            "value": "What\u0027s the make of the vehicle?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.74882127809.1441847898870",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the vehicle?"
           }
         ]
       },
@@ -422,7 +351,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "In a few words, can you describe the issue you're reporting?"
+            "value": "In a few words, can you describe the issue you\u0027re reporting?"
           }
         ]
       },
@@ -462,7 +391,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you're reporting an abandoned {color} {make} {model} , is that right?"
+            "value": "Just to confirm, you\u0027re reporting an abandoned {color} {make} {model} , is that right?"
           }
         ]
       },
@@ -471,24 +400,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What's the model of the {make} ?"
+            "value": "What\u0027s the model of the {make} ?"
           },
           {
             "type": "PlainText",
-            "value": "What's the model of the {vehicle} ?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.486647140061.760696688304",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "What's the color of the {vehicle} ?"
+            "value": "What\u0027s the model of the {vehicle} ?"
           }
         ]
       }
     ]
   },
-  "version": "59"
+  "version": "60"
 }

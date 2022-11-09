@@ -7,6 +7,7 @@ const Alexa = require("ask-sdk-core")
 
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
+const petcomplaint =require("./petcomplaint.js")
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -200,6 +201,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     ticketCategoryIntentHandler,
     // HelloWorldIntentHandler,
     potHole.PotHoleRequestHandler,
+    petcomplaint.petcomplaintHandler ,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
