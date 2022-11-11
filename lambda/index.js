@@ -7,7 +7,15 @@ const Alexa = require("ask-sdk-core")
 
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
-const petcomplaint =require("./petcomplaint.js")
+const petcomplaint = require("./petcomplaint.js")
+
+
+// Stows the asked question in a session attribute for yes and no intent handlers
+function setQuestion(handlerInput, questionAsked) {
+  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  sessionAttributes.questionAsked = questionAsked;
+  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+}
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -16,59 +24,144 @@ const LaunchRequestHandler = {
     )
   },
   handle(handlerInput) {
-    const speakOutput =
-      "Welcome to the Sacramento 311 App. In a few words, can you please describe your issue?"
-
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .reprompt(speakOutput)
-      .getResponse()
-    // .delegate()
-  },
-}
-
-const ticketCategoryIntentHandler = {
-  canHandle(handlerInput) {
-    const request = handlerInput.requestEnvelope.request
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) ===
-        "ticketCategoryIntent"
-    )
-  },
-  handle(handlerInput) {
-    const slotValue = Alexa.getSlotValue(
-      handlerInput.requestEnvelope,
-      "ticketCategoryType"
-    )
-    const speakOutput = "Your issue is " + slotValue
-
     return (
       handlerInput.responseBuilder
-        .speak(speakOutput)
-        // .reprompt()
+        .speak("Thank you for contacting Sacramento Three One One. How can I help you today?")
+        .reprompt("How can I help? You can report an issue, or you can get information about city-related activities.")
         .getResponse()
     )
   },
 }
-// const HelloWorldIntentHandler = {
-//   canHandle(handlerInput) {
-//     return (
-//       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-//       Alexa.getIntentName(handlerInput.requestEnvelope) === "HelloWorldIntent"
-//     )
-//   },
-//   handle(handlerInput) {
-//     const speakOutput = "Hello World!"
 
-//     return (
-//       handlerInput.responseBuilder
-//         .speak(speakOutput)
-//         //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-//         .getResponse()
-//     )
-//   },
-// }
+const ReportAnIssueIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'ReportAnIssueIntent'
+    )
+  },
+  handle(handlerInput) {
+    setQuestion(handlerInput, null)
+    const speakOutput = "Alright. What's the issue you're reporting?"
+    return (
+      handlerInput.responseBuilder
+        .speak(speakOutput)
+        .withShouldEndSession(false) // keep the session open
+        .getResponse()
+    )
+  }
+}
+
+const YesIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent'
+      && handlerInput.attributesManager.getSessionAttributes().questionAsked !== null
+    )
+  },
+  handle(handlerInput) {
+    const currentIntent = handlerInput.requestEnvelope.request.intent
+    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedVehicleCorrect') {
+      setQuestion(handlerInput, null)
+      setQuestion(handlerInput, 'IsAbandonedTime')
+      return (
+        handlerInput.responseBuilder
+          .speak('Has the vehicle been abandoned for more than seventy-two hours?')
+          .withShouldEndSession(false)
+          .getResponse()
+      )
+    }
+
+    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedTime') {
+      setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
+      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
+      tempSlots = sessionAttributes['ConfirmAbandonedVehicleIntent'].slots
+      return (
+        handlerInput.responseBuilder
+          .addDelegateDirective({ // This is what intent chaining looks like https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/03/intent-chaining-for-alexa-skill
+            name: 'AbandonedVehicleIntent',
+            confirmationStatus: 'NONE',
+            slots: { // Adding slots that may have been collected by ConfirmAbandonedVehicleIntent
+              make: {
+                name: 'make',
+                value: tempSlots.make.value,
+                confirmationStatus: 'NONE'
+              },
+              model: {
+                name: 'model',
+                value: tempSlots.model.value,
+                confirmationStatus: 'NONE'
+              },
+              color: {
+                name: 'color',
+                value: tempSlots.color.value,
+                confirmationStatus: 'NONE'
+              }
+            }
+          })
+          .getResponse()
+      )
+    }
+
+    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain') {
+      setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
+      return (
+        handlerInput.responseBuilder
+          .speak("Alright, what can I do for you?")
+          .withShouldEndSession(false)
+          .getResponse()
+      )
+    }
+
+  },
+}
+
+const NoIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
+      && handlerInput.attributesManager.getSessionAttributes().questionAsked !== null
+    )
+  },
+  handle(handlerInput) {
+    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedVehicleCorrect') {
+      setQuestion(handlerInput, null)
+      setQuestion(handlerInput, 'TryAgain')
+      return (
+        handlerInput.responseBuilder
+          .speak("Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.")
+          .reprompt("I'm still here. Do you want to try reporting your issue again?")
+          .withShouldEndSession(false) // This prevents the skill from ending the session
+          .getResponse()
+      )
+    }
+
+    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedTime') {
+      setQuestion(handlerInput, null)
+      setQuestion(handlerInput, 'TryAgain')
+      return (
+        handlerInput.responseBuilder
+          .speak("Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. \
+          Is there anything else I can help you with?")
+          .withShouldEndSession(false) // This prevents the skill from ending the session
+          .getResponse()
+      )
+    }
+
+    // If the user does not wish to try rephrasing their intent.
+    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain') {
+      setQuestion(handlerInput, null)
+      return (
+        handlerInput.responseBuilder
+          .speak("Understood. Thank you for contacting Sacramento three one one. Goodbye!")
+          .withShouldEndSession(true) // This will end the session
+          .getResponse()
+      )
+    }
+  },
+}
 
 const HelpIntentHandler = {
   canHandle(handlerInput) {
@@ -94,7 +187,7 @@ const CancelAndStopIntentHandler = {
       (Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "AMAZON.CancelIntent" ||
         Alexa.getIntentName(handlerInput.requestEnvelope) ===
-          "AMAZON.StopIntent")
+        "AMAZON.StopIntent")
     )
   },
   handle(handlerInput) {
@@ -113,7 +206,7 @@ const FallbackIntentHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
-        "AMAZON.FallbackIntent"
+      "AMAZON.FallbackIntent"
     )
   },
   handle(handlerInput) {
@@ -189,25 +282,32 @@ const ErrorHandler = {
   },
 }
 
+
 /**
  * This handler acts as the entry point for your skill, routing all request and response
  * payloads to the handlers above. Make sure any new handlers or interceptors you've
  * defined are included below. The order matters - they're processed top to bottom
  * */
+// TODO: Add all handlers to an array https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs/issues/283
 exports.handler = Alexa.SkillBuilders.custom()
-  .addRequestHandlers(
+  .addRequestHandlers(  // Order matters with these!
     LaunchRequestHandler,
+    ReportAnIssueIntentHandler,
+    abandonedVehicle.ConfirmAbandonedVehicleIntentHandler,
     abandonedVehicle.AbandonedVehicleIntentHandler,
-    ticketCategoryIntentHandler,
-    // HelloWorldIntentHandler,
     potHole.PotHoleRequestHandler,
-    petcomplaint.petcomplaintHandler ,
+    petcomplaint.petcomplaintHandler,
+    YesIntentHandler,
+    NoIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
     SessionEndedRequestHandler,
-    IntentReflectorHandler
+    IntentReflectorHandler,
   )
   .addErrorHandlers(ErrorHandler)
-  .withCustomUserAgent("lilDinosaurBoi")
+  .withCustomUserAgent("DinosaurWithGrowingPains")
   .lambda()
+
+// Custom Exports
+exports.setQuestion = setQuestion

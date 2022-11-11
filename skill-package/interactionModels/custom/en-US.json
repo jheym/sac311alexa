@@ -4,6 +4,14 @@
       "invocationName": "sacramento three one one",
       "intents": [
         {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
           "name": "AMAZON.CancelIntent",
           "samples": []
         },
@@ -77,13 +85,11 @@
             },
             {
               "name": "color",
-              "type": "AMAZON.Color",
+              "type": "colorType",
               "samples": [
-                "{color} is the color",
-                "It is {color}",
-                "{color}",
-                "The color is {color}",
-                "It\u0027s {color}"
+                "the {vehicle} is {color}",
+                "It\u0027s {color}",
+                "{color}"
               ]
             },
             {
@@ -95,12 +101,56 @@
               "type": "abandonedSynonymsType"
             }
           ],
+          "samples": []
+        },
+        {
+          "name": "petcomplaintIntent",
+          "slots": [
+            {
+              "name": "animal",
+              "type": "AMAZON.Animal"
+            }
+          ],
           "samples": [
+            "How many {animal} are there",
+            "What\u0027s the type of {animal}"
+          ]
+        },
+        {
+          "name": "ConfirmAbandonedVehicleIntent",
+          "slots": [
+            {
+              "name": "abandoned",
+              "type": "abandonedSynonymsType"
+            },
+            {
+              "name": "vehicle",
+              "type": "vehicleSynonymsType"
+            },
+            {
+              "name": "model",
+              "type": "vehicleModelType"
+            },
+            {
+              "name": "color",
+              "type": "colorType"
+            },
+            {
+              "name": "make",
+              "type": "vehicleMakeType"
+            }
+          ],
+          "samples": [
+            "Someone left their {color} {make} {model}",
+            "Someone left their {color} {vehicle}",
+            "Someone left their {make} {model}",
+            "Someone left their {model}",
+            "Someone left their {make}",
+            "Someone left their {vehicle}",
             "There\u0027s an {abandoned} {vehicle}",
             "There\u0027s a {abandoned} {model}",
             "There\u0027s a {abandoned} {color} {model}",
             "someone {abandoned} their {vehicle} ",
-            "{make} {model}",
             "A {vehicle} has no owner",
             "{color} {abandoned} {vehicle}",
             "{abandoned} {color} {make} {model}",
@@ -115,18 +165,39 @@
           ]
         },
         {
-          "name": "petcomplaintIntent",
+          "name": "strayAnimal",
           "slots": [
             {
-              "name": "animal",
-              "type": "AMAZON.Animal"
+              "name": "stray",
+              "type": "straySynonymsType"
+            },
+            {
+              "name": "strayAnimalSlot",
+              "type": "animalType"
+            },
+            {
+              "name": "strayAnimalAddress",
+              "type": "AMAZON.PostalAddress",
+              "samples": [
+                "The {strayAnimalSlot} is at {strayAnimalAddress}",
+                "{strayAnimalAddress}",
+                "It is located at {strayAnimalAddress}"
+              ]
             }
           ],
           "samples": [
-            "There\u0027s an {animal} complaint I want to report",
-            "I want to report an {animal} complaint",
-            "How many {animal} are there",
-            "What\u0027s the type of {animal}"
+            "Report a {stray} {strayAnimalSlot}",
+            "{stray} {strayAnimalSlot}",
+            "There\u0027s a {stray} {strayAnimalSlot}"
+          ]
+        },
+        {
+          "name": "ReportAnIssueIntent",
+          "slots": [],
+          "samples": [
+            "Report a complant",
+            "Report an incident",
+            "Report an issue"
           ]
         }
       ],
@@ -234,6 +305,157 @@
             }
           ],
           "name": "abandonedSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "pink"
+              }
+            },
+            {
+              "name": {
+                "value": "silver"
+              }
+            },
+            {
+              "name": {
+                "value": "brown"
+              }
+            },
+            {
+              "name": {
+                "value": "teal"
+              }
+            },
+            {
+              "name": {
+                "value": "gray",
+                "synonyms": [
+                  "grey"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "burgundy",
+                "synonyms": [
+                  "maroon"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "purple",
+                "synonyms": [
+                  "violet"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "orange"
+              }
+            },
+            {
+              "name": {
+                "value": "white"
+              }
+            },
+            {
+              "name": {
+                "value": "black"
+              }
+            },
+            {
+              "name": {
+                "value": "yellow"
+              }
+            },
+            {
+              "name": {
+                "value": "green"
+              }
+            },
+            {
+              "name": {
+                "value": "blue"
+              }
+            },
+            {
+              "name": {
+                "value": "red"
+              }
+            }
+          ],
+          "name": "colorType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "stray",
+                "synonyms": [
+                  "disowned",
+                  "loose",
+                  "lost",
+                  "feral"
+                ]
+              }
+            }
+          ],
+          "name": "straySynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "cow",
+                "synonyms": [
+                  "cattle",
+                  "bull"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "horse",
+                "synonyms": [
+                  "mare"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "chicken",
+                "synonyms": [
+                  "hen"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "fish"
+              }
+            },
+            {
+              "name": {
+                "value": "dog",
+                "synonyms": [
+                  "canine"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "cat",
+                "synonyms": [
+                  "feline"
+                ]
+              }
+            }
+          ],
+          "name": "animalType"
         }
       ]
     },
@@ -264,11 +486,11 @@
             },
             {
               "name": "color",
-              "type": "AMAZON.Color",
+              "type": "colorType",
               "elicitationRequired": true,
               "confirmationRequired": false,
               "prompts": {
-                "elicitation": "Elicit.Slot.74882127809.1441847898870"
+                "elicitation": "Elicit.Slot.486647140061.760696688304"
               }
             },
             {
@@ -286,7 +508,7 @@
               "prompts": {}
             }
           ],
-          "delegationStrategy": "SKILL_RESPONSE"
+          "delegationStrategy": "ALWAYS"
         },
         {
           "name": "PotHoleIntent",
@@ -306,6 +528,79 @@
             }
           ],
           "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "ConfirmAbandonedVehicleIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "abandoned",
+              "type": "abandonedSynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "vehicle",
+              "type": "vehicleSynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "model",
+              "type": "vehicleModelType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "color",
+              "type": "colorType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "make",
+              "type": "vehicleMakeType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ],
+          "delegationStrategy": "ALWAYS"
+        },
+        {
+          "name": "strayAnimal",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "stray",
+              "type": "straySynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "strayAnimalSlot",
+              "type": "animalType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "strayAnimalAddress",
+              "type": "AMAZON.PostalAddress",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.221614793867.602172036702"
+              }
+            }
+          ]
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -334,15 +629,6 @@
           {
             "type": "PlainText",
             "value": "What\u0027s the make of the vehicle?"
-          }
-        ]
-      },
-      {
-        "id": "Elicit.Slot.74882127809.1441847898870",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "What\u0027s the color of the vehicle?"
           }
         ]
       },
@@ -407,8 +693,85 @@
             "value": "What\u0027s the model of the {vehicle} ?"
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.486647140061.760696688304",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the {make} {model} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the {vehicle} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1377301254532.794869357877",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the address of the trash?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.1377301254532.794869357877",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, the address is at {address} , correct?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1415835869966",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {make} {model} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {model} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {make} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you calling about an abandoned vehicle?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.221614793867.602172036702",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Where is the {stray} {strayAnimalSlot} located?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Where is the {strayAnimalSlot} located?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the address?"
+          }
+        ]
       }
     ]
   },
-  "version": "60"
+  "version": "84"
 }
