@@ -1,7 +1,8 @@
 /* *
- * This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK (v2).
- * Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
- * session persistence, api calls, and more.
+ * 🚨 This is the main file for the Sacramento 311 Alexa Skill 📞
+ * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona Alexa Carrell, Ethan Borg, 
+ * Humayoon Rafei, and Justin Heyman
+ * Dinosaur Game 💪
  * */
 const Alexa = require("ask-sdk-core")
 
@@ -52,114 +53,43 @@ const ReportAnIssueIntentHandler = {
   }
 }
 
-const YesIntentHandler = {
+// If the user wishes to try rephrasing their intent
+const YesRetryIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked !== null
+      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain'
     )
   },
   handle(handlerInput) {
-    const currentIntent = handlerInput.requestEnvelope.request.intent
-    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedVehicleCorrect') {
-      setQuestion(handlerInput, null)
-      setQuestion(handlerInput, 'IsAbandonedTime')
-      return (
-        handlerInput.responseBuilder
-          .speak('Has the vehicle been abandoned for more than seventy-two hours?')
-          .withShouldEndSession(false)
-          .getResponse()
-      )
-    }
-
-    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedTime') {
-      setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
-      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
-      tempSlots = sessionAttributes['ConfirmAbandonedVehicleIntent'].slots
-      return (
-        handlerInput.responseBuilder
-          .addDelegateDirective({ // This is what intent chaining looks like https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/03/intent-chaining-for-alexa-skill
-            name: 'AbandonedVehicleIntent',
-            confirmationStatus: 'NONE',
-            slots: { // Adding slots that may have been collected by ConfirmAbandonedVehicleIntent
-              make: {
-                name: 'make',
-                value: tempSlots.make.value,
-                confirmationStatus: 'NONE'
-              },
-              model: {
-                name: 'model',
-                value: tempSlots.model.value,
-                confirmationStatus: 'NONE'
-              },
-              color: {
-                name: 'color',
-                value: tempSlots.color.value,
-                confirmationStatus: 'NONE'
-              }
-            }
-          })
-          .getResponse()
-      )
-    }
-
-    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain') {
-      setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
-      return (
-        handlerInput.responseBuilder
-          .speak("Alright, what can I do for you?")
-          .withShouldEndSession(false)
-          .getResponse()
-      )
-    }
-
-  },
+    setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
+    return (
+      handlerInput.responseBuilder
+        .speak("Alright, what can I do for you?")
+        .withShouldEndSession(false)
+        .getResponse()
+    )
+  }
 }
 
-const NoIntentHandler = {
+// If the user does not wish to try rephrasing their intent.
+const NoRetryIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked !== null
+      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain'
     )
   },
   handle(handlerInput) {
-    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedVehicleCorrect') {
-      setQuestion(handlerInput, null)
-      setQuestion(handlerInput, 'TryAgain')
-      return (
-        handlerInput.responseBuilder
-          .speak("Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.")
-          .reprompt("I'm still here. Do you want to try reporting your issue again?")
-          .withShouldEndSession(false) // This prevents the skill from ending the session
-          .getResponse()
-      )
-    }
-
-    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedTime') {
-      setQuestion(handlerInput, null)
-      setQuestion(handlerInput, 'TryAgain')
-      return (
-        handlerInput.responseBuilder
-          .speak("Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. \
-          Is there anything else I can help you with?")
-          .withShouldEndSession(false) // This prevents the skill from ending the session
-          .getResponse()
-      )
-    }
-
-    // If the user does not wish to try rephrasing their intent.
-    if (handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain') {
-      setQuestion(handlerInput, null)
-      return (
-        handlerInput.responseBuilder
-          .speak("Understood. Thank you for contacting Sacramento three one one. Goodbye!")
-          .withShouldEndSession(true) // This will end the session
-          .getResponse()
-      )
-    }
+    setQuestion(handlerInput, null)
+    return (
+      handlerInput.responseBuilder
+        .speak("Understood. Thank you for contacting Sacramento three one one. Goodbye!")
+        .withShouldEndSession(true) // This will end the session
+        .getResponse()
+    )
   },
 }
 
@@ -295,10 +225,14 @@ exports.handler = Alexa.SkillBuilders.custom()
     ReportAnIssueIntentHandler,
     abandonedVehicle.ConfirmAbandonedVehicleIntentHandler,
     abandonedVehicle.AbandonedVehicleIntentHandler,
+    abandonedVehicle.YesAbandonedVehicleIntentHandler,
+    abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
+    abandonedVehicle.NoAbandonedVehicleIntentHandler,
+    abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
     potHole.PotHoleRequestHandler,
     petcomplaint.petcomplaintHandler,
-    YesIntentHandler,
-    NoIntentHandler,
+    YesRetryIntentHandler,
+    NoRetryIntentHandler,
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,

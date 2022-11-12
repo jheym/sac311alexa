@@ -108,12 +108,19 @@
           "slots": [
             {
               "name": "animal",
-              "type": "AMAZON.Animal"
+              "type": "animalType",
+              "samples": [
+                "It\u0027s a {animal}",
+                "The {animal} I saw is",
+                "{animal} is "
+              ]
             }
           ],
           "samples": [
-            "How many {animal} are there",
-            "What\u0027s the type of {animal}"
+            "pet complaint",
+            "Report pet complaint",
+            "I would like to report a pet complaint",
+            "There is an {animal} in the street"
           ]
         },
         {
@@ -601,6 +608,22 @@
               }
             }
           ]
+        },
+        {
+          "name": "petcomplaintIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "animal",
+              "type": "animalType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1176709426849.1317643299465"
+              }
+            }
+          ]
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -770,8 +793,25 @@
             "value": "What\u0027s the address?"
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.1176709426849.1317643299465",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What kind of {animal} did you saw?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What {animal} did you spot?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What type of {animal} is it?"
+          }
+        ]
       }
     ]
   },
-  "version": "84"
+  "version": "88"
 }
