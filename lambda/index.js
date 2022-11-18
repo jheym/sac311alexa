@@ -9,6 +9,8 @@ const Alexa = require("ask-sdk-core")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
 const petcomplaint = require("./petcomplaint.js")
+const homelessCamp = require("./homeless-encampment.js")
+
 const trashpickup = require("./trash-pickup.js")
 
 // Stows the asked question in a session attribute for yes and no intent handlers
@@ -161,9 +163,9 @@ const SessionEndedRequestHandler = {
     )
   },
   handle(handlerInput) {
-    console.log(
-      `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
-    )
+   // console.log(
+   //   `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
+  //  )
     // Any cleanup logic goes here.
     return handlerInput.responseBuilder.getResponse() // notice we send an empty response
   },
@@ -229,6 +231,10 @@ exports.handler = Alexa.SkillBuilders.custom()
     abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
     abandonedVehicle.NoAbandonedVehicleIntentHandler,
     abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
+   // homelessCamp.ConfirmHomelessEncampmentIntentHandler,
+    homelessCamp.HomelessCampIntentHandler,
+    homelessCamp.YesHomelessCampIntentHandler,
+    homelessCamp.NoHomelessCampIntentHandler,
     potHole.PotHoleRequestHandler,
     petcomplaint.petcomplaintHandler,
     trashpickup.TrashPickUpIntentHandler,
