@@ -9,7 +9,7 @@ const Alexa = require("ask-sdk-core")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
 const petcomplaint = require("./petcomplaint.js")
-
+const trashpickup = require("./trash-pickup.js")
 
 // Stows the asked question in a session attribute for yes and no intent handlers
 function setQuestion(handlerInput, questionAsked) {
@@ -231,6 +231,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
     potHole.PotHoleRequestHandler,
     petcomplaint.petcomplaintHandler,
+    trashpickup.TrashPickUpIntentHandler,
     YesRetryIntentHandler,
     NoRetryIntentHandler,
     HelpIntentHandler,

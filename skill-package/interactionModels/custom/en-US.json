@@ -24,19 +24,6 @@
           "samples": []
         },
         {
-          "name": "HelloWorldIntent",
-          "slots": [],
-          "samples": [
-            "hello",
-            "how are you",
-            "say hi world",
-            "say hi",
-            "hi",
-            "say hello world",
-            "say hello"
-          ]
-        },
-        {
           "name": "AMAZON.NavigateHomeIntent",
           "samples": []
         },
@@ -44,24 +31,24 @@
           "name": "PotHoleIntent",
           "slots": [
             {
-              "name": "address",
+              "name": "potholeAddress",
               "type": "AMAZON.StreetAddress",
               "samples": [
-                "Its on {address}",
-                "{address}"
+                "Its on {potholeAddress}",
+                "{potholeAddress}"
               ]
             }
           ],
           "samples": [
-            "I would like to report a pothole on {address}",
+            "I would like to report a pothole on {potholeAddress}",
             "I would like to report a pothole",
-            "There is a pothole {address}",
+            "There is a pothole {potholeAddress}",
             "Pothole",
             "There is a pothole"
           ]
         },
         {
-          "name": "AbandonedVehicleIntent",
+          "name": "OldAbandonedVehicleIntent",
           "slots": [
             {
               "name": "make",
@@ -124,7 +111,7 @@
           ]
         },
         {
-          "name": "ConfirmAbandonedVehicleIntent",
+          "name": "AbandonedVehicleIntent",
           "slots": [
             {
               "name": "abandoned",
@@ -135,19 +122,45 @@
               "type": "vehicleSynonymsType"
             },
             {
+              "name": "make",
+              "type": "vehicleMakeType",
+              "samples": [
+                "It\u0027s a {make}",
+                "{make}",
+                "a {make}",
+                "{make} is the make"
+              ]
+            },
+            {
               "name": "model",
-              "type": "vehicleModelType"
+              "type": "vehicleModelType",
+              "samples": [
+                "{model}",
+                "It\u0027s a {make} {model}",
+                "It\u0027s a {model}",
+                "It\u0027s a {color} {make} {model}"
+              ]
             },
             {
               "name": "color",
-              "type": "colorType"
+              "type": "colorType",
+              "samples": [
+                "{color}",
+                "It\u0027s {color}",
+                "The {vehicle} is {color}"
+              ]
             },
             {
-              "name": "make",
-              "type": "vehicleMakeType"
+              "name": "abandonedVehicleAddress",
+              "type": "AMAZON.PostalAddress"
             }
           ],
           "samples": [
+            "Report an {abandoned} {make} {model} at {abandonedVehicleAddress}",
+            "Report an {abandoned} {make} at {abandonedVehicleAddress}",
+            "Report an {abandoned} {model} at {abandonedVehicleAddress}",
+            "There\u0027s an {abandoned} {vehicle} at {abandonedVehicleAddress}",
+            "Report an {abandoned} {vehicle} at {abandonedVehicleAddress}",
             "Someone left their {color} {make} {model}",
             "Someone left their {color} {vehicle}",
             "Someone left their {make} {model}",
@@ -172,7 +185,7 @@
           ]
         },
         {
-          "name": "strayAnimal",
+          "name": "strayAnimalIntent",
           "slots": [
             {
               "name": "stray",
@@ -205,6 +218,104 @@
             "Report a complant",
             "Report an incident",
             "Report an issue"
+          ]
+        },
+        {
+          "name": "HomelessCampIntent",
+          "slots": [
+            {
+              "name": "homelessCamp",
+              "type": "homelessSynonymsType"
+            },
+            {
+              "name": "homelessCampAddress",
+              "type": "AMAZON.StreetAddress"
+            },
+            {
+              "name": "propertyType",
+              "type": "propertySynonymsType",
+              "samples": [
+                "It is on {propertyType}",
+                "{propertyType}"
+              ]
+            },
+            {
+              "name": "numPeople",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "About {numPeople} people",
+                "{numPeople} persons",
+                "{numPeople} people",
+                "There are {numPeople} people",
+                "{numPeople}"
+              ]
+            },
+            {
+              "name": "isChildren",
+              "type": "yesNoType",
+              "samples": [
+                "{isChildren}"
+              ]
+            },
+            {
+              "name": "isAnimals",
+              "type": "yesNoType"
+            },
+            {
+              "name": "campDescription",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "Report a {homelessCamp} on {propertyType}",
+            "Report a {homelessCamp}",
+            "There is a {homelessCamp} on {propertyType}",
+            "There is a {homelessCamp}",
+            "{homelessCamp} on {propertyType}",
+            "{homelessCamp}",
+            "Help me report a {homelessCamp}  ticket",
+            "Reporting {homelessCamp}  on {propertyType}",
+            "Reporting {homelessCamp} on  {propertyType}",
+            "Report {homelessCamp} ",
+            "There is a {homelessCamp}  on {propertyType}"
+          ]
+        },
+        {
+          "name": "GetAddressIntent",
+          "slots": [
+            {
+              "name": "userAddress",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{userAddress}"
+              ]
+            }
+          ],
+          "samples": []
+        },
+        {
+          "name": "ConfirmAddressIntent",
+          "slots": [
+            {
+              "name": "address",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": []
+        },
+        {
+          "name": "TrashPickupIntent",
+          "slots": [
+            {
+              "name": "trashType",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{trashType}"
+              ]
+            }
+          ],
+          "samples": [
+            "Report trash"
           ]
         }
       ],
@@ -463,13 +574,115 @@
             }
           ],
           "name": "animalType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "homeless Camp",
+                "synonyms": [
+                  "homeless encampment",
+                  "unhoused",
+                  "homeless tent",
+                  "homeless tents",
+                  "homeless camp",
+                  "campsite",
+                  "transient",
+                  "encampment",
+                  "camp",
+                  "tents",
+                  "tent"
+                ]
+              }
+            }
+          ],
+          "name": "homelessSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "private property",
+                "synonyms": [
+                  "private",
+                  "privately owned property",
+                  "privately owned land",
+                  "private land"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "public property",
+                "synonyms": [
+                  "public",
+                  "publicly owned land",
+                  "publicly own property",
+                  "public land "
+                ]
+              }
+            }
+          ],
+          "name": "propertySynonymsType"
+        },
+        {
+          "values": [
+            {
+              "id": "FALSE",
+              "name": {
+                "value": "no",
+                "synonyms": [
+                  "naw",
+                  "not",
+                  "negative",
+                  "nope"
+                ]
+              }
+            },
+            {
+              "id": "TRUE",
+              "name": {
+                "value": "yes",
+                "synonyms": [
+                  "yup",
+                  "of course",
+                  "for sure",
+                  "absolutely",
+                  "affirmative",
+                  "correct",
+                  "yep",
+                  "yeah"
+                ]
+              }
+            }
+          ],
+          "name": "yesNoType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "trash",
+                "synonyms": [
+                  "scraps",
+                  "rubbish",
+                  "junk",
+                  "debris",
+                  "garbage",
+                  "litter",
+                  "waste"
+                ]
+              }
+            }
+          ],
+          "name": "trash"
         }
       ]
     },
     "dialog": {
       "intents": [
         {
-          "name": "AbandonedVehicleIntent",
+          "name": "OldAbandonedVehicleIntent",
           "confirmationRequired": false,
           "prompts": {},
           "slots": [
@@ -515,7 +728,7 @@
               "prompts": {}
             }
           ],
-          "delegationStrategy": "ALWAYS"
+          "delegationStrategy": "SKILL_RESPONSE"
         },
         {
           "name": "PotHoleIntent",
@@ -525,7 +738,7 @@
           },
           "slots": [
             {
-              "name": "address",
+              "name": "potholeAddress",
               "type": "AMAZON.StreetAddress",
               "elicitationRequired": true,
               "confirmationRequired": false,
@@ -537,7 +750,7 @@
           "delegationStrategy": "SKILL_RESPONSE"
         },
         {
-          "name": "ConfirmAbandonedVehicleIntent",
+          "name": "AbandonedVehicleIntent",
           "confirmationRequired": false,
           "prompts": {},
           "slots": [
@@ -556,33 +769,48 @@
               "prompts": {}
             },
             {
+              "name": "make",
+              "type": "vehicleMakeType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.159243950675.45262955813"
+              }
+            },
+            {
               "name": "model",
               "type": "vehicleModelType",
-              "elicitationRequired": false,
+              "elicitationRequired": true,
               "confirmationRequired": false,
-              "prompts": {}
+              "prompts": {
+                "elicitation": "Elicit.Slot.159243950675.1214583905306"
+              }
             },
             {
               "name": "color",
               "type": "colorType",
-              "elicitationRequired": false,
+              "elicitationRequired": true,
               "confirmationRequired": false,
-              "prompts": {}
+              "prompts": {
+                "elicitation": "Elicit.Slot.159243950675.1551161405556"
+              }
             },
             {
-              "name": "make",
-              "type": "vehicleMakeType",
+              "name": "abandonedVehicleAddress",
+              "type": "AMAZON.PostalAddress",
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
             }
           ],
-          "delegationStrategy": "ALWAYS"
+          "delegationStrategy": "SKILL_RESPONSE"
         },
         {
-          "name": "strayAnimal",
-          "confirmationRequired": false,
-          "prompts": {},
+          "name": "strayAnimalIntent",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.88351892471"
+          },
           "slots": [
             {
               "name": "stray",
@@ -624,6 +852,126 @@
               }
             }
           ]
+        },
+        {
+          "name": "HomelessCampIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "homelessCamp",
+              "type": "homelessSynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "homelessCampAddress",
+              "type": "AMAZON.StreetAddress",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "propertyType",
+              "type": "propertySynonymsType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.409468368967.699702184701"
+              }
+            },
+            {
+              "name": "numPeople",
+              "type": "AMAZON.NUMBER",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.478901083922.774744802323"
+              }
+            },
+            {
+              "name": "isChildren",
+              "type": "yesNoType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.478901083922.677574959232"
+              }
+            },
+            {
+              "name": "isAnimals",
+              "type": "yesNoType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.478901083922.331242269140"
+              }
+            },
+            {
+              "name": "campDescription",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.409468368967.625938744990"
+              }
+            }
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "ConfirmAddressIntent",
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.1058867146719"
+          },
+          "slots": [
+            {
+              "name": "address",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "GetAddressIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "userAddress",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.535311827128.1335337409156",
+                "elicitation": "Elicit.Slot.1639118695942.1016003359675"
+              }
+            }
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "TrashPickupIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "trashType",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.695582460385.101077360916",
+                "elicitation": "Elicit.Slot.695582460385.101077360916"
+              }
+            }
+          ],
+          "delegationStrategy": "ALWAYS"
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -678,7 +1026,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Did you say the pothole was located on {address} ?"
+            "value": "Did you say the pothole was located on {potholeAddress} ?"
           }
         ]
       },
@@ -810,8 +1158,185 @@
             "value": "What type of {animal} is it?"
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.478901083922.774744802323",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "How many people are at the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.478901083922.677574959232",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Are there any children at the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.478901083922.331242269140",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Are there any animals at the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.409468368967.699702184701",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Is the camp on public or private property?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.409468368967.625938744990",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Can you provide a description of the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1058867146719",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, is the address at {address} ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.88351892471",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Did you say the {stray} is located around {strayAnimalAddress}"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1639118695942.1016003359675",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "May I please have the address of the issue you\u0027re reporting?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.497628180714.416267865584",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the address?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.159243950675.1214583905306",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the model of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the model of the {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the model of the {make} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.159243950675.45262955813",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the make of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the vehicle make or manufacturer name?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the make of the {vehicle} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.159243950675.1551161405556",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What\u0027s the color of the {make} {model} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.852077765526.1405916262811",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "No problem, can you please provide the nearest address?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.852077765526.1405916262811",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, did you say the address was at {address} ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.535311827128.1335337409156",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Did you say the address was at {userAddress} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.695582460385.101077360916",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Can you please provide a description of the type of trash?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.695582460385.101077360916",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Here is what you said - {trashType} . Is this description okay?"
+          }
+        ]
       }
     ]
   },
-  "version": "88"
+  "version": "131"
 }
