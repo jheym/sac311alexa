@@ -1,33 +1,6 @@
 const Alexa = require("ask-sdk-core")
 const index = require("./index.js")
 
-const ConfirmAbandonedVehicleIntentHandler = {
-  canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest"
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === "ConfirmAbandonedVehicleIntent"
-    )
-  },
-  handle(handlerInput) {
-    // Storing the current intent in the session handler https://m.media-amazon.com/images/G/01/mobile-apps/dex/alexa/alexa-skills-kit/guide/Dialog-Management-Guide.pdf?aliId=29905953
-    let currentIntent = handlerInput.requestEnvelope.request.intent
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
-    sessionAttributes['ConfirmAbandonedVehicleIntent'] = currentIntent
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
-
-    const speakOutput = "Just to confirm, are you reporting an abandoned vehicle?"
-    index.setQuestion(handlerInput, null)
-    index.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect')
-    return (
-      handlerInput.responseBuilder
-        .addDelegateDirective()
-        .withShouldEndSession(false)
-        .speak(speakOutput)
-        .getResponse()
-    )
-  },
-}
-
 const AbandonedVehicleIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -36,10 +9,31 @@ const AbandonedVehicleIntentHandler = {
     )
   },
   handle(handlerInput) {
-    if (Alexa.getDialogState(handlerInput.requestEnvelope) !== "COMPLETED") {
+    const { attributesManager, requestEnvelope, responseBuilder } = handlerInput
+    const currentIntent = requestEnvelope.request.intent;
+    const sessionAttributes = attributesManager.getSessionAttributes()
+
+    // If confirmedAddress exists, the address has been confirmed already and we should update this intent's slot value
+    if (sessionAttributes.confirmedAddress) {
+      currentIntent.slots.abandonedVehicleAddress.value = sessionAttributes.confirmedAddress
+    }
+
+    if (Alexa.getDialogState(handlerInput.requestEnvelope) === "STARTED") {
+      const speakOutput = "Just to confirm, are you reporting an abandoned vehicle?"
+      index.setQuestion(handlerInput, null)
+      index.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect')
       return (
         handlerInput.responseBuilder
-          .addDelegateDirective()
+          .withShouldEndSession(false)
+          .speak(speakOutput)
+          .getResponse()
+      )
+    }
+
+    if (Alexa.getDialogState(handlerInput.requestEnvelope) === "IN_PROGRESS") {
+      return (
+        handlerInput.responseBuilder
+          .addDelegateDirective(currentIntent)
           .getResponse()
       )
     }
@@ -47,11 +41,14 @@ const AbandonedVehicleIntentHandler = {
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "COMPLETED") {
       var make = Alexa.getSlotValue(handlerInput.requestEnvelope, 'make')
       var model = Alexa.getSlotValue(handlerInput.requestEnvelope, 'model')
-      speakOutput = `Thank you for reporting the abandoned ${make} ${model}. We'll dispatch someone to the incident as soon as we can.`
+      var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color')
+      var address = Alexa.getSlotValue(handlerInput.requestEnvelope, 'abandonedVehicleAddress')
+      speakOutput = `Thank you for reporting the abandoned ${color} ${make} ${model} located near ${address}. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?`
+      //TODO: Set question for "anything else?" 
       return (
         handlerInput.responseBuilder
           .speak(speakOutput)
-          .withShouldEndSession(true) // Replace this later to go back to welcome message optionally
+          .withShouldEndSession(false) // Replace this later to go back to welcome message optionally
           .getResponse()
       )
     }
@@ -69,6 +66,8 @@ const YesAbandonedVehicleIntentHandler = {
   handle(handlerInput) {
     index.setQuestion(handlerInput, null)
     index.setQuestion(handlerInput, 'IsAbandonedTime')
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
+    sessionAttributes.reasonForCalling = 'AbandonedVehicleIntent' // So GetAddressIntent knows where to delegate back to after confirming the address
     return (
       handlerInput.responseBuilder
         .speak('Has the vehicle been abandoned for more than seventy-two hours?')
@@ -88,27 +87,27 @@ const YesAbandonedVehicleTimeIntentHandler = {
   },
   handle(handlerInput) {
     index.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
-    tempSlots = sessionAttributes['ConfirmAbandonedVehicleIntent'].slots
+    const { responseBuilder, attributesManager } = handlerInput
+    const sessionAttributes = attributesManager.getSessionAttributes()
+    // If the user provided an address with initial intent, store the address in the userProvidedAddress property
+    if (sessionAttributes['AbandonedVehicleIntent'].slots.abandonedVehicleAddress.value) {
+      sessionAttributes.userProvidedAddress = sessionAttributes['AbandonedVehicleIntent'].slots.abandonedVehicleAddress.value
+    }
+    attributesManager.setSessionAttributes(sessionAttributes)
+
+    // TODO: Sending the address from here is not ideal because we also have to
+    // chain into another yes/no abandoned vehicle intent to ask if the user
+    // wants to use their location. That will need to be copied to all
+    // modules... Maybe a response interceptor is a solution?
     return (
-      handlerInput.responseBuilder
-        .addDelegateDirective({ // This is what intent chaining looks like https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/03/intent-chaining-for-alexa-skill
-          name: 'AbandonedVehicleIntent',
+      responseBuilder
+        .addDelegateDirective({
+          name: 'GetAddressIntent',
           confirmationStatus: 'NONE',
-          slots: { // Adding slots that may have been collected by ConfirmAbandonedVehicleIntent
-            make: {
-              name: 'make',
-              value: tempSlots.make.value,
-              confirmationStatus: 'NONE'
-            },
-            model: {
-              name: 'model',
-              value: tempSlots.model.value,
-              confirmationStatus: 'NONE'
-            },
-            color: {
-              name: 'color',
-              value: tempSlots.color.value,
+          slots: {
+            userAddress: {
+              name: 'userAddress',
+              value: sessionAttributes['AbandonedVehicleIntent'].slots.abandonedVehicleAddress.value,
               confirmationStatus: 'NONE'
             }
           }
@@ -161,7 +160,6 @@ const NoAbandonedVehicleTimeIntentHandler = {
 }
 
 module.exports = {
-  ConfirmAbandonedVehicleIntentHandler,
   AbandonedVehicleIntentHandler,
   YesAbandonedVehicleIntentHandler,
   YesAbandonedVehicleTimeIntentHandler,

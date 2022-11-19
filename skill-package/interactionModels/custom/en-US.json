@@ -263,10 +263,28 @@
             },
             {
               "name": "campDescription",
-              "type": "AMAZON.SearchQuery"
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{campDescription}"
+              ]
+            },
+            {
+              "name": "isTrash",
+              "type": "yesNoType",
+              "samples": [
+                "{isTrash}"
+              ]
             }
           ],
           "samples": [
+            "{homelessCamp} on {propertyType} on {homelessCampAddress}",
+            "{homelessCamp} on {propertyType} at {homelessCampAddress}",
+            "{homelessCamp} at {homelessCampAddress}",
+            "{homelessCamp} on {homelessCampAddress}",
+            "There\u0027s a {homelessCamp} at {homelessCampAddress}",
+            "There\u0027s a {homelessCamp} on {homelessCampAddress}",
+            "Report a {homelessCamp} on {homelessCampAddress}",
+            "Report a {homelessCamp} at {homelessCampAddress}",
             "Report a {homelessCamp} on {propertyType}",
             "Report a {homelessCamp}",
             "There is a {homelessCamp} on {propertyType}",
@@ -312,6 +330,10 @@
               "samples": [
                 "{trashType}"
               ]
+            },
+            {
+              "name": "trashPickupAddress",
+              "type": "AMAZON.PostalAddress"
             }
           ],
           "samples": [
@@ -912,9 +934,19 @@
               "name": "campDescription",
               "type": "AMAZON.SearchQuery",
               "elicitationRequired": true,
+              "confirmationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.591693848777.1646553018457",
+                "elicitation": "Elicit.Slot.409468368967.625938744990"
+              }
+            },
+            {
+              "name": "isTrash",
+              "type": "yesNoType",
+              "elicitationRequired": true,
               "confirmationRequired": false,
               "prompts": {
-                "elicitation": "Elicit.Slot.409468368967.625938744990"
+                "elicitation": "Elicit.Slot.1100716015297.948173215885"
               }
             }
           ],
@@ -1191,7 +1223,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Is the camp on public or private property?"
+            "value": "Is the camp on public property, or is it on private property?"
           }
         ]
       },
@@ -1314,7 +1346,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Did you say the address was at {userAddress} ?"
+            "value": "Just to confirm, is the address at {userAddress} ?"
           }
         ]
       },
@@ -1335,8 +1367,26 @@
             "value": "Here is what you said - {trashType} . Is this description okay?"
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.1100716015297.948173215885",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Is there trash around the camp that needs to be picked up?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.591693848777.1646553018457",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Here is what you said - {campDescription} . Is that right?"
+          }
+        ]
       }
     ]
   },
-  "version": "131"
+  "version": "138"
 }
