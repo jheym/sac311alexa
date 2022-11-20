@@ -5,7 +5,7 @@
  * Dinosaur Game 💪
  * */
 const Alexa = require("ask-sdk-core")
-
+const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
 const petcomplaint = require("./petcomplaint.js")
@@ -354,6 +354,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     potHole.PotHoleRequestHandler,
     petcomplaint.petcomplaintHandler,
     trashpickup.TrashPickUpIntentHandler,
+    strayAnimal.strayAnimalHandler,
     YesRetryIntentHandler,
     NoRetryIntentHandler,
     HelpIntentHandler,

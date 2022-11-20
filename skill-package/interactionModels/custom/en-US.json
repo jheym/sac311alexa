@@ -339,6 +339,32 @@
           "samples": [
             "Report trash"
           ]
+        },
+        {
+          "name": "DeadAnimalIntent",
+          "slots": [
+            {
+              "name": "deadAnimalAddress",
+              "type": "AMAZON.PostalAddress",
+              "samples": [
+                "{deadAnimalAddress}",
+                "The address is {deadAnimalAddress}"
+              ]
+            },
+            {
+              "name": "deadAnimal",
+              "type": "animalType",
+              "samples": [
+                "it is a {deadAnimal}",
+                "{deadAnimal}"
+              ]
+            }
+          ],
+          "samples": [
+            "dead {deadAnimal} at {deadAnimalAddress}",
+            "a dead {deadAnimal}",
+            "I would like to report a dead {deadAnimal} on {deadAnimalAddress}"
+          ]
         }
       ],
       "types": [
@@ -548,6 +574,11 @@
         },
         {
           "values": [
+            {
+              "name": {
+                "value": "bird"
+              }
+            },
             {
               "name": {
                 "value": "cow",
@@ -1004,6 +1035,33 @@
             }
           ],
           "delegationStrategy": "ALWAYS"
+        },
+        {
+          "name": "DeadAnimalIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "deadAnimalAddress",
+              "type": "AMAZON.PostalAddress",
+              "elicitationRequired": true,
+              "confirmationRequired": true,
+              "prompts": {
+                "confirmation": "Confirm.Slot.926509532094.1564036416986",
+                "elicitation": "Elicit.Slot.926509532094.1564036416986"
+              }
+            },
+            {
+              "name": "deadAnimal",
+              "type": "animalType",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.926509532094.455346598984"
+              }
+            }
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -1385,8 +1443,44 @@
             "value": "Here is what you said - {campDescription} . Is that right?"
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.926509532094.1564036416986",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "what is the address of the dead Animal ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.926509532094.1564036416986",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "do you confim the address of the dead animal as {deadAnimalAddress}"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.926509532094",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "is the the dead animal a {bird} or a {Mammale} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.926509532094.455346598984",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the animal?"
+          }
+        ]
       }
     ]
   },
-  "version": "138"
+  "version": "139"
 }
