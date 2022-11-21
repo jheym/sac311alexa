@@ -52,7 +52,9 @@ const YesUseCurrentLocationHandler = {
   handle(handlerInput) {
     const { responseBuilder, attributesManager } = handlerInput
     sessionAttributes = attributesManager.getSessionAttributes()
-    let address = sessionAttributes.asc.address
+    if (sessionAttributes.asc) {
+      let address = sessionAttributes.asc.address
+    }
     // TODO: Turn "APT" into "apartment"
     index.setQuestion(handlerInput, null)
 
@@ -116,7 +118,7 @@ const TryUserLocationResponseInterceptor = {
         console.log('The address was not provided with the intent. Ask the user if they want to use their current location.')
 
         // If we have an address from address service client
-        if (sessionAttributes.asc.address) {
+        if (sessionAttributes.asc) {
           if (sessionAttributes.userProvidedAddress) {
             // We've already executed the steps below
           } else {

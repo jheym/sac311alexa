@@ -29,7 +29,11 @@ const HomelessCampIntentHandler = {
     }
 
     // TODO: Add user specified slots that are the alternative to the yes/no
-    // slots which users can specify with their initial intent.
+    // slots which users can specify with their initial intent. Additionally,
+    // when a user says an address with initial intent, sometimes the street
+    // number resolves to the number slot instead. The number slots might need
+    // to be changed because it doesn't accept anything other than a straight
+    // number, so people can't say "about 4" or something similar.
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "IN_PROGRESS") {
       return (
         handlerInput.responseBuilder
@@ -61,6 +65,7 @@ const HomelessCampIntentHandler = {
               }
             })
             .speak(speakOutput + ' We just need a little more information about the trash.')
+            .withShouldEndSession(false)
             .getResponse()
         )
       } else {
