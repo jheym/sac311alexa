@@ -1,5 +1,13 @@
+
 const Alexa = require("ask-sdk-core")
 const index = require("./index.js")
+
+const dbHelper = require('./dynamo-testDB.js')
+var AWS = require("aws-sdk");
+const tableName = "dynamodb-test";
+var dbHelper = function () { };
+var docClient = new AWS.DynamoDB.DocumentClient();
+
 
 const AbandonedVehicleIntentHandler = {
   canHandle(handlerInput) {
@@ -20,14 +28,21 @@ const AbandonedVehicleIntentHandler = {
 
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "STARTED") {
       const speakOutput = "Just to confirm, are you reporting an abandoned vehicle?"
+	    const userID = handlerInput.requestEnvelope.context.System.user.userId; 
+	    const slots = handlerInput.requestEnvelope.request.intent.slots;
+	    const response = slots.Response.value;
+	
       index.setQuestion(handlerInput, null)
       index.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect')
-      return (
+      return (				//Changing to return dbHelper.addResponse(response, userID) to save response?
         handlerInput.responseBuilder
           .withShouldEndSession(false)
           .speak(speakOutput)
           .getResponse()
       )
+	/*.then((data) => {
+		const speechText = 'Testing you just said ${response}. Testing';
+		*/
     }
 
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "IN_PROGRESS") {
