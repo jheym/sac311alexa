@@ -20,6 +20,7 @@ const TrashPickUpIntentHandler = {
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "COMPLETED") {
       var trashType = Alexa.getSlotValue(handlerInput.requestEnvelope, 'trashType')
       speakOutput = `Thank you for reporting the ${trashType} trash. We'll dispatch someone to the incident as soon as we can.`
+      
       return (
         handlerInput.responseBuilder
           .speak(speakOutput)

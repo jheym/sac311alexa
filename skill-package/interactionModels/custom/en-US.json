@@ -57,16 +57,16 @@
                 "{make} is the make",
                 "a {make}",
                 "{make}",
-                "It\u0027s a {make}"
+                "It's a {make}"
               ]
             },
             {
               "name": "model",
               "type": "vehicleModelType",
               "samples": [
-                "It\u0027s a {color} {make} {model}",
-                "It\u0027s a {model}",
-                "It\u0027s a {make} {model}",
+                "It's a {color} {make} {model}",
+                "It's a {model}",
+                "It's a {make} {model}",
                 "{model}"
               ]
             },
@@ -75,7 +75,7 @@
               "type": "colorType",
               "samples": [
                 "the {vehicle} is {color}",
-                "It\u0027s {color}",
+                "It's {color}",
                 "{color}"
               ]
             },
@@ -97,7 +97,7 @@
               "name": "animal",
               "type": "animalType",
               "samples": [
-                "It\u0027s a {animal}",
+                "It's a {animal}",
                 "The {animal} I saw is",
                 "{animal} is "
               ]
@@ -125,7 +125,7 @@
               "name": "make",
               "type": "vehicleMakeType",
               "samples": [
-                "It\u0027s a {make}",
+                "It's a {make}",
                 "{make}",
                 "a {make}",
                 "{make} is the make"
@@ -136,9 +136,9 @@
               "type": "vehicleModelType",
               "samples": [
                 "{model}",
-                "It\u0027s a {make} {model}",
-                "It\u0027s a {model}",
-                "It\u0027s a {color} {make} {model}"
+                "It's a {make} {model}",
+                "It's a {model}",
+                "It's a {color} {make} {model}"
               ]
             },
             {
@@ -146,7 +146,7 @@
               "type": "colorType",
               "samples": [
                 "{color}",
-                "It\u0027s {color}",
+                "It's {color}",
                 "The {vehicle} is {color}"
               ]
             },
@@ -159,7 +159,7 @@
             "Report an {abandoned} {make} {model} at {abandonedVehicleAddress}",
             "Report an {abandoned} {make} at {abandonedVehicleAddress}",
             "Report an {abandoned} {model} at {abandonedVehicleAddress}",
-            "There\u0027s an {abandoned} {vehicle} at {abandonedVehicleAddress}",
+            "There's an {abandoned} {vehicle} at {abandonedVehicleAddress}",
             "Report an {abandoned} {vehicle} at {abandonedVehicleAddress}",
             "Someone left their {color} {make} {model}",
             "Someone left their {color} {vehicle}",
@@ -167,9 +167,9 @@
             "Someone left their {model}",
             "Someone left their {make}",
             "Someone left their {vehicle}",
-            "There\u0027s an {abandoned} {vehicle}",
-            "There\u0027s a {abandoned} {model}",
-            "There\u0027s a {abandoned} {color} {model}",
+            "There's an {abandoned} {vehicle}",
+            "There's a {abandoned} {model}",
+            "There's a {abandoned} {color} {model}",
             "someone {abandoned} their {vehicle} ",
             "A {vehicle} has no owner",
             "{color} {abandoned} {vehicle}",
@@ -208,7 +208,7 @@
           "samples": [
             "Report a {stray} {strayAnimalSlot}",
             "{stray} {strayAnimalSlot}",
-            "There\u0027s a {stray} {strayAnimalSlot}"
+            "There's a {stray} {strayAnimalSlot}"
           ]
         },
         {
@@ -281,8 +281,8 @@
             "{homelessCamp} on {propertyType} at {homelessCampAddress}",
             "{homelessCamp} at {homelessCampAddress}",
             "{homelessCamp} on {homelessCampAddress}",
-            "There\u0027s a {homelessCamp} at {homelessCampAddress}",
-            "There\u0027s a {homelessCamp} on {homelessCampAddress}",
+            "There's a {homelessCamp} at {homelessCampAddress}",
+            "There's a {homelessCamp} on {homelessCampAddress}",
             "Report a {homelessCamp} on {homelessCampAddress}",
             "Report a {homelessCamp} at {homelessCampAddress}",
             "Report a {homelessCamp} on {propertyType}",
@@ -336,9 +336,7 @@
               "type": "AMAZON.PostalAddress"
             }
           ],
-          "samples": [
-            "Report trash"
-          ]
+          "samples": []
         },
         {
           "name": "DeadAnimalIntent",
@@ -364,6 +362,25 @@
             "dead {deadAnimal} at {deadAnimalAddress}",
             "a dead {deadAnimal}",
             "I would like to report a dead {deadAnimal} on {deadAnimalAddress}"
+          ]
+        },
+        {
+          "name": "TrafficLightIntent",
+          "slots": [
+            {
+              "name": "intersectionAddress",
+              "type": "AMAZON.StreetName",
+              "multipleValues": {
+                "enabled": true
+              }
+            }
+          ],
+          "samples": [
+            "Traffic light",
+            "Traffic light broken at {intersectionAddress} {intersectionAddress}",
+            "Traffic light broken on {intersectionAddress}",
+            "Traffic light broken at intersection of {intersectionAddress} and {intersectionAddress}",
+            "Traffic light down at the intersection of {intersectionAddress} and {intersectionAddress}"
           ]
         }
       ],
@@ -1034,7 +1051,7 @@
               }
             }
           ],
-          "delegationStrategy": "ALWAYS"
+          "delegationStrategy": "SKILL_RESPONSE"
         },
         {
           "name": "DeadAnimalIntent",
@@ -1072,7 +1089,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you\u0027d like to report a {ticketCategoryType} . Is that correct?"
+            "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
           }
         ]
       },
@@ -1089,7 +1106,7 @@
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the make of the vehicle?"
+            "value": "What's the make of the vehicle?"
           }
         ]
       },
@@ -1098,7 +1115,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "In a few words, can you describe the issue you\u0027re reporting?"
+            "value": "In a few words, can you describe the issue you're reporting?"
           }
         ]
       },
@@ -1138,7 +1155,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you\u0027re reporting an abandoned {color} {make} {model} , is that right?"
+            "value": "Just to confirm, you're reporting an abandoned {color} {make} {model} , is that right?"
           }
         ]
       },
@@ -1147,11 +1164,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {make} ?"
+            "value": "What's the model of the {make} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {vehicle} ?"
+            "value": "What's the model of the {vehicle} ?"
           }
         ]
       },
@@ -1160,15 +1177,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {make} {model} ?"
+            "value": "What's the color of the {make} {model} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the vehicle?"
+            "value": "What's the color of the vehicle?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {vehicle} ?"
+            "value": "What's the color of the {vehicle} ?"
           }
         ]
       },
@@ -1228,7 +1245,7 @@
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the address?"
+            "value": "What's the address?"
           }
         ]
       },
@@ -1317,7 +1334,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "May I please have the address of the issue you\u0027re reporting?"
+            "value": "May I please have the address of the issue you're reporting?"
           }
         ]
       },
@@ -1326,7 +1343,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the address?"
+            "value": "What's the address?"
           }
         ]
       },
@@ -1335,15 +1352,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the vehicle?"
+            "value": "What's the model of the vehicle?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {vehicle} ?"
+            "value": "What's the model of the {vehicle} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {make} ?"
+            "value": "What's the model of the {make} ?"
           }
         ]
       },
@@ -1352,7 +1369,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the make of the vehicle?"
+            "value": "What's the make of the vehicle?"
           },
           {
             "type": "PlainText",
@@ -1369,15 +1386,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {vehicle} ?"
+            "value": "What's the color of the {vehicle} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the vehicle?"
+            "value": "What's the color of the vehicle?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {make} {model} ?"
+            "value": "What's the color of the {make} {model} ?"
           }
         ]
       },
@@ -1482,5 +1499,5 @@
       }
     ]
   },
-  "version": "139"
+  "version": "143"
 }
