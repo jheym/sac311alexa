@@ -5,7 +5,7 @@ const index = require("./index.js")
 const dbHelper = require('./dynamo-testDB.js')
 var AWS = require("aws-sdk");
 const tableName = "dynamodb-test";
-var dbHelper = function () { };
+//var dbHelper = function () { }; //ethan did this, throwing error
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 

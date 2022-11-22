@@ -11,7 +11,7 @@ const potHole = require("./pothole.js")
 const petcomplaint = require("./petcomplaint.js")
 const homelessCamp = require("./homeless-encampment.js")
 const getAddress = require("./get-address")
-
+const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
 
 // Stows the asked question in a session attribute for yes and no intent handlers
@@ -355,6 +355,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     petcomplaint.petcomplaintHandler,
     trashpickup.TrashPickUpIntentHandler,
     strayAnimal.strayAnimalHandler,
+    dirtyBathroom.dirtyBathroomHandler,
     YesRetryIntentHandler,
     NoRetryIntentHandler,
     HelpIntentHandler,
