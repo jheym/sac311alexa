@@ -4,15 +4,24 @@
  * Humayoon Rafei, and Justin Heyman
  * Dinosaur Game 💪
  * */
-const Alexa = require("ask-sdk-core")
+const Alexa = require("ask-sdk")
+// const AWS = require("aws-sdk");
+// const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');
+// const dbHelper = require('./dbHelper');
+
+
+
+
+
 const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
 const petcomplaint = require("./petcomplaint.js")
 const homelessCamp = require("./homeless-encampment.js")
-const getAddress = require("./get-address")
+const getLocation = require("./getLocation")
 const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
+const liveAgent = require("./liveAgent.js")
 
 // Stows the asked question in a session attribute for yes and no intent handlers
 function setQuestion(handlerInput, questionAsked) {
@@ -27,10 +36,18 @@ const LaunchRequestHandler = {
       Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
     )
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
+    // const attributesManager = handlerInput.attributesManager;
+    // const attributes = await attributesManager.getPersistentAttributes() || {};
+    // console.log('attributes is: ', attributes);
+    // dbHelper.credentials().then((result) => {
+    //   console.log(result)
+    // })
+    // const counter = attributes.hasOwnProperty('counter') ? attributes.counter : 0;
+
     return (
       handlerInput.responseBuilder
-        .speak("Thank you for contacting Sacramento Three One One. How can I help you today?")
+        .speak(`Thank you for contacting Sacramento Three One One. How can I help you today?`)
         .reprompt("How can I help? You can report an issue, or you can get information about city-related activities.")
         .getResponse()
     )
@@ -132,9 +149,10 @@ const CancelAndStopIntentHandler = {
   },
 }
 /* *
- * FallbackIntent triggers when a customer says something that doesn’t map to any intents in your skill
- * It must also be defined in the language model (if the locale supports it)
- * This handler can be safely added but will be ingnored in locales that do not support it yet
+ * FallbackIntent triggers when a customer says something that doesn’t map to
+ * any intents in your skill It must also be defined in the language model (if
+ * the locale supports it) This handler can be safely added but will be
+ * ingnored in locales that do not support it yet
  * */
 const FallbackIntentHandler = {
   canHandle(handlerInput) {
@@ -144,6 +162,8 @@ const FallbackIntentHandler = {
       "AMAZON.FallbackIntent"
     )
   },
+  // TODO: Add sessionattributes counter for fallbacks. If 3 fallbacks then
+  // offer to send to live agent or end the session.
   handle(handlerInput) {
     const speakOutput = "Sorry, I don't know about that. Please try again."
 
@@ -165,12 +185,19 @@ const SessionEndedRequestHandler = {
       "SessionEndedRequest"
     )
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     // console.log(
     //   `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
     // )
     // Any cleanup logic goes here.
-    return handlerInput.responseBuilder.getResponse() // notice we send an empty response
+    // const attributesManager = handlerInput.attributesManager;
+    // let attributes = { "counter": 10 };
+
+    // attributesManager.setPersistentAttributes(attributes);
+    // await attributesManager.savePersistentAttributes();
+
+    return handlerInput.responseBuilder
+      .getResponse(); // notice we send an empty response
   },
 }
 /* *
@@ -256,49 +283,22 @@ const ContextSwitchingRequestInterceptor = {
   }
 }
 
-
+//TODO: Probably don't get the address unless we need to.
 const NewSessionRequestInterceptor = {
   async process(handlerInput) {
     // console.log('request:', JSON.stringify(handlerInput.requestEnvelope.request));
 
+
+
     if (handlerInput.requestEnvelope.session.new) {
-      const { requestEnvelope, serviceClientFactory, attributesManager } = handlerInput
-      const sessionAttributes = attributesManager.getSessionAttributes()
-      const consentToken = requestEnvelope.context.System.user.permissions
-        && requestEnvelope.context.System.user.permissions.consentToken
-      if (!consentToken) {
-        console.log('The user does not have location permissions enabled.')
-        return false
-      }
 
-      try {
-        const { deviceId } = requestEnvelope.context.System.device;
-        const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
-        // This is why the function is async. We wait for a response from the
-        // serviceClient API before executing the next line of code.
-        const address = await deviceAddressServiceClient.getFullAddress(deviceId);  // This is an API call to the Address Service
 
-        if (address.addressLine1 === null && address.stateOrRegion === null) {
-          console.log('The user does not have an address set.')
-          return false
-        } else {
-          // const ADDRESS_MESSAGE = `Here is your full address: ${address.addressLine1}, ${address.stateOrRegion}, ${address.postalCode}`;
-          sessionAttributes.asc = {}
-          sessionAttributes.asc.address = address.addressLine1;
-          sessionAttributes.asc.stateOrRegion = address.stateOrRegion
-          sessionAttributes.asc.postalCode = address.postalCode
-          attributesManager.setSessionAttributes(sessionAttributes);
-          console.log('The address has been stored in session attributes.');
-          console.log(sessionAttributes)
-          return true
-        }
-      } catch (error) {
-        if (error.name !== 'ServiceError') {
-          console.log('Something went wrong.')
-          return false
-        }
-        throw error;
-      }
+
+      const { attributesManager } = handlerInput;
+      const attributes = await attributesManager.getPersistentAttributes() || {};
+
+
+
     }
   }
 }
@@ -329,6 +329,40 @@ const DelegateDirectiveResponseInterceptor = {
   }
 }
 
+async function createDB() {
+  const STS = new AWS.STS({ apiVersion: '2011-06-15' });
+  const credentials = await STS.assumeRole({
+    RoleArn: 'arn:aws:iam::020485550387:role/311DynamoDB',
+    RoleSessionName: '311dbSession' // You can rename with any name
+  }, (err, res) => {
+    if (err) {
+      console.log('AssumeRole FAILED: ', err);
+      throw new Error('Error while assuming role');
+    }
+    return res;
+  }).promise();
+
+  const creds = createDB();
+
+  // 2. Make a new DynamoDB instance with the assumed role credentials
+  //    and scan the DynamoDB table
+  // const dynamoDB = new AWS.DynamoDB({
+  //   apiVersion: 'latest',
+  //   region: 'us-east-1',
+  //   accessKeyId: credentials.Credentials.AccessKeyId,
+  //   secretAccessKey: credentials.Credentials.SecretAccessKey,
+  //   sessionToken: credentials.Credentials.SessionToken
+  // });
+  // const tableData = await dynamoDB.scan({ TableName: 'sac311table' }, (err, data) => {
+  //   if (err) {
+  //     console.log('Scan FAILED', err);
+  //     throw new Error('Error while scanning table');
+  //   }
+  //   return data;
+  // }).promise();
+
+  // ... Use table data as required ...
+}
 
 /**
  * This handler acts as the entry point for your skill, routing all request and response
@@ -336,13 +370,17 @@ const DelegateDirectiveResponseInterceptor = {
  * defined are included below. The order matters - they're processed top to bottom
  * */
 // TODO: Add all handlers to an array https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs/issues/283
-exports.handler = Alexa.SkillBuilders.custom()
+exports.handler = Alexa.SkillBuilders.standard()
   .addRequestHandlers(  // Order matters with these!
     LaunchRequestHandler,
     ReportAnIssueIntentHandler,
-    getAddress.GetAddressIntentHandler,
-    getAddress.YesUseCurrentLocationHandler,
-    getAddress.NoUseCurrentLocationHandler,
+    getLocation.GetLocationIntentHandler,
+    getLocation.YesUseCurrentLocationIntentHandler,
+    getLocation.NoUseCurrentLocationIntentHandler,
+    getLocation.YesUseHomeAddressIntentHandler,
+    getLocation.NoUseHomeAddressIntentHandler,
+    getLocation.GetLocationHelperIntentHandler,
+    liveAgent.LiveAgentIntentHandler,
     abandonedVehicle.AbandonedVehicleIntentHandler,
     abandonedVehicle.YesAbandonedVehicleIntentHandler,
     abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
@@ -365,17 +403,33 @@ exports.handler = Alexa.SkillBuilders.custom()
     IntentReflectorHandler,
   )
   .addRequestInterceptors(
-    NewSessionRequestInterceptor,
-    ContextSwitchingRequestInterceptor
+    // NewSessionRequestInterceptor,
+    ContextSwitchingRequestInterceptor,
+    getLocation.GetLocationRequestInterceptor
   )
   .addResponseInterceptors(
-    // DelegateDirectiveResponseInterceptor
-    getAddress.TryUserLocationResponseInterceptor
-  )
+  // DelegateDirectiveResponseInterceptor
+  // getLocation.DelegateToGetLocationResponseInterceptor
+)
   .addErrorHandlers(ErrorHandler)
-  .withApiClient(new Alexa.DefaultApiClient())
+  // .withApiClient(new Alexa.DefaultApiClient())
   .withCustomUserAgent("DinosaurWithGrowingPains")
-  .lambda()
+  // .withPersistenceAdapter(
+  //   new ddbAdapter.DynamoDbPersistenceAdapter({
+  //     tableName: 'sac311table',
+  //     createTable: false,
+  //     dynamoDBClient: new AWS.DynamoDB({
+  //       apiVersion: 'latest',
+  //       region: 'us-east-1',
+  // accessKeyId: credentials.Credentials.AccessKeyId,
+  // secretAccessKey: credentials.Credentials.SecretAccessKey,
+  // sessionToken: credentials.Credentials.SessionToken
+  // })
+  // })
+  // )
+  // .withTableName('sac311table')
+  // .withAutoCreateTable(true)
+  .lambda();
 
 // Custom Exports
 exports.setQuestion = setQuestion

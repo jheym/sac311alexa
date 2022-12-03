@@ -48,50 +48,7 @@
           ]
         },
         {
-          "name": "OldAbandonedVehicleIntent",
-          "slots": [
-            {
-              "name": "make",
-              "type": "vehicleMakeType",
-              "samples": [
-                "{make} is the make",
-                "a {make}",
-                "{make}",
-                "It\u0027s a {make}"
-              ]
-            },
-            {
-              "name": "model",
-              "type": "vehicleModelType",
-              "samples": [
-                "It\u0027s a {color} {make} {model}",
-                "It\u0027s a {model}",
-                "It\u0027s a {make} {model}",
-                "{model}"
-              ]
-            },
-            {
-              "name": "color",
-              "type": "colorType",
-              "samples": [
-                "the {vehicle} is {color}",
-                "It\u0027s {color}",
-                "{color}"
-              ]
-            },
-            {
-              "name": "vehicle",
-              "type": "vehicleSynonymsType"
-            },
-            {
-              "name": "abandoned",
-              "type": "abandonedSynonymsType"
-            }
-          ],
-          "samples": []
-        },
-        {
-          "name": "petcomplaintIntent",
+          "name": "PetComplaintIntent",
           "slots": [
             {
               "name": "animal",
@@ -151,16 +108,20 @@
               ]
             },
             {
-              "name": "abandonedVehicleAddress",
+              "name": "abandonedVehicleLocation",
               "type": "AMAZON.PostalAddress"
+            },
+            {
+              "name": "nullRequired",
+              "type": "nullRequiredType"
             }
           ],
           "samples": [
-            "Report an {abandoned} {make} {model} at {abandonedVehicleAddress}",
-            "Report an {abandoned} {make} at {abandonedVehicleAddress}",
-            "Report an {abandoned} {model} at {abandonedVehicleAddress}",
-            "There\u0027s an {abandoned} {vehicle} at {abandonedVehicleAddress}",
-            "Report an {abandoned} {vehicle} at {abandonedVehicleAddress}",
+            "Report an {abandoned} {make} {model} at {abandonedVehicleLocation}",
+            "Report an {abandoned} {make} at {abandonedVehicleLocation}",
+            "Report an {abandoned} {model} at {abandonedVehicleLocation}",
+            "There\u0027s an {abandoned} {vehicle} at {abandonedVehicleLocation}",
+            "Report an {abandoned} {vehicle} at {abandonedVehicleLocation}",
             "Someone left their {color} {make} {model}",
             "Someone left their {color} {vehicle}",
             "Someone left their {make} {model}",
@@ -185,7 +146,7 @@
           ]
         },
         {
-          "name": "strayAnimalIntent",
+          "name": "StrayAnimalIntent",
           "slots": [
             {
               "name": "stray",
@@ -299,24 +260,11 @@
           ]
         },
         {
-          "name": "GetAddressIntent",
+          "name": "GetLocationIntent",
           "slots": [
             {
-              "name": "userAddress",
-              "type": "AMAZON.SearchQuery",
-              "samples": [
-                "{userAddress}"
-              ]
-            }
-          ],
-          "samples": []
-        },
-        {
-          "name": "ConfirmAddressIntent",
-          "slots": [
-            {
-              "name": "address",
-              "type": "AMAZON.SearchQuery"
+              "name": "location",
+              "type": "AMAZON.PostalAddress"
             }
           ],
           "samples": []
@@ -384,7 +332,7 @@
           ]
         },
         {
-          "name": "dirtyParkBathroomIntent",
+          "name": "DirtyParkBathroomIntent",
           "slots": [
             {
               "name": "dirtyType",
@@ -411,6 +359,39 @@
             "Our local park {bathroomType} is {dirtyType}",
             "There is a {dirtyType} park {bathroomType}"
           ]
+        },
+        {
+          "name": "GetLocationHelperIntent",
+          "slots": [
+            {
+              "name": "helperLocation",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{helperLocation}"
+              ]
+            }
+          ],
+          "samples": []
+        },
+        {
+          "name": "LiveAgentIntent",
+          "slots": [],
+          "samples": [
+            "Speak to live agent",
+            "Live agent"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StartOverIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
         }
       ],
       "types": [
@@ -856,60 +837,21 @@
             }
           ],
           "name": "dirtyType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "supercalifragilisticexpialidocious"
+              }
+            }
+          ],
+          "name": "nullRequiredType"
         }
       ]
     },
     "dialog": {
       "intents": [
-        {
-          "name": "OldAbandonedVehicleIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "make",
-              "type": "vehicleMakeType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.537774412930.108680342923"
-              }
-            },
-            {
-              "name": "model",
-              "type": "vehicleModelType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.347766119927.878483551565"
-              }
-            },
-            {
-              "name": "color",
-              "type": "colorType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.486647140061.760696688304"
-              }
-            },
-            {
-              "name": "vehicle",
-              "type": "vehicleSynonymsType",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            },
-            {
-              "name": "abandoned",
-              "type": "abandonedSynonymsType",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
         {
           "name": "PotHoleIntent",
           "confirmationRequired": true,
@@ -931,8 +873,10 @@
         },
         {
           "name": "AbandonedVehicleIntent",
-          "confirmationRequired": false,
-          "prompts": {},
+          "confirmationRequired": true,
+          "prompts": {
+            "confirmation": "Confirm.Intent.1294467916183"
+          },
           "slots": [
             {
               "name": "abandoned",
@@ -976,8 +920,15 @@
               }
             },
             {
-              "name": "abandonedVehicleAddress",
+              "name": "abandonedVehicleLocation",
               "type": "AMAZON.PostalAddress",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "nullRequired",
+              "type": "nullRequiredType",
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
@@ -986,7 +937,7 @@
           "delegationStrategy": "SKILL_RESPONSE"
         },
         {
-          "name": "strayAnimalIntent",
+          "name": "StrayAnimalIntent",
           "confirmationRequired": true,
           "prompts": {
             "confirmation": "Confirm.Intent.88351892471"
@@ -1018,7 +969,7 @@
           ]
         },
         {
-          "name": "petcomplaintIntent",
+          "name": "PetComplaintIntent",
           "confirmationRequired": false,
           "prompts": {},
           "slots": [
@@ -1111,36 +1062,16 @@
           "delegationStrategy": "SKILL_RESPONSE"
         },
         {
-          "name": "ConfirmAddressIntent",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.1058867146719"
-          },
-          "slots": [
-            {
-              "name": "address",
-              "type": "AMAZON.SearchQuery",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
-          "name": "GetAddressIntent",
+          "name": "GetLocationIntent",
           "confirmationRequired": false,
           "prompts": {},
           "slots": [
             {
-              "name": "userAddress",
-              "type": "AMAZON.SearchQuery",
-              "elicitationRequired": true,
-              "confirmationRequired": true,
-              "prompts": {
-                "confirmation": "Confirm.Slot.535311827128.1335337409156",
-                "elicitation": "Elicit.Slot.1639118695942.1016003359675"
-              }
+              "name": "location",
+              "type": "AMAZON.PostalAddress",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
             }
           ],
           "delegationStrategy": "SKILL_RESPONSE"
@@ -1189,6 +1120,22 @@
             }
           ],
           "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "GetLocationHelperIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "helperLocation",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1349433291344.1451233083949"
+              }
+            }
+          ]
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -1531,7 +1478,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, is the address at {userAddress} ?"
+            "value": "Just to confirm, is the address at {location} ?"
           }
         ]
       },
@@ -1606,8 +1553,35 @@
             "value": "What is the animal?"
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.1349433291344.1451233083949",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "You can give an address or nearest cross street."
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1294467916183",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, the vehicle is a {color} {make} {model} , is that right?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1009600416173.307545323055",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "You shouldn\u0027t be hearing this"
+          }
+        ]
       }
     ]
   },
-  "version": "144"
+  "version": "169"
 }

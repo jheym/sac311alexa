@@ -43,6 +43,9 @@
       },
       {
         "name": "alexa::person_id:read"
+      },
+      {
+        "name": "amazon_communication::calling"
       }
     ],
     "publishingInformation": {

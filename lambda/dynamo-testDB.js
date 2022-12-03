@@ -1,5 +1,5 @@
 var AWS = require("aws-sdk");
-AWS.config.update({region: "us-east-1"});
+AWS.config.update({ region: "us-east-1" });
 const tableName = "dynamodb-starter";
 
 var dbHelper = function () { };
@@ -10,8 +10,8 @@ dbHelper.prototype.addResponse = (response, userID) => {
         const params = {
             TableName: tableName,
             Item: {
-              'response' : response,
-              'userId': userID
+                'response': response,
+                'userId': userID
             }
         };
         docClient.put(params, (err, data) => {
@@ -41,10 +41,10 @@ dbHelper.prototype.getResponse = (userID) => {
             if (err) {
                 console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
                 return reject(JSON.stringify(err, null, 2))
-            } 
+            }
             console.log("GetItem succeeded:", JSON.stringify(data, null, 2));
             resolve(data.Items)
-            
+
         })
     });
 }
@@ -71,7 +71,7 @@ dbHelper.prototype.removeResponse = (response, userID) => {
     });
 }
 
-module.exports = new dbHelper();
+// module.exports = new dbHelper();
 
 
 //Testing commit and deploy again.

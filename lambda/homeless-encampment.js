@@ -104,11 +104,11 @@ const YesHomelessCampIntentHandler = {
     return (
       responseBuilder
         .addDelegateDirective({
-          name: 'GetAddressIntent',
+          name: 'GetLocationIntent',
           confirmationStatus: 'NONE',
           slots: {
-            userAddress: {
-              name: 'userAddress',
+            location: {
+              name: 'location',
               value: homelessCampSlots.homelessCampAddress.value,
               confirmationStatus: 'NONE'
             }
