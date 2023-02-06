@@ -14,7 +14,7 @@ const GetLocationIntentHandler = {
     const { responseBuilder, requestEnvelope, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
 
-    // If the location slot is empty
+    // If the location slot is empty.
     if (!Alexa.getSlotValue(requestEnvelope, 'location')) {
       if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
         var speakOutput = 'Do you want to use your current location?'
