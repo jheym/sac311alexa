@@ -4,6 +4,13 @@
  * Humayoon Rafei, and Justin Heyman
  * Dinosaur Game 💪
  * */
+
+// TODO: Prevent the reflector handler from being triggered if it is a yes/no
+// intent and instead direct it to the fallback intent
+
+//  TODO: Create "anythingElse?" YesNo intents to handle the "anything else?" question
+
+
 const Alexa = require("ask-sdk")
 // const AWS = require("aws-sdk");
 // const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');

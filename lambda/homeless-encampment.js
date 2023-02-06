@@ -45,8 +45,8 @@ const HomelessCampIntentHandler = {
       var homelessCamp = Alexa.getSlotValue(handlerInput.requestEnvelope, 'homelessCamp')
       var propertyType = Alexa.getSlotValue(handlerInput.requestEnvelope, 'propertyType')
       var numPeople = Alexa.getSlotValue(handlerInput.requestEnvelope, 'numPeople')
-      var address = Alexa.getSlotValue(handlerInput.requestEnvelope, 'homelessCampAddress')
-      speakOutput = `Thank you for reporting the ${homelessCamp} with ${numPeople} people on ${propertyType} at ${address}. \
+      var location = sessionAttributes.confirmedLocation;
+      speakOutput = `Thank you for reporting the ${homelessCamp} with ${numPeople} people on ${propertyType} at ${location}. \
       We will dispatch someone to the incident as soon as we can.`
 
       // If isTrash is TRUE, chain into trashpickupintent 
@@ -69,7 +69,9 @@ const HomelessCampIntentHandler = {
             .getResponse()
         )
       } else {
-        // index.setQuestion(handlerInput, 'AnythingElse') // TODO: Make yesno intent for this
+        index.setQuestion(handlerInput, null)
+        index.setQuestion(handlerInput, 'AnythingElse?')
+        console.log(sessionAttributes.questionAsked)
         return (
           handlerInput.responseBuilder
             .speak(speakOutput + ' Is there anything else I can help with?')
@@ -95,24 +97,18 @@ const YesHomelessCampIntentHandler = {
     homelessCampSlots = sessionAttributes['HomelessCampIntent'].slots
     index.setQuestion(handlerInput, null)
 
-    // If the user provided an address with initial intent, store the address in the userProvidedAddress property
-    if (homelessCampSlots.homelessCampAddress.value) {
-      sessionAttributes.userProvidedAddress = homelessCampSlots.homelessCampAddress.value
-      attributesManager.setSessionAttributes(sessionAttributes)
-    }
+    // // If the user provided an address with initial intent, store the address in the userProvidedAddress property
+    // if (homelessCampSlots.homelessCampAddress.value) {
+    //   sessionAttributes.userProvidedAddress = homelessCampSlots.homelessCampAddress.value
+    //   attributesManager.setSessionAttributes(sessionAttributes)
+    // }
 
     return (
       responseBuilder
         .addDelegateDirective({
           name: 'GetLocationIntent',
           confirmationStatus: 'NONE',
-          slots: {
-            location: {
-              name: 'location',
-              value: homelessCampSlots.homelessCampAddress.value,
-              confirmationStatus: 'NONE'
-            }
-          }
+          slots: {}
         })
         .getResponse()
     )

@@ -108,20 +108,11 @@
               ]
             },
             {
-              "name": "abandonedVehicleLocation",
-              "type": "AMAZON.PostalAddress"
-            },
-            {
               "name": "nullRequired",
               "type": "nullRequiredType"
             }
           ],
           "samples": [
-            "Report an {abandoned} {make} {model} at {abandonedVehicleLocation}",
-            "Report an {abandoned} {make} at {abandonedVehicleLocation}",
-            "Report an {abandoned} {model} at {abandonedVehicleLocation}",
-            "There\u0027s an {abandoned} {vehicle} at {abandonedVehicleLocation}",
-            "Report an {abandoned} {vehicle} at {abandonedVehicleLocation}",
             "Someone left their {color} {make} {model}",
             "Someone left their {color} {vehicle}",
             "Someone left their {make} {model}",
@@ -189,10 +180,6 @@
               "type": "homelessSynonymsType"
             },
             {
-              "name": "homelessCampAddress",
-              "type": "AMAZON.StreetAddress"
-            },
-            {
               "name": "propertyType",
               "type": "propertySynonymsType",
               "samples": [
@@ -238,14 +225,6 @@
             }
           ],
           "samples": [
-            "{homelessCamp} on {propertyType} on {homelessCampAddress}",
-            "{homelessCamp} on {propertyType} at {homelessCampAddress}",
-            "{homelessCamp} at {homelessCampAddress}",
-            "{homelessCamp} on {homelessCampAddress}",
-            "There\u0027s a {homelessCamp} at {homelessCampAddress}",
-            "There\u0027s a {homelessCamp} on {homelessCampAddress}",
-            "Report a {homelessCamp} on {homelessCampAddress}",
-            "Report a {homelessCamp} at {homelessCampAddress}",
             "Report a {homelessCamp} on {propertyType}",
             "Report a {homelessCamp}",
             "There is a {homelessCamp} on {propertyType}",
@@ -278,10 +257,6 @@
               "samples": [
                 "{trashType}"
               ]
-            },
-            {
-              "name": "trashPickupAddress",
-              "type": "AMAZON.PostalAddress"
             }
           ],
           "samples": []
@@ -920,13 +895,6 @@
               }
             },
             {
-              "name": "abandonedVehicleLocation",
-              "type": "AMAZON.PostalAddress",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            },
-            {
               "name": "nullRequired",
               "type": "nullRequiredType",
               "elicitationRequired": false,
@@ -992,13 +960,6 @@
             {
               "name": "homelessCamp",
               "type": "homelessSynonymsType",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            },
-            {
-              "name": "homelessCampAddress",
-              "type": "AMAZON.StreetAddress",
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
@@ -1355,7 +1316,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Is the camp on public property, or is it on private property?"
+            "value": "Is the camp on public property? Or is it on private property?"
           }
         ]
       },
@@ -1583,5 +1544,5 @@
       }
     ]
   },
-  "version": "169"
+  "version": "174"
 }

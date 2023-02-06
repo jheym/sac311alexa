@@ -80,13 +80,14 @@ const AbandonedVehicleIntentHandler = {
 
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "COMPLETED") {
 
-      if (currentIntent.confirmationStatus === 'NONE') {
-        return responseBuilder
-          .addConfirmIntentDirective()
-          .speak('Do you want to confirm this intent?')
-          .getResponse()
-      }
+      // if (currentIntent.confirmationStatus === 'NONE') {
+      //   return responseBuilder
+      //     .addConfirmIntentDirective()
+      //     .speak('Do you want to confirm this intent?')
+      //     .getResponse()
+      // }
 
+      // If the user denies the slots, we need to clear the slots and start over
       if (currentIntent.confirmationStatus === 'DENIED') {
         console.log("Abandoned vehicle intent confirmation was DENIED")
         let updatedIntent = currentIntent;
@@ -159,13 +160,7 @@ const YesAbandonedVehicleTimeIntentHandler = {
       .addDelegateDirective({
         name: 'GetLocationIntent',
         confirmationStatus: 'NONE',
-        slots: {
-          location: {
-            name: 'location',
-            value: sessionAttributes['AbandonedVehicleIntent'].slots.abandonedVehicleLocation.value,
-            confirmationStatus: 'NONE'
-          }
-        }
+        slots: {}
       })
       .getResponse()
   }
@@ -176,7 +171,7 @@ const NoAbandonedVehicleIntentHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedVehicleCorrect'
+      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedVehicleCorrect?'
     )
   },
   handle(handlerInput) {
@@ -197,7 +192,7 @@ const NoAbandonedVehicleTimeIntentHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedTime'
+      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAbandonedTime?'
     )
   },
   handle(handlerInput) {

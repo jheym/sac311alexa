@@ -10,7 +10,7 @@ const GetLocationIntentHandler = {
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent'
     )
   },
-  async handle(handlerInput) {
+  handle(handlerInput) {
     const { responseBuilder, requestEnvelope, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
 
@@ -41,6 +41,7 @@ const GetLocationIntentHandler = {
         Alexa.getSlot(requestEnvelope, 'location').confirmationStatus !== 'CONFIRMED') {
         console.log('The location slot is filled but unconfirmed')
         let location = Alexa.getSlotValue(requestEnvelope, 'location')
+        console.log("location: " + location)
         return responseBuilder
           .addDelegateDirective({
             name: 'GetLocationHelperIntent',
@@ -48,12 +49,13 @@ const GetLocationIntentHandler = {
             slots: {
               helperLocation: {
                 name: 'helperLocation',
-                value: location,
+                value: location, // FIXME: This doesn't work because it is filling the only slot it needs to delegate for
                 confirmationStatus: 'NONE'
               }
             }
           })
           .getResponse();
+          
       }
 
       if (Alexa.getSlot(requestEnvelope, 'location') &&
@@ -61,9 +63,11 @@ const GetLocationIntentHandler = {
         // It is up to the original intent to add this confirmedAddress to its
         // own address slot, if necessary.
         sessionAttributes.confirmedLocation = Alexa.getSlotValue(requestEnvelope, 'location')
-        const reasonForCalling = await sessionAttributes.reasonForCalling
+        const reasonForCalling = sessionAttributes.reasonForCalling
         let tempSlots = sessionAttributes[reasonForCalling].slots
-        await attributesManager.setSessionAttributes(sessionAttributes)
+        attributesManager.setSessionAttributes(sessionAttributes)
+        index.setQuestion(handlerInput, null) // TODO: Temp fix because of line 197
+        console.log(sessionAttributes.questionAsked) 
         // FIXME: If all slots are filled in initial intent, this fails for
         // some reason? UPDATE: The workaround was to add an intent
         // confirmation in the dialog model. Is this the only way?
@@ -75,7 +79,6 @@ const GetLocationIntentHandler = {
               slots: tempSlots
             })
             .withShouldEndSession(false)
-            // .reprompt('huh?')
             .getResponse()
         );
       }
@@ -193,7 +196,8 @@ const YesUseHomeAddressIntentHandler = {
     )
   },
   handle(handlerInput) {
-    index.setQuestion(handlerInput, null)
+    index.setQuestion(handlerInput, null) // TODO: Why isn't the quesionAsked attribute being cleared here?
+    // console.log(sessionAttributes.questionAsked) // FIXME: ReferenceError: Cannot access 'sessionAttributes' before initialization
     const { responseBuilder, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
     var address = sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc &&
@@ -202,6 +206,8 @@ const YesUseHomeAddressIntentHandler = {
       sessionAttributes.GetLocation.asc.postalCode;
     console.log(address + ' ' + postalCode)
     let location = address + ' ' + postalCode
+
+    
     // TODO: What happens if locationObj is null?
     // TODO: Run address against ESRI
 
