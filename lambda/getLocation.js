@@ -3,89 +3,113 @@ const Alexa = require('ask-sdk-core')
 const index = require('./index.js')
 // TODO: Add getting device geolocation
 // Gets an address or prompts for an address and then confirms the address is correct
-const GetLocationIntentHandler = {
-  canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent'
-    )
-  },
-  handle(handlerInput) {
-    const { responseBuilder, requestEnvelope, attributesManager } = handlerInput
-    const sessionAttributes = attributesManager.getSessionAttributes()
-
-    // If the location slot is empty.
-    if (!Alexa.getSlotValue(requestEnvelope, 'location')) {
-      if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
-        var speakOutput = 'Do you want to use your current location?'
-        index.setQuestion(handlerInput, null)
-        index.setQuestion(handlerInput, 'UseCurrentLocation?')
-        return responseBuilder
-          .speak(speakOutput)
-          .withShouldEndSession(false)
-          .getResponse();
-      }
-
-      if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
-        var speakOutput = 'Do you want to use your home address?'
-        index.setQuestion(handlerInput, null)
-        index.setQuestion(handlerInput, 'UseHomeAddress?')
-        return responseBuilder
-          .speak(speakOutput)
-          .withShouldEndSession(false)
-          .getResponse();
-      }
-
-    } else {
-      if (Alexa.getSlot(requestEnvelope, 'location') &&
-        Alexa.getSlot(requestEnvelope, 'location').confirmationStatus !== 'CONFIRMED') {
-        console.log('The location slot is filled but unconfirmed')
-        let location = Alexa.getSlotValue(requestEnvelope, 'location')
-        console.log("location: " + location)
-        return responseBuilder
-          .addDelegateDirective({
-            name: 'GetLocationHelperIntent',
-            confirmationStatus: 'NONE',
-            slots: {
-              helperLocation: {
-                name: 'helperLocation',
-                value: location, // FIXME: This doesn't work because it is filling the only slot it needs to delegate for
-                confirmationStatus: 'NONE'
-              }
-            }
-          })
-          .getResponse();
-          
-      }
-
-      if (Alexa.getSlot(requestEnvelope, 'location') &&
-        Alexa.getSlot(requestEnvelope, 'location').confirmationStatus === 'CONFIRMED') {
-        // It is up to the original intent to add this confirmedAddress to its
-        // own address slot, if necessary.
-        sessionAttributes.confirmedLocation = Alexa.getSlotValue(requestEnvelope, 'location')
-        const reasonForCalling = sessionAttributes.reasonForCalling
-        let tempSlots = sessionAttributes[reasonForCalling].slots
-        attributesManager.setSessionAttributes(sessionAttributes)
-        index.setQuestion(handlerInput, null) // TODO: Temp fix because of line 197
-        console.log(sessionAttributes.questionAsked) 
-        // FIXME: If all slots are filled in initial intent, this fails for
-        // some reason? UPDATE: The workaround was to add an intent
-        // confirmation in the dialog model. Is this the only way?
+    const GetLocationIntentHandler = {
+      canHandle(handlerInput) {
         return (
-          handlerInput.responseBuilder
-            .addDelegateDirective({
-              name: reasonForCalling,
+          Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+          && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent'
+        )
+      },
+      handle(handlerInput) {
+        const { responseBuilder, requestEnvelope, attributesManager } = handlerInput
+        const sessionAttributes = attributesManager.getSessionAttributes()
+        if (Alexa.getSlot(requestEnvelope, 'location') &&
+            Alexa.getSlot(requestEnvelope, 'location').confirmationStatus !== 'CONFIRMED') {
+            console.log('The location slot is filled but unconfirmed')
+            let location = Alexa.getSlotValue(requestEnvelope, 'location')
+            let helperLocation = 
+            console.log("location: " + location)
+            return responseBuilder
+              .addDelegateDirective({
+                name: 'GetLocationHelperIntent',
+                confirmationStatus: 'NONE',
+                slots: {
+                  helperLocation: {
+                    name: 'helperLocation',
+                    value: location, // FIXME: This doesn't work because it is filling the only slot it needs to delegate for
+                    confirmationStatus: 'NONE'
+                  }
+                }
+              })
+              .getResponse();
+        }
+        
+        // If the location slot is empty.
+        if (!Alexa.getSlotValue(requestEnvelope, 'location')) {
+          
+          if (!(sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation &&sessionAttributes.GetLocation.asc)) {
+            var speakOutput = 'What is the address of the incident you are reporting?'
+            index.setQuestion(handlerInput, null)
+            return handlerInput.responseBuilder
+              .addDelegateDirective({
+              name: 'GetLocationHelperIntent',
               confirmationStatus: 'NONE',
-              slots: tempSlots
+              slots: {
+                helperLocation: {
+                  name: 'helperLocation',
+                  value: null,
+                  confirmationStatus: 'NONE'
+                }
+              }
             })
+            .speak("What's the location?")
             .withShouldEndSession(false)
-            .getResponse()
-        );
-      }
+            .reprompt('Reprompt')
+            .getResponse();
+          } 
+    
+    
+          if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
+            var speakOutput = 'Do you want to use your current location?'
+            index.setQuestion(handlerInput, null)
+            index.setQuestion(handlerInput, 'UseCurrentLocation?')
+            return responseBuilder
+              .speak(speakOutput)
+              .withShouldEndSession(false)
+              .getResponse();
+          }
+    
+          if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
+            var speakOutput = 'Do you want to use your home address?'
+            index.setQuestion(handlerInput, null)
+            index.setQuestion(handlerInput, 'UseHomeAddress?')
+            return responseBuilder
+              .speak(speakOutput)
+              .withShouldEndSession(false)
+              .getResponse();
+          }
+    
+        }
+      
+              
+          
+    
+          if (Alexa.getSlot(requestEnvelope, 'location') &&
+            Alexa.getSlot(requestEnvelope, 'location').confirmationStatus === 'CONFIRMED') {
+            // It is up to the original intent to add this confirmedAddress to its
+            // own address slot, if necessary.
+            sessionAttributes.confirmedLocation = Alexa.getSlotValue(requestEnvelope, 'location')
+            const reasonForCalling = sessionAttributes.reasonForCalling
+            let tempSlots = sessionAttributes[reasonForCalling].slots
+            attributesManager.setSessionAttributes(sessionAttributes)
+            index.setQuestion(handlerInput, null) // TODO: Temp fix because of line 197
+            console.log(sessionAttributes.questionAsked) 
+            // FIXME: If all slots are filled in initial intent, this fails for
+            // some reason? UPDATE: The workaround was to add an intent
+            // confirmation in the dialog model. Is this the only way?
+            return (
+              handlerInput.responseBuilder
+                .addDelegateDirective({
+                  name: reasonForCalling,
+                  confirmationStatus: 'NONE',
+                  slots: tempSlots
+                })
+                .withShouldEndSession(false)
+                .getResponse()
+       );
     }
   },
 }
-
 
 //   if (Alexa.getDialogState(requestEnvelope) !== 'COMPLETED') {
 //     return (
