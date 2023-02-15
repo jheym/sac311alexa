@@ -113,6 +113,10 @@
             }
           ],
           "samples": [
+            "Someone left their {color} {model}",
+            "I\u0027d like to report a {abandoned} {make} {model}",
+            "I\u0027d like to report a {abandoned} {make}",
+            "I\u0027d like to report a {abandoned} {vehicle}",
             "Someone left their {color} {make} {model}",
             "Someone left their {color} {vehicle}",
             "Someone left their {make} {model}",
@@ -1544,5 +1548,5 @@
       }
     ]
   },
-  "version": "174"
+  "version": "176"
 }

@@ -407,7 +407,7 @@ exports.handler = Alexa.SkillBuilders.standard()
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
     SessionEndedRequestHandler,
-    IntentReflectorHandler,
+   // IntentReflectorHandler,
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,

@@ -1,0 +1,3 @@
+{
+    "handler":"../lambda/sacramento-311/index.js"
+}
