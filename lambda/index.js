@@ -17,9 +17,6 @@ const Alexa = require("ask-sdk")
 // const dbHelper = require('./dbHelper');
 
 
-
-
-
 const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
@@ -371,43 +368,46 @@ async function createDB() {
   // ... Use table data as required ...
 }
 
+//add new intents to this array, order matters!!
+const handlerIntents= [LaunchRequestHandler,
+  ReportAnIssueIntentHandler,
+  getLocation.GetLocationIntentHandler,
+  getLocation.YesUseCurrentLocationIntentHandler,
+  getLocation.NoUseCurrentLocationIntentHandler,
+  getLocation.YesUseHomeAddressIntentHandler,
+  getLocation.NoUseHomeAddressIntentHandler,
+  getLocation.GetLocationHelperIntentHandler,
+  liveAgent.LiveAgentIntentHandler,
+  abandonedVehicle.AbandonedVehicleIntentHandler,
+  abandonedVehicle.YesAbandonedVehicleIntentHandler,
+  abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
+  abandonedVehicle.NoAbandonedVehicleIntentHandler,
+  abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
+  homelessCamp.HomelessCampIntentHandler,
+  homelessCamp.YesHomelessCampIntentHandler,
+  homelessCamp.NoHomelessCampIntentHandler,
+  potHole.PotHoleRequestHandler,
+  petcomplaint.petcomplaintHandler,
+  trashpickup.TrashPickUpIntentHandler,
+  strayAnimal.strayAnimalHandler,
+  dirtyBathroom.dirtyBathroomHandler,
+  YesRetryIntentHandler,
+  NoRetryIntentHandler,
+  HelpIntentHandler,
+  CancelAndStopIntentHandler,
+  FallbackIntentHandler,
+  SessionEndedRequestHandler];
+// IntentReflectorHandler,
+
 /**
  * This handler acts as the entry point for your skill, routing all request and response
  * payloads to the handlers above. Make sure any new handlers or interceptors you've
  * defined are included below. The order matters - they're processed top to bottom
  * */
-// TODO: Add all handlers to an array https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs/issues/283
+//make sure to use triple dots '...' if more arrays are to be created for interceptors
 exports.handler = Alexa.SkillBuilders.standard()
-  .addRequestHandlers(  // Order matters with these!
-    LaunchRequestHandler,
-    ReportAnIssueIntentHandler,
-    getLocation.GetLocationIntentHandler,
-    getLocation.YesUseCurrentLocationIntentHandler,
-    getLocation.NoUseCurrentLocationIntentHandler,
-    getLocation.YesUseHomeAddressIntentHandler,
-    getLocation.NoUseHomeAddressIntentHandler,
-    getLocation.GetLocationHelperIntentHandler,
-    liveAgent.LiveAgentIntentHandler,
-    abandonedVehicle.AbandonedVehicleIntentHandler,
-    abandonedVehicle.YesAbandonedVehicleIntentHandler,
-    abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
-    abandonedVehicle.NoAbandonedVehicleIntentHandler,
-    abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
-    homelessCamp.HomelessCampIntentHandler,
-    homelessCamp.YesHomelessCampIntentHandler,
-    homelessCamp.NoHomelessCampIntentHandler,
-    potHole.PotHoleRequestHandler,
-    petcomplaint.petcomplaintHandler,
-    trashpickup.TrashPickUpIntentHandler,
-    strayAnimal.strayAnimalHandler,
-    dirtyBathroom.dirtyBathroomHandler,
-    YesRetryIntentHandler,
-    NoRetryIntentHandler,
-    HelpIntentHandler,
-    CancelAndStopIntentHandler,
-    FallbackIntentHandler,
-    SessionEndedRequestHandler,
-   // IntentReflectorHandler,
+  .addRequestHandlers(
+  ...handlerIntents
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,
