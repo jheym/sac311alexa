@@ -169,11 +169,29 @@ const FallbackIntentHandler = {
   // TODO: Add sessionattributes counter for fallbacks. If 3 fallbacks then
   // offer to send to live agent or end the session.
   handle(handlerInput) {
-    const speakOutput = "Sorry, I don't know about that. Please try again."
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
+    let speakOutput = "Sorry, I don't know about that. Please try again."
+    let repromptOutput = "Please try again."
 
+    if (!sessionAttributes.fallbackCount) {
+      sessionAttributes.fallbackCount = 1
+    } else {
+      sessionAttributes.fallbackCount++
+      if (sessionAttributes.fallbackCount >= 3) {
+        speakOutput = "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?"
+        repromptOutput = "Would you like me to transfer you to a live agent?"
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
+        return handlerInput.responseBuilder
+          .speak(speakOutput)
+          .reprompt(repromptOutput)
+          .getResponse()
+      }
+    }
+
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .reprompt(speakOutput)
+      .reprompt(repromptOutput)
       .getResponse()
   },
 }
