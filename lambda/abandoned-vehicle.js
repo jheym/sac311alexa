@@ -20,7 +20,7 @@ const AbandonedVehicleIntentHandler = {
     if (Alexa.getDialogState(requestEnvelope) === "STARTED") {
       index.setQuestion(handlerInput, null);
       index.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
-      const speakOutput = "Just to confirm, are you reporting an abandoned vehicle?"
+      const speakOutput = handlerInput.t("ABANDONED_VEHICLE_CONFIRMATION")
       return responseBuilder
         .withShouldEndSession(false)
         .speak(speakOutput)
@@ -110,7 +110,7 @@ const AbandonedVehicleIntentHandler = {
         var model = Alexa.getSlotValue(handlerInput.requestEnvelope, 'model');
         var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color');
         var location = sessionAttributes.confirmedLocation;
-        speakOutput = `Thank you for reporting the abandoned ${color} ${make} ${model} located near ${location}. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?`
+        speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS',{color: `${color}`, make: `${make}`, model: `${model}`, location: `${location}`})
         //TODO: Set question for "anything else?" 
         return responseBuilder
           .speak(speakOutput)
@@ -136,7 +136,7 @@ const YesAbandonedVehicleIntentHandler = {
     sessionAttributes.reasonForCalling = 'AbandonedVehicleIntent' // So GetLocationIntent knows where to delegate back to after confirming the address
     return (
       handlerInput.responseBuilder
-        .speak('Has the vehicle been abandoned for more than seventy-two hours?')
+        .speak(handlerInput.t('ABANDONED_VEHICLE_72Q'))
         .withShouldEndSession(false)
         .getResponse()
     )
@@ -179,8 +179,8 @@ const NoAbandonedVehicleIntentHandler = {
     index.setQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
-        .speak("Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.")
-        .reprompt("I'm still here. Do you want to try reporting your issue again?")
+        .speak(handlerInput.t('UNKNOWN_MSG'))
+        .reprompt(handlerInput.t('UNKNOWN_MSG_REPROMPT'))
         .withShouldEndSession(false) // This prevents the skill from ending the session
         .getResponse()
     )
@@ -200,8 +200,7 @@ const NoAbandonedVehicleTimeIntentHandler = {
     index.setQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
-        .speak("Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. \
-        Is there anything else I can help you with?")
+        .speak(handlerInput.t('ABANDONED_VEHICLE_72A'))
         .withShouldEndSession(false) // This prevents the skill from ending the session
         .getResponse()
     )

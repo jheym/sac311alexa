@@ -16,7 +16,8 @@
     "aws-sdk": "^2.1264.0",
     "axios": "^1.2.0",
     "got": "^11.8.5",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "i18next": "^22.4.10"
   },
   "devDependencies": {
     "ask-sdk-local-debug": "^1.1.0"

@@ -38,7 +38,7 @@ const index = require('./index.js')
         if (!Alexa.getSlotValue(requestEnvelope, 'location')) {
           
           if (!(sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation &&sessionAttributes.GetLocation.asc)) {
-            var speakOutput = 'What is the address of the incident you are reporting?'
+            var speakOutput = handlerInput.t('LOCATION_GET_ADDRESS')
             index.setQuestion(handlerInput, null)
             return handlerInput.responseBuilder
               .addDelegateDirective({
@@ -52,15 +52,15 @@ const index = require('./index.js')
                 }
               }
             })
-            .speak("What's the location?")
+            .speak(handlerInput.t('LOCATION_GET_LOCATION'))
             .withShouldEndSession(false)
-            .reprompt('Reprompt')
+            .reprompt(handlerInput.t('GENERIC_REPROMPT'))
             .getResponse();
           } 
     
     
           if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
-            var speakOutput = 'Do you want to use your current location?'
+            var speakOutput = handlerInput.t('LOCATION_USE_CURRENT')
             index.setQuestion(handlerInput, null)
             index.setQuestion(handlerInput, 'UseCurrentLocation?')
             return responseBuilder
@@ -70,7 +70,7 @@ const index = require('./index.js')
           }
     
           if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
-            var speakOutput = 'Do you want to use your home address?'
+            var speakOutput = handlerInput.t('LOCATION_USE_HOME')
             index.setQuestion(handlerInput, null)
             index.setQuestion(handlerInput, 'UseHomeAddress?')
             return responseBuilder
@@ -187,7 +187,7 @@ const NoUseCurrentLocationIntentHandler = {
     if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
       index.setQuestion(handlerInput, 'UseHomeAddress?')
       return responseBuilder
-        .speak('Do you want to use your home address?')
+        .speak(handlerInput.t('LOCATION_USE_HOME'))
         .withShouldEndSession(false)
         .getResponse();
     } else {
@@ -203,9 +203,9 @@ const NoUseCurrentLocationIntentHandler = {
             }
           }
         })
-        .speak("What's the location?")
+        .speak(handlerInput.t('LOCATION_GET_LOCATION'))
         .withShouldEndSession(false)
-        .reprompt('Reprompt')
+        .reprompt(handlerInput.t('GENERIC_REPROMPT'))
         .getResponse();
     }
   },
@@ -273,9 +273,9 @@ const NoUseHomeAddressIntentHandler = {
           }
         }
       })
-      .speak("What's the location?")
+      .speak(handlerInput.t('LOCATION_GET_LOCATION'))
       .withShouldEndSession(false)
-      .reprompt('Reprompt')
+      .reprompt(handlerInput.t('GENERIC_REPROMPT'))
       .getResponse();
   }
 }
@@ -301,8 +301,8 @@ const GetLocationHelperIntentHandler = {
       let location = Alexa.getSlotValue(requestEnvelope, 'helperLocation');
       return responseBuilder
         .addConfirmSlotDirective('helperLocation')
-        .speak(`Is the location near ${location}?`)
-        .reprompt(`Is the location near ${location}?`)
+        .speak(handlerInput.t('LOCATION_CONFIRM',{location: `${location}`}))
+        .reprompt(handlerInput.t('LOCATION_CONFIRM',{location: `${location}`}))
         .getResponse();
     }
 
@@ -321,7 +321,7 @@ const GetLocationHelperIntentHandler = {
             }
           }
         })
-        .speak(`Let's try that again. What's the location?`)
+        .speak(handlerInput.t('LOCATION_RETRY'))
         .getResponse();
     }
 

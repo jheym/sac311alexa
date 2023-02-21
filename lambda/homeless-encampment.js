@@ -17,7 +17,7 @@ const HomelessCampIntentHandler = {
 
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "STARTED") {
       sessionAttributes.reasonForCalling = currentIntent.name // GetAddress needs this
-      const speakOutput = "Just to confirm, are you reporting about a homeless camp?"
+      const speakOutput = handlerInput.t('HOMELESS_CONFIRMATION')
       index.setQuestion(handlerInput, null)
       index.setQuestion(handlerInput, 'IsHomelessCampCorrect')
       return (
@@ -46,8 +46,6 @@ const HomelessCampIntentHandler = {
       var propertyType = Alexa.getSlotValue(handlerInput.requestEnvelope, 'propertyType')
       var numPeople = Alexa.getSlotValue(handlerInput.requestEnvelope, 'numPeople')
       var location = sessionAttributes.confirmedLocation;
-      speakOutput = `Thank you for reporting the ${homelessCamp} with ${numPeople} people on ${propertyType} at ${location}. \
-      We will dispatch someone to the incident as soon as we can.`
 
       // If isTrash is TRUE, chain into trashpickupintent 
       if (currentIntent.slots.isTrash.resolutions.resolutionsPerAuthority[0].values[0].value.id === 'TRUE') {
@@ -64,7 +62,7 @@ const HomelessCampIntentHandler = {
                 }
               }
             })
-            .speak(speakOutput + ' We just need a little more information about the trash.')
+            .speak(handlerInput.t('HOMELESS_THANKS_CONTINUATION',{homelessCamp: `${homelessCamp}`, numPeople: `${numPeople}`, propertyType: `${propertyType}`, location: `${location}`}))
             .withShouldEndSession(false)
             .getResponse()
         )
@@ -74,7 +72,7 @@ const HomelessCampIntentHandler = {
         console.log(sessionAttributes.questionAsked)
         return (
           handlerInput.responseBuilder
-            .speak(speakOutput + ' Is there anything else I can help with?')
+            .speak(handlerInput.t('HOMELESS_THANKS',{homelessCamp: `${homelessCamp}`, numPeople: `${numPeople}`, propertyType: `${propertyType}`, location: `${location}`}))
             .withShouldEndSession(false) // Replace this later to go back to welcome message optionally
             .getResponse()
         )
@@ -128,8 +126,8 @@ const NoHomelessCampIntentHandler = {
     index.setQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
-        .speak("Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.")
-        .reprompt("I'm still here. Do you want to try reporting your issue again?")
+        .speak(handlerInput.t('UNKNOWN_MSG'))
+        .reprompt(handlerInput.t('UNKNOWN_MSG_REPROMPT'))
         .withShouldEndSession(false) // This prevents the skill from ending the session
         .getResponse()
     )

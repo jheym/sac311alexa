@@ -14,9 +14,9 @@ const LiveAgentIntentHandler = {
     let speakOutput;
     try {
       await startCommunicationSession(handlerInput);
-      speakOutput = 'Calling customer service';
+      speakOutput = handlerInput.t('LIVEAGENT_CONFIRM');
     } catch (error) {
-      speakOutput = 'Sorry, I am having a problem right now.';
+      speakOutput = handlerInput.t('LIVEAGENT_PROBLEM');
     }
 
     return handlerInput.responseBuilder

@@ -11,7 +11,8 @@
 //  TODO: Create "anythingElse?" YesNo intents to handle the "anything else?" question
 
 
-const Alexa = require("ask-sdk")
+const Alexa = require("ask-sdk");
+const i18n = require("i18next");
 // const AWS = require("aws-sdk");
 // const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');
 // const dbHelper = require('./dbHelper');
@@ -26,6 +27,68 @@ const getLocation = require("./getLocation")
 const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
 const liveAgent = require("./liveAgent.js")
+
+const languageStrings = {
+  /*
+  Key names should be the same between all languages
+  Translate the output to spanish to implement spanish
+  English is the fallback language if the key isn't present in another language
+  To use variable from other files, use {{var}} notation and explicitly pass individual variables like example below or a data model: (i18next interpolation)
+  EX: handlerInput.t(WELCOME_MSG,{var: `${varID}`}) or handlerInput.t(WELCOME_MSG,{var1: `${var1ID}`,var2: `${var2ID}`})
+  if sending a data model, use . operator to access the elements in this file
+  Use control+f to search for speak or reprompt to check for missed implementation
+  */
+  en: {
+    translation: {
+      //please add key and message here when adding new speak or reprompt
+      WELCOME_MSG: 'Thank you for contacting Sacramento Three One One. How can I help you today?',
+      WELCOME_REPROMPT: 'How can I help? You can report an issue, or you can get information about city-related activities.',
+      REPORT_ISSUE: "Alright. What's the issue you're reporting?",
+      YES_RETRY: 'Alright, what can I do for you?',
+      NO_RETRY: "Understood. Thank you for contacting Sacramento three one one. Goodbye!",
+      HELP_MSG: "You can say hello to me! How can I help?",
+      FALLBACK_MSG: "Sorry, I don't know about that. Please try again.",
+      FALLBACK_MSG_REPROMPT: "Please try again.",
+      FALLBACK_STILL_MSG: "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
+      FALLBACK_STILL_MSG_REPROMPT: "Would you like me to transfer you to a live agent?",
+      ERROR_MSG: "Sorry, I had trouble doing what you asked. Please try again.",
+      UNKNOWN_MSG: "Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.",
+      UNKNOWN_MSG_REPROMPT: "I'm still here. Do you want to try reporting your issue again?",
+      GENERIC_REPROMPT: 'Reprompt',
+      GOODBYE_MSG: "Goodbye!",
+      LIVEAGENT_CONFIRM: 'Calling customer service',
+      LIVEAGENT_PROBLEM: 'Sorry, I am having a problem right now.',
+      TRASH_THANKS: `Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. \ 
+      Is there anything else I can help you with?`,
+
+      ABANDONED_VEHICLE_CONFIRMATION: "Just to confirm, are you reporting an abandoned vehicle?",
+      ABANDONED_VEHICLE_THANKS: `Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. 
+      We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?`,
+      ABANDONED_VEHICLE_72Q: 'Has the vehicle been abandoned for more than seventy-two hours?',
+      ABANDONED_VEHICLE_72A: "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. \
+      Is there anything else I can help you with?",
+
+      HOMELESS_CONFIRMATION: "Just to confirm, are you reporting about a homeless camp?",
+      HOMELESS_THANKS: `Thank you for reporting the {{homelessCamp}} with {{numPeople}} people on {{propertyType}} property at {{location}}. \
+      We will dispatch someone to the incident as soon as we can. Is there anything else I can help with?`,
+      HOMELESS_THANKS_CONTINUATION: `Thank you for reporting the {{homelessCamp}} with {{numPeople}} people on {{propertyType}} property at {{location}}. \
+      We will dispatch someone to the incident as soon as we can. We just need a little more information about the trash.`,
+
+      LOCATION_GET_ADDRESS: 'What is the address of the incident you are reporting?',
+      LOCATION_GET_LOCATION: "What's the location?",
+      LOCATION_USE_CURRENT: 'Do you want to use your current location?',
+      LOCATION_USE_HOME: 'Do you want to use your home address?',
+      LOCATION_CONFIRM: 'Is the location near {{location}}?',
+      LOCATION_RETRY: "Let's try that again. What's the location?"
+    }
+  },
+  es: {
+    translation: {
+      WELCOME_MSG: 'Gracias por contactar a Sacramento Three One One. ¿Cómo puedo ayudarte hoy?',
+      GOODBYE_MSG: 'Hasta luego!'
+    }
+  }
+}
 
 // Stows the asked question in a session attribute for yes and no intent handlers
 function setQuestion(handlerInput, questionAsked) {
@@ -51,8 +114,8 @@ const LaunchRequestHandler = {
 
     return (
       handlerInput.responseBuilder
-        .speak(`Thank you for contacting Sacramento Three One One. How can I help you today?`)
-        .reprompt("How can I help? You can report an issue, or you can get information about city-related activities.")
+        .speak(handlerInput.t('WELCOME_MSG'))
+        .reprompt(handlerInput.t('WELCOME_REPROMPT'))
         .getResponse()
     )
   },
@@ -67,10 +130,9 @@ const ReportAnIssueIntentHandler = {
   },
   handle(handlerInput) {
     setQuestion(handlerInput, null)
-    const speakOutput = "Alright. What's the issue you're reporting?"
     return (
       handlerInput.responseBuilder
-        .speak(speakOutput)
+        .speak(handlerInput.t('REPORT_ISSUE'))
         .withShouldEndSession(false) // keep the session open
         .getResponse()
     )
@@ -91,7 +153,7 @@ const YesRetryIntentHandler = {
     setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
     return (
       handlerInput.responseBuilder
-        .speak("Alright, what can I do for you?")
+        .speak(handlerInput.t('YES_RETRY'))
         .withShouldEndSession(false)
         .getResponse()
     )
@@ -112,7 +174,7 @@ const NoRetryIntentHandler = {
     setQuestion(handlerInput, null)
     return (
       handlerInput.responseBuilder
-        .speak("Understood. Thank you for contacting Sacramento three one one. Goodbye!")
+        .speak(handlerInput.t('NO_RETRY'))
         .withShouldEndSession(true) // This will end the session
         .getResponse()
     )
@@ -127,11 +189,9 @@ const HelpIntentHandler = {
     )
   },
   handle(handlerInput) {
-    const speakOutput = "You can say hello to me! How can I help?"
-
     return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .reprompt(speakOutput)
+      .speak(handlerInput.t('HELP_MSG'))
+      .reprompt(handlerInput.t('HELP_MSG'))
       .getResponse()
   },
 }
@@ -147,9 +207,7 @@ const CancelAndStopIntentHandler = {
     )
   },
   handle(handlerInput) {
-    const speakOutput = "Goodbye!"
-
-    return handlerInput.responseBuilder.speak(speakOutput).getResponse()
+    return handlerInput.responseBuilder.speak(handlerInput.t('GOODBYE_MSG')).getResponse()
   },
 }
 /* *
@@ -170,28 +228,24 @@ const FallbackIntentHandler = {
   // offer to send to live agent or end the session.
   handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
-    let speakOutput = "Sorry, I don't know about that. Please try again."
-    let repromptOutput = "Please try again."
 
     if (!sessionAttributes.fallbackCount) {
       sessionAttributes.fallbackCount = 1
     } else {
       sessionAttributes.fallbackCount++
       if (sessionAttributes.fallbackCount >= 3) {
-        speakOutput = "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?"
-        repromptOutput = "Would you like me to transfer you to a live agent?"
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
         return handlerInput.responseBuilder
-          .speak(speakOutput)
-          .reprompt(repromptOutput)
+          .speak(handlerInput.t('FALLBACK_STILL_MSG'))
+          .reprompt(handlerInput.t('FALLBACK_STILL_MSG_REPROMPT'))
           .getResponse()
       }
     }
 
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
     return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .reprompt(repromptOutput)
+      .speak(handlerInput.t('FALLBACK_MSG'))
+      .reprompt(handlerInput.t('FALLBACK_MSG_REPROMPT'))
       .getResponse()
   },
 }
@@ -228,6 +282,7 @@ const SessionEndedRequestHandler = {
  * by defining them above, then also adding them to the request handler chain below
  * */
 const IntentReflectorHandler = {
+  //not set up with i18n
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest"
@@ -255,14 +310,12 @@ const ErrorHandler = {
     return true
   },
   handle(handlerInput, error) {
-    const speakOutput =
-      "Sorry, I had trouble doing what you asked. Please try again."
     console.log(`~~~~ Error handled ~~~~`)
     console.log(error)
 
     return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .reprompt(speakOutput)
+      .speak(handlerInput.t('ERROR_MSG'))
+      .reprompt(handlerInput.t('ERROR_MSG'))
       .getResponse()
   },
 }
@@ -351,6 +404,21 @@ const DelegateDirectiveResponseInterceptor = {
   }
 }
 
+const LocalisationRequestInterceptor = {
+  //maybe use namespaces to keep translations in other file
+  process(handlerInput) {
+      i18n.init({
+          lng: Alexa.getLocale(handlerInput.requestEnvelope),
+          fallbackLng: 'en',
+          resources: languageStrings
+      }).then((t) => {
+          handlerInput.t = (...args) => t(...args);
+      });
+      //i18n.changeLanguage('es');
+      //use above statement to test fallbackLng and spanish functionality
+  }
+}
+
 async function createDB() {
   const STS = new AWS.STS({ apiVersion: '2011-06-15' });
   const credentials = await STS.assumeRole({
@@ -429,6 +497,7 @@ exports.handler = Alexa.SkillBuilders.standard()
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,
+    LocalisationRequestInterceptor,
     ContextSwitchingRequestInterceptor,
     getLocation.GetLocationRequestInterceptor
   )
