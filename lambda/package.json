@@ -13,11 +13,11 @@
     "ask-sdk-core": "^2.7.0",
     "ask-sdk-dynamodb-persistence-adapter": "^2.9.0",
     "ask-sdk-model": "^1.19.0",
-    "aws-sdk": "^2.1264.0",
+    "aws-sdk": "^2.1323.0",
     "axios": "^1.2.0",
     "got": "^11.8.5",
-    "uuid": "^9.0.0",
-    "i18next": "^22.4.10"
+    "i18next": "^22.4.10",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "ask-sdk-local-debug": "^1.1.0"

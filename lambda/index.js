@@ -12,11 +12,10 @@
 
 
 const Alexa = require("ask-sdk");
+const AWS = require("aws-sdk");
+const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter");
 const i18n = require("i18next");
-// const AWS = require("aws-sdk");
-// const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');
-// const dbHelper = require('./dbHelper');
-
+var axios = require("axios");
 
 const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
@@ -28,6 +27,7 @@ const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
 const liveAgent = require("./liveAgent.js")
 
+//TODO: Ethan: Move to a separate file
 const languageStrings = {
   /*
   Key names should be the same between all languages
@@ -42,11 +42,12 @@ const languageStrings = {
     translation: {
       //please add key and message here when adding new speak or reprompt
       WELCOME_MSG: 'Thank you for contacting Sacramento Three One One. How can I help you today?',
+      PERSONALIZED_WELCOME_MSG: 'Welcome back {{name}}. How can I help you today?',
       WELCOME_REPROMPT: 'How can I help? You can report an issue, or you can get information about city-related activities.',
       REPORT_ISSUE: "Alright. What's the issue you're reporting?",
       YES_RETRY: 'Alright, what can I do for you?',
       NO_RETRY: "Understood. Thank you for contacting Sacramento three one one. Goodbye!",
-      HELP_MSG: "You can say hello to me! How can I help?",
+      HELP_MSG: "This is the Help Message. It gives further instructions on how to use the skill.",
       FALLBACK_MSG: "Sorry, I don't know about that. Please try again.",
       FALLBACK_MSG_REPROMPT: "Please try again.",
       FALLBACK_STILL_MSG: "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
@@ -104,21 +105,23 @@ const LaunchRequestHandler = {
     )
   },
   async handle(handlerInput) {
-    // const attributesManager = handlerInput.attributesManager;
-    // const attributes = await attributesManager.getPersistentAttributes() || {};
-    // console.log('attributes is: ', attributes);
-    // dbHelper.credentials().then((result) => {
-    //   console.log(result)
-    // })
-    // const counter = attributes.hasOwnProperty('counter') ? attributes.counter : 0;
-
-    return (
-      handlerInput.responseBuilder
-        .speak(handlerInput.t('WELCOME_MSG'))
-        .reprompt(handlerInput.t('WELCOME_REPROMPT'))
-        .getResponse()
-    )
-  },
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    if (sessionAttributes.userFullName) {
+      return (
+        handlerInput.responseBuilder
+          .speak(handlerInput.t('PERSONALIZED_WELCOME_MSG', { name: sessionAttributes.userFullName }))
+          .reprompt(handlerInput.t('WELCOME_REPROMPT'))
+          .getResponse()
+      )
+    } else {
+      return (
+        handlerInput.responseBuilder
+          .speak(handlerInput.t('WELCOME_MSG'))
+          .reprompt(handlerInput.t('WELCOME_REPROMPT'))
+          .getResponse()
+      )
+    }
+  }
 }
 
 const ReportAnIssueIntentHandler = {
@@ -266,16 +269,14 @@ const SessionEndedRequestHandler = {
     //   `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
     // )
     // Any cleanup logic goes here.
-    // const attributesManager = handlerInput.attributesManager;
-    // let attributes = { "counter": 10 };
-
-    // attributesManager.setPersistentAttributes(attributes);
-    // await attributesManager.savePersistentAttributes();
+    console.log("Session ended")
 
     return handlerInput.responseBuilder
       .getResponse(); // notice we send an empty response
   },
 }
+
+
 /* *
  * The intent reflector is used for interaction model testing and debugging.
  * It will simply repeat the intent the user said. You can create custom handlers for your intents
@@ -300,6 +301,8 @@ const IntentReflectorHandler = {
     )
   },
 }
+
+
 /**
  * Generic error handling to capture any syntax or routing errors. If you receive an error
  * stating the request handler chain is not found, you have not implemented a handler for
@@ -320,13 +323,6 @@ const ErrorHandler = {
   },
 }
 
-
-// Stores the asked question in a session attribute for yes and no intent handlers
-function setQuestion(handlerInput, questionAsked) {
-  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-  sessionAttributes.questionAsked = questionAsked;
-  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-}
 
 // TODO: Create an interceptor that checks if the current intent has empty
 // slots that can be filled from sessionAttributes
@@ -419,43 +415,65 @@ const LocalisationRequestInterceptor = {
   }
 }
 
-async function createDB() {
-  const STS = new AWS.STS({ apiVersion: '2011-06-15' });
-  const credentials = await STS.assumeRole({
-    RoleArn: 'arn:aws:iam::020485550387:role/311DynamoDB',
-    RoleSessionName: '311dbSession' // You can rename with any name
-  }, (err, res) => {
-    if (err) {
-      console.log('AssumeRole FAILED: ', err);
-      throw new Error('Error while assuming role');
+const PersonalizationRequestInterceptor = {
+  async process(handlerInput) {
+    if (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest") {
+      const { attributesManager, requestEnvelope } = handlerInput
+      const {apiAccessToken} = requestEnvelope.context.System ? requestEnvelope.context.System : null;
+      const sessionAttributes = attributesManager.getSessionAttributes() || {};
+      let persistentAttributes = await attributesManager.getPersistentAttributes() || {};
+      console.log('persistentAttributes: ' + JSON.stringify(persistentAttributes));
+      const userFullName = persistentAttributes.hasOwnProperty('userFullName') ? persistentAttributes.userFullName : null;
+      console.log('userFullName: ' + userFullName)
+
+      // If no full name was in persistent attributes, get it from the API
+      if (!userFullName) {
+
+      // Axios config to set headers
+        let config = {
+          headers: {
+            'Authorization': `Bearer ${apiAccessToken}`
+          }
+        }
+
+        try {
+          res = await axios.get(
+          'https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name',
+          config
+        )
+        } catch (error) {
+          console.log("There was a problem getting the user's name") 
+          console.log(error)
+        }
+
+        if (res.status === 200) {
+          persistentAttributes = {"userFullName":res.data}
+          attributesManager.setPersistentAttributes(persistentAttributes)  // Pay attention to these two lines: set 
+          await attributesManager.savePersistentAttributes()                // and then save
+        } else {
+          console.log("There was a problem getting the user's name") 
+          console.log(res)
+        }
+
+      } else {  // Else, if there was a full name in persistent attributes, set it in session attributes  
+        sessionAttributes.userFullName = userFullName
+        attributesManager.setSessionAttributes(sessionAttributes)
+      }
     }
-    return res;
-  }).promise();
-
-  const creds = createDB();
-
-  // 2. Make a new DynamoDB instance with the assumed role credentials
-  //    and scan the DynamoDB table
-  // const dynamoDB = new AWS.DynamoDB({
-  //   apiVersion: 'latest',
-  //   region: 'us-east-1',
-  //   accessKeyId: credentials.Credentials.AccessKeyId,
-  //   secretAccessKey: credentials.Credentials.SecretAccessKey,
-  //   sessionToken: credentials.Credentials.SessionToken
-  // });
-  // const tableData = await dynamoDB.scan({ TableName: 'sac311table' }, (err, data) => {
-  //   if (err) {
-  //     console.log('Scan FAILED', err);
-  //     throw new Error('Error while scanning table');
-  //   }
-  //   return data;
-  // }).promise();
-
-  // ... Use table data as required ...
+  }
 }
 
+// Stores the asked question in a session attribute for yes and no intent handlers
+function setQuestion(handlerInput, questionAsked) {
+  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  sessionAttributes.questionAsked = questionAsked;
+  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+}
+
+
 //add new intents to this array, order matters!!
-const handlerIntents= [LaunchRequestHandler,
+const handlerIntents= [
+  LaunchRequestHandler,
   ReportAnIssueIntentHandler,
   getLocation.GetLocationIntentHandler,
   getLocation.YesUseCurrentLocationIntentHandler,
@@ -479,11 +497,12 @@ const handlerIntents= [LaunchRequestHandler,
   dirtyBathroom.dirtyBathroomHandler,
   YesRetryIntentHandler,
   NoRetryIntentHandler,
+  FallbackIntentHandler,
   HelpIntentHandler,
   CancelAndStopIntentHandler,
-  FallbackIntentHandler,
-  SessionEndedRequestHandler];
-// IntentReflectorHandler,
+  SessionEndedRequestHandler,
+];
+// IntentReflectorHandler,  // For debugging
 
 /**
  * This handler acts as the entry point for your skill, routing all request and response
@@ -491,12 +510,13 @@ const handlerIntents= [LaunchRequestHandler,
  * defined are included below. The order matters - they're processed top to bottom
  * */
 //make sure to use triple dots '...' if more arrays are to be created for interceptors
-exports.handler = Alexa.SkillBuilders.standard()
+exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
   ...handlerIntents
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,
+    PersonalizationRequestInterceptor,
     LocalisationRequestInterceptor,
     ContextSwitchingRequestInterceptor,
     getLocation.GetLocationRequestInterceptor
@@ -506,23 +526,14 @@ exports.handler = Alexa.SkillBuilders.standard()
   // getLocation.DelegateToGetLocationResponseInterceptor
 )
   .addErrorHandlers(ErrorHandler)
-  // .withApiClient(new Alexa.DefaultApiClient())
   .withCustomUserAgent("DinosaurWithGrowingPains")
-  // .withPersistenceAdapter(
-  //   new ddbAdapter.DynamoDbPersistenceAdapter({
-  //     tableName: 'sac311table',
-  //     createTable: false,
-  //     dynamoDBClient: new AWS.DynamoDB({
-  //       apiVersion: 'latest',
-  //       region: 'us-east-1',
-  // accessKeyId: credentials.Credentials.AccessKeyId,
-  // secretAccessKey: credentials.Credentials.SecretAccessKey,
-  // sessionToken: credentials.Credentials.SessionToken
-  // })
-  // })
-  // )
-  // .withTableName('sac311table')
-  // .withAutoCreateTable(true)
+  .withPersistenceAdapter(
+    new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
+      tableName: 'sac311table',
+      createTable: true,
+      dynamoDBClient: new AWS.DynamoDB({apiVersion: 'latest', region: 'us-east-1'})
+    })
+  )
   .lambda();
 
 // Custom Exports
