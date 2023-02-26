@@ -17,6 +17,20 @@ const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter
 const i18n = require("i18next");
 var axios = require("axios");
 
+// Creating the local dynamoDB client for development
+// You will need to install dynamoDB locally and run it on port 8000
+// https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#DynamoDBLocal.DownloadingAndRunning.title
+
+// TODO: set up different client for alexa-hosted environment contingent on environment variables
+const dynamoDBClient = new AWS.DynamoDB(
+  { apiVersion: "latest",
+    region: "us-west-2", 
+    endpoint: "http://localhost:8000",
+    accessKeyId: 'fakeMyKeyId',
+    secretAccessKey: 'fakeSecretAccessKey'  
+  }
+);
+
 const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
@@ -109,7 +123,7 @@ const LaunchRequestHandler = {
     if (sessionAttributes.userFullName) {
       return (
         handlerInput.responseBuilder
-          .speak(handlerInput.t('PERSONALIZED_WELCOME_MSG', { name: sessionAttributes.userFullName }))
+          .speak(handlerInput.t('PERSONALIZED_WELCOME_MSG', { name: sessionAttributes.userFullName })) // TODO: Trim last name
           .reprompt(handlerInput.t('WELCOME_REPROMPT'))
           .getResponse()
       )
@@ -472,6 +486,7 @@ function setQuestion(handlerInput, questionAsked) {
 
 
 //add new intents to this array, order matters!!
+// TODO: Get rid of the array and just use the handlers directly
 const handlerIntents= [
   LaunchRequestHandler,
   ReportAnIssueIntentHandler,
@@ -531,7 +546,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
       tableName: 'sac311table',
       createTable: true,
-      dynamoDBClient: new AWS.DynamoDB({apiVersion: 'latest', region: 'us-east-1'})
+      dynamoDBClient: localDynamoDBClient // Use this only for local development
     })
   )
   .lambda();
