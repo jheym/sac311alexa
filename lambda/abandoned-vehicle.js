@@ -1,7 +1,6 @@
 
 const Alexa = require("ask-sdk-core")
 const index = require("./index.js")
-const liveAgent = require("./liveAgent")
 
 
 const AbandonedVehicleIntentHandler = {

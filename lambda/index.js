@@ -22,12 +22,12 @@ var axios = require("axios");
 // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#DynamoDBLocal.DownloadingAndRunning.title
 
 // TODO: set up different client for alexa-hosted environment contingent on environment variables
-const dynamoDBClient = new AWS.DynamoDB(
+const localDynamoDBClient = new AWS.DynamoDB(
   { apiVersion: "latest",
-    region: "us-west-2", 
+    region: "us-west-2",
     endpoint: "http://localhost:8000",
     accessKeyId: 'fakeMyKeyId',
-    secretAccessKey: 'fakeSecretAccessKey'  
+    secretAccessKey: 'fakeSecretAccessKey' 
   }
 );
 
@@ -531,7 +531,7 @@ exports.handler = Alexa.SkillBuilders.custom()
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,
-    PersonalizationRequestInterceptor,
+    // PersonalizationRequestInterceptor, //TODO: Fix whatever was happening on ronald's machine
     LocalisationRequestInterceptor,
     ContextSwitchingRequestInterceptor,
     getLocation.GetLocationRequestInterceptor
@@ -540,6 +540,7 @@ exports.handler = Alexa.SkillBuilders.custom()
   // DelegateDirectiveResponseInterceptor
   // getLocation.DelegateToGetLocationResponseInterceptor
 )
+  .withApiClient(new Alexa.DefaultApiClient())
   .addErrorHandlers(ErrorHandler)
   .withCustomUserAgent("DinosaurWithGrowingPains")
   .withPersistenceAdapter(
