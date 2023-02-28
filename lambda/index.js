@@ -26,6 +26,7 @@ if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
 } else {
   console.log("Not running on Alexa-Hosted Lambda Environment")
   // TODO: Check to see this works on windows
+  console.log('Importing exec dependencies...')
   require('dotenv').config()
   const { exec } = require('child_process');
   console.log("Starting local dynamoDB server...")
