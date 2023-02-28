@@ -12,12 +12,12 @@ const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter
 const i18n = require("i18next")
 const axios = require("axios")
 
-require('dotenv').config()
+
 
 // Flag for checking if we are running in the Alexa-Hosted Lambda Environment
 var awsHostedEnv = false
 var ddbClient
-const { exec } = require('child_process');
+
 
 // Checking environment variables to set dynamoDB client
 if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
@@ -26,6 +26,8 @@ if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
 } else {
   console.log("Not running on Alexa-Hosted Lambda Environment")
   // TODO: Check to see this works on windows
+  require('dotenv').config()
+  const { exec } = require('child_process');
   console.log("Starting local dynamoDB server...")
   exec('java -D"java.library.path=../local_dynamodb/DynamoDBLocal_lib" -jar \
   ../local_dynamodb/DynamoDBLocal.jar -sharedDb', (err, stdout, stderr) => {
