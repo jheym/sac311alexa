@@ -1,7 +1,7 @@
 {
     "en": {
         "translation": {
-            "WELCOME_MSG": "Thank you for contacting Sacramento Three One One. How can I help you today?",
+            "WELCOME_MSG": "Thank you for contacting Sacramento Three One One. You've used this skill {{counter}} times. How can I help you today?",
             "WELCOME_REPROMPT": "How can I help? You can report an issue, or you can get information about city-related activities.",
             "PERSONALIZED_WELCOME_MSG": "Welcome back {{name}}. How can I help you today?",
             "REPORT_ISSUE": "Alright. What's the issue you're reporting?",

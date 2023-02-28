@@ -14,12 +14,12 @@ const axios = require("axios")
 
 // Flag for checking if we are running in the Alexa-Hosted Lambda Environment
 var awsHostedEnv = false
+var ddbClient
 
 // Checking environment variables to set dynamoDB client
 if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
   console.log("Running in Alexa-Hosted Lambda Environment")
   awsHostedEnv = true
-  ddbClient = new AWS.DynamoDB({apiVersion: 'latest'})
 } else {
   console.log("Not running on Alexa-Hosted Lambda Environment")
   ddbClient = new AWS.DynamoDB(
@@ -60,7 +60,21 @@ const LaunchRequestHandler = {
   },
   async handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    const attributesManager = handlerInput.attributesManager;
+
+    // DYNAMODB TEST CODE //
+    let persistentAttributes = await attributesManager.getPersistentAttributes() || {};
+    console.log('persistentAttributes: ' + JSON.stringify(persistentAttributes));
     
+    var counter = persistentAttributes.hasOwnProperty('counter') ? persistentAttributes.counter : 1;
+    console.log('counter: ' + counter)
+
+    persistentAttributes = {"counter": counter + 1}
+    attributesManager.setPersistentAttributes(persistentAttributes)  // Pay attention to these two lines: set 
+    await attributesManager.savePersistentAttributes()           // and then save
+    // END DYNAMODB TEST CODE //
+
+
     // If we found the user's name in dynamodb, personalize the welcome message
     if (sessionAttributes.userFullName) {
       return (
@@ -72,7 +86,7 @@ const LaunchRequestHandler = {
     } else {
       return (
         handlerInput.responseBuilder
-          .speak(handlerInput.t('WELCOME_MSG'))
+          .speak(handlerInput.t('WELCOME_MSG', { counter: counter })) // TODO: DynamoDB test counter is temporary
           .reprompt(handlerInput.t('WELCOME_REPROMPT'))
           .getResponse()
       )
