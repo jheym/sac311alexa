@@ -31,6 +31,7 @@ const localDynamoDBClient = new AWS.DynamoDB(
   }
 );
 
+const languageStrings = require("./ns-common.json")
 const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const potHole = require("./pothole.js")
@@ -41,69 +42,6 @@ const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
 const liveAgent = require("./liveAgent.js")
 
-//TODO: Ethan: Move to a separate file
-const languageStrings = {
-  /*
-  Key names should be the same between all languages
-  Translate the output to spanish to implement spanish
-  English is the fallback language if the key isn't present in another language
-  To use variable from other files, use {{var}} notation and explicitly pass individual variables like example below or a data model: (i18next interpolation)
-  EX: handlerInput.t(WELCOME_MSG,{var: `${varID}`}) or handlerInput.t(WELCOME_MSG,{var1: `${var1ID}`,var2: `${var2ID}`})
-  if sending a data model, use . operator to access the elements in this file
-  Use control+f to search for speak or reprompt to check for missed implementation
-  */
-  en: {
-    translation: {
-      //please add key and message here when adding new speak or reprompt
-      WELCOME_MSG: 'Thank you for contacting Sacramento Three One One. How can I help you today?',
-      PERSONALIZED_WELCOME_MSG: 'Welcome back {{name}}. How can I help you today?',
-      WELCOME_REPROMPT: 'How can I help? You can report an issue, or you can get information about city-related activities.',
-      REPORT_ISSUE: "Alright. What's the issue you're reporting?",
-      YES_RETRY: 'Alright, what can I do for you?',
-      NO_RETRY: "Understood. Thank you for contacting Sacramento three one one. Goodbye!",
-      HELP_MSG: "This is the Help Message. It gives further instructions on how to use the skill.",
-      FALLBACK_MSG: "Sorry, I don't know about that. Please try again.",
-      FALLBACK_MSG_REPROMPT: "Please try again.",
-      FALLBACK_STILL_MSG: "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
-      FALLBACK_STILL_MSG_REPROMPT: "Would you like me to transfer you to a live agent?",
-      ERROR_MSG: "Sorry, I had trouble doing what you asked. Please try again.",
-      UNKNOWN_MSG: "Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.",
-      UNKNOWN_MSG_REPROMPT: "I'm still here. Do you want to try reporting your issue again?",
-      GENERIC_REPROMPT: 'Reprompt',
-      GOODBYE_MSG: "Goodbye!",
-      LIVEAGENT_CONFIRM: 'Calling customer service',
-      LIVEAGENT_PROBLEM: 'Sorry, I am having a problem right now.',
-      TRASH_THANKS: `Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. \ 
-      Is there anything else I can help you with?`,
-
-      ABANDONED_VEHICLE_CONFIRMATION: "Just to confirm, are you reporting an abandoned vehicle?",
-      ABANDONED_VEHICLE_THANKS: `Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. 
-      We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?`,
-      ABANDONED_VEHICLE_72Q: 'Has the vehicle been abandoned for more than seventy-two hours?',
-      ABANDONED_VEHICLE_72A: "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. \
-      Is there anything else I can help you with?",
-
-      HOMELESS_CONFIRMATION: "Just to confirm, are you reporting about a homeless camp?",
-      HOMELESS_THANKS: `Thank you for reporting the {{homelessCamp}} with {{numPeople}} people on {{propertyType}} property at {{location}}. \
-      We will dispatch someone to the incident as soon as we can. Is there anything else I can help with?`,
-      HOMELESS_THANKS_CONTINUATION: `Thank you for reporting the {{homelessCamp}} with {{numPeople}} people on {{propertyType}} property at {{location}}. \
-      We will dispatch someone to the incident as soon as we can. We just need a little more information about the trash.`,
-
-      LOCATION_GET_ADDRESS: 'What is the address of the incident you are reporting?',
-      LOCATION_GET_LOCATION: "What's the location?",
-      LOCATION_USE_CURRENT: 'Do you want to use your current location?',
-      LOCATION_USE_HOME: 'Do you want to use your home address?',
-      LOCATION_CONFIRM: 'Is the location near {{location}}?',
-      LOCATION_RETRY: "Let's try that again. What's the location?"
-    }
-  },
-  es: {
-    translation: {
-      WELCOME_MSG: 'Gracias por contactar a Sacramento Three One One. ¿Cómo puedo ayudarte hoy?',
-      GOODBYE_MSG: 'Hasta luego!'
-    }
-  }
-}
 
 // Stows the asked question in a session attribute for yes and no intent handlers
 function setQuestion(handlerInput, questionAsked) {
@@ -415,7 +353,7 @@ const DelegateDirectiveResponseInterceptor = {
 }
 
 const LocalisationRequestInterceptor = {
-  //maybe use namespaces to keep translations in other file
+  //add new Strings and keys to ns-common.json
   process(handlerInput) {
       i18n.init({
           lng: Alexa.getLocale(handlerInput.requestEnvelope),
@@ -424,8 +362,7 @@ const LocalisationRequestInterceptor = {
       }).then((t) => {
           handlerInput.t = (...args) => t(...args);
       });
-      //i18n.changeLanguage('es');
-      //use above statement to test fallbackLng and spanish functionality
+      //i18n.changeLanguage('es'); //use statement to test fallbackLng and spanish functionality
   }
 }
 
@@ -484,50 +421,44 @@ function setQuestion(handlerInput, questionAsked) {
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
 
-
-//add new intents to this array, order matters!!
-// TODO: Get rid of the array and just use the handlers directly
-const handlerIntents= [
-  LaunchRequestHandler,
-  ReportAnIssueIntentHandler,
-  getLocation.GetLocationIntentHandler,
-  getLocation.YesUseCurrentLocationIntentHandler,
-  getLocation.NoUseCurrentLocationIntentHandler,
-  getLocation.YesUseHomeAddressIntentHandler,
-  getLocation.NoUseHomeAddressIntentHandler,
-  getLocation.GetLocationHelperIntentHandler,
-  liveAgent.LiveAgentIntentHandler,
-  abandonedVehicle.AbandonedVehicleIntentHandler,
-  abandonedVehicle.YesAbandonedVehicleIntentHandler,
-  abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
-  abandonedVehicle.NoAbandonedVehicleIntentHandler,
-  abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
-  homelessCamp.HomelessCampIntentHandler,
-  homelessCamp.YesHomelessCampIntentHandler,
-  homelessCamp.NoHomelessCampIntentHandler,
-  potHole.PotHoleRequestHandler,
-  petcomplaint.petcomplaintHandler,
-  trashpickup.TrashPickUpIntentHandler,
-  strayAnimal.strayAnimalHandler,
-  dirtyBathroom.dirtyBathroomHandler,
-  YesRetryIntentHandler,
-  NoRetryIntentHandler,
-  FallbackIntentHandler,
-  HelpIntentHandler,
-  CancelAndStopIntentHandler,
-  SessionEndedRequestHandler,
-];
-// IntentReflectorHandler,  // For debugging
-
 /**
  * This handler acts as the entry point for your skill, routing all request and response
  * payloads to the handlers above. Make sure any new handlers or interceptors you've
  * defined are included below. The order matters - they're processed top to bottom
  * */
-//make sure to use triple dots '...' if more arrays are to be created for interceptors
+//arrays can be created prior and passed using ... but there an unintended consequences
+//for now place new Handlers and Interceptors manually, order matters!
 exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
-  ...handlerIntents
+    LaunchRequestHandler,
+    ReportAnIssueIntentHandler,
+    getLocation.GetLocationIntentHandler,
+    getLocation.YesUseCurrentLocationIntentHandler,
+    getLocation.NoUseCurrentLocationIntentHandler,
+    getLocation.YesUseHomeAddressIntentHandler,
+    getLocation.NoUseHomeAddressIntentHandler,
+    getLocation.GetLocationHelperIntentHandler,
+    liveAgent.LiveAgentIntentHandler,
+    abandonedVehicle.AbandonedVehicleIntentHandler,
+    abandonedVehicle.YesAbandonedVehicleIntentHandler,
+    abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
+    abandonedVehicle.NoAbandonedVehicleIntentHandler,
+    abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
+    homelessCamp.HomelessCampIntentHandler,
+    homelessCamp.YesHomelessCampIntentHandler,
+    homelessCamp.NoHomelessCampIntentHandler,
+    potHole.PotHoleRequestHandler,
+    petcomplaint.petcomplaintHandler,
+    trashpickup.TrashPickUpIntentHandler,
+    strayAnimal.strayAnimalHandler,
+    dirtyBathroom.dirtyBathroomHandler,
+    YesRetryIntentHandler,
+    NoRetryIntentHandler,
+    FallbackIntentHandler,
+    HelpIntentHandler,
+    CancelAndStopIntentHandler,
+    SessionEndedRequestHandler,
+    // IntentReflectorHandler,
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,
