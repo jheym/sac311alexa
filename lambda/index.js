@@ -12,6 +12,8 @@ const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter
 const i18n = require("i18next")
 var axios = require("axios")
 
+console.log(process.env)
+
 // Creating the local dynamoDB client for development
 // You will need to install dynamoDB locally and run it on port 8000
 // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#DynamoDBLocal.DownloadingAndRunning.title
