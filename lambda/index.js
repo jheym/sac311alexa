@@ -2,7 +2,7 @@
  * 🚨 This is the main file for the Sacramento 311 Alexa Skill 📞
  * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alexa Carrell, Ethan Borg, 
  * Humayoon Rafei, and Justin Heyman
- * Dinosaur Game 💪
+ * Team Dinosaur Game 💪
  * */
 
 
@@ -10,7 +10,29 @@ const Alexa = require("ask-sdk")
 const AWS = require("aws-sdk")
 const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter")
 const i18n = require("i18next")
-var axios = require("axios")
+const axios = require("axios")
+
+// Flag for checking if we are running in the Alexa-Hosted Lambda Environment
+var awsHostedEnv = false
+
+// Checking environment variables to set dynamoDB client
+if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
+  console.log("Running in Alexa-Hosted Lambda Environment")
+  awsHostedEnv = true
+  ddbClient = new AWS.DynamoDB({apiVersion: 'latest'})
+} else {
+  console.log("Not running on Alexa-Hosted Lambda Environment")
+  ddbClient = new AWS.DynamoDB(
+    { apiVersion: "latest",
+      region: "us-west-2",
+      endpoint: "http://localhost:8000",
+      accessKeyId: 'fakeMyKeyId',
+      secretAccessKey: 'fakeSecretAccessKey' 
+    }
+  );
+}
+
+
 
 console.log(process.env)
 
@@ -18,15 +40,6 @@ console.log(process.env)
 // You will need to install dynamoDB locally and run it on port 8000
 // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#DynamoDBLocal.DownloadingAndRunning.title
 
-// TODO: set up different client for alexa-hosted environment contingent on environment variables
-const localDynamoDBClient = new AWS.DynamoDB(
-  { apiVersion: "latest",
-    region: "us-west-2",
-    endpoint: "http://localhost:8000",
-    accessKeyId: 'fakeMyKeyId',
-    secretAccessKey: 'fakeSecretAccessKey' 
-  }
-);
 
 const languageStrings = require("./ns-common.json")
 const strayAnimal = require("./strayAnimal.js")
@@ -425,7 +438,63 @@ function setQuestion(handlerInput, questionAsked) {
  * */
 //arrays can be created prior and passed using ... but there an unintended consequences
 //for now place new Handlers and Interceptors manually, order matters!
-exports.handler = Alexa.SkillBuilders.custom()
+if (!awsHostedEnv) {  // Running Locally
+  exports.handler = Alexa.SkillBuilders.custom()
+    .addRequestHandlers(
+      LaunchRequestHandler,
+      ReportAnIssueIntentHandler,
+      getLocation.GetLocationIntentHandler,
+      getLocation.YesUseCurrentLocationIntentHandler,
+      getLocation.NoUseCurrentLocationIntentHandler,
+      getLocation.YesUseHomeAddressIntentHandler,
+      getLocation.NoUseHomeAddressIntentHandler,
+      getLocation.GetLocationHelperIntentHandler,
+      liveAgent.LiveAgentIntentHandler,
+      abandonedVehicle.AbandonedVehicleIntentHandler,
+      abandonedVehicle.YesAbandonedVehicleIntentHandler,
+      abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
+      abandonedVehicle.NoAbandonedVehicleIntentHandler,
+      abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
+      homelessCamp.HomelessCampIntentHandler,
+      homelessCamp.YesHomelessCampIntentHandler,
+      homelessCamp.NoHomelessCampIntentHandler,
+      potHole.PotHoleRequestHandler,
+      petcomplaint.petcomplaintHandler,
+      trashpickup.TrashPickUpIntentHandler,
+      strayAnimal.strayAnimalHandler,
+      dirtyBathroom.dirtyBathroomHandler,
+      YesRetryIntentHandler,
+      NoRetryIntentHandler,
+      FallbackIntentHandler,
+      HelpIntentHandler,
+      CancelAndStopIntentHandler,
+      SessionEndedRequestHandler,
+      // IntentReflectorHandler,
+    )
+    .addRequestInterceptors(
+      // NewSessionRequestInterceptor,
+      // PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
+      LocalisationRequestInterceptor,
+      ContextSwitchingRequestInterceptor,
+      getLocation.GetLocationRequestInterceptor
+    )
+    .addResponseInterceptors(
+    // DelegateDirectiveResponseInterceptor
+    // getLocation.DelegateToGetLocationResponseInterceptor
+  )
+    .withApiClient(new Alexa.DefaultApiClient())
+    .addErrorHandlers(ErrorHandler)
+    .withCustomUserAgent("BigDino")
+    .withPersistenceAdapter(
+      new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
+        tableName: 'sac311table',
+        createTable: true,
+        dynamoDBClient: ddbClient
+      })
+    )
+    .lambda();
+} else { // Alexa-Hosted
+  exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
     ReportAnIssueIntentHandler,
@@ -470,15 +539,16 @@ exports.handler = Alexa.SkillBuilders.custom()
 )
   .withApiClient(new Alexa.DefaultApiClient())
   .addErrorHandlers(ErrorHandler)
-  .withCustomUserAgent("DinosaurWithGrowingPains")
+  .withCustomUserAgent("BigDino")
   .withPersistenceAdapter(
     new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
-      tableName: 'sac311table',
-      createTable: true,
-      dynamoDBClient: localDynamoDBClient // Use this only for local development
+      tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
+      createTable: false,
+      dynamoDBClient: new AWS.DynamoDB({apiVersion: 'latest', region: process.env.DYNAMODB_PERSISTENCE_REGION})
     })
   )
   .lambda();
+}
 
 // Custom Exports
 exports.setQuestion = setQuestion

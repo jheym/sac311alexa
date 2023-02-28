@@ -1,5 +1,5 @@
 const Alexa = require('ask-sdk-core')
-const index = require('./index.js')
+const index = require('./index.js') // TODO: Can we just import the setQuestion function so we don't need to write index.setQuestion?
 
 /**
  * This file handles the entire GetLocation conversation flow. Most of the logic
@@ -25,7 +25,7 @@ const GetLocationIntentHandler = {
   handle(handlerInput) {
     const { responseBuilder, requestEnvelope, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
-
+    
     // If the location slot is empty.
     if (!Alexa.getSlotValue(requestEnvelope, 'location')) {
       // If we found a geolocation and the user has not been prompted yet
@@ -37,9 +37,8 @@ const GetLocationIntentHandler = {
           .speak(speakOutput)
           .withShouldEndSession(false)
           .getResponse();
-      }
+      } else if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
       // If we found an address and the user has not been prompted yet
-      if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
         var speakOutput = 'Do you want to use your home address?'
         index.setQuestion(handlerInput, null)
         index.setQuestion(handlerInput, 'UseHomeAddress?')
@@ -47,8 +46,25 @@ const GetLocationIntentHandler = {
           .speak(speakOutput)
           .withShouldEndSession(false)
           .getResponse();
+      } else {
+        // If no address or geolocation were available from from the user, delegate to the GetLocationHelperIntent
+        return responseBuilder
+          .speak("What's the location?")
+          .addDelegateDirective({
+            name: 'GetLocationHelperIntent',
+            confirmationStatus: 'NONE',
+            slots: {
+              helperLocation: {
+                name: 'helperLocation',
+                confirmationStatus: 'NONE'
+              }
+            }
+          })
+          .getResponse();
       }
 
+
+     
     } else {
       // If the location slot is filled but unconfirmed.
       if (Alexa.getSlot(requestEnvelope, 'location') &&
@@ -339,14 +355,13 @@ const GetLocationRequestInterceptor = {
     if (requestEnvelope.request.type === 'IntentRequest' &&
       Alexa.getIntentName(requestEnvelope) === 'GetLocationIntent' &&
       !sessionAttributes.GetLocation) { // If the location has already been set, don't do anything
-      const consentToken = requestEnvelope.context.System.user.permissions 
-        && requestEnvelope.context.System.user.permissions.consentToken;
+      
+      
       var isGeoSupported = requestEnvelope.context.System.device.supportedInterfaces.Geolocation;
+      
       sessionAttributes.GetLocation = {};
 
-      if (!consentToken) {
-        console.log('The user has not given any permissions');
-      }
+
 
       if (isGeoSupported) {
         if (requestEnvelope.context.Geolocation) {
