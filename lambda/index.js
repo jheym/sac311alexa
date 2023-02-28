@@ -5,11 +5,6 @@
  * Dinosaur Game 💪
  * */
 
-// TODO: Prevent the reflector handler from being triggered if it is a yes/no
-// intent and instead direct it to the fallback intent
-
-//  TODO: Create "anythingElse?" YesNo intents to handle the "anything else?" question
-
 
 const Alexa = require("ask-sdk")
 const AWS = require("aws-sdk")
@@ -42,14 +37,6 @@ const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
 const liveAgent = require("./liveAgent.js")
 
-
-// Stows the asked question in a session attribute for yes and no intent handlers
-function setQuestion(handlerInput, questionAsked) {
-  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-  sessionAttributes.questionAsked = questionAsked;
-  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-}
-
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
@@ -58,6 +45,8 @@ const LaunchRequestHandler = {
   },
   async handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    
+    // If we found the user's name in dynamodb, personalize the welcome message
     if (sessionAttributes.userFullName) {
       return (
         handlerInput.responseBuilder
@@ -259,7 +248,7 @@ const IntentReflectorHandler = {
  * Generic error handling to capture any syntax or routing errors. If you receive an error
  * stating the request handler chain is not found, you have not implemented a handler for
  * the intent being invoked or included it in the skill builder below
- * */
+ **/
 const ErrorHandler = {
   canHandle() {
     return true
@@ -276,8 +265,14 @@ const ErrorHandler = {
 }
 
 
-// TODO: Create an interceptor that checks if the current intent has empty
-// slots that can be filled from sessionAttributes
+/**
+ * This request interceptor looks to see if the current intent has any saved
+ * slots in session attributes. If so, it will add them to the current intent's
+ * slots. This is useful for switching between intents without losing slot
+ * values.
+ * 
+ * https://developer.amazon.com/blogs/alexa/post/114cec18-4a38-4cbe-8c6b-0fa6d8413f4f/build-for-context-switching-don-t-forget-important-information-when-switching-between-intents
+ */
 const ContextSwitchingRequestInterceptor = {
   process(handlerInput) {
     const { requestEnvelope, attributesManager } = handlerInput
@@ -285,13 +280,14 @@ const ContextSwitchingRequestInterceptor = {
 
     if (requestEnvelope.request.type === 'IntentRequest'
       && requestEnvelope.request.dialogState !== 'COMPLETED') {
+      
       const sessionAttributes = attributesManager.getSessionAttributes();
-
-      // If there are no session attributes we've never entered dialog
-      // management for this intent before 
+      
+      // If this intent has been invoked in the session before, it will have an
+      // entry in session attributes
       if (sessionAttributes[currentIntent.name]) {
         let savedSlots = sessionAttributes[currentIntent.name].slots
-
+        // This loop will add saved slots to the current intent's slots
         for (let key in savedSlots) {
           // The current intent's slot values take precedence over saved slots
           if (!currentIntent.slots[key].value && savedSlots[key].value) {
@@ -300,39 +296,28 @@ const ContextSwitchingRequestInterceptor = {
         }
       }
 
+      // Regardless of whether we've seen this intent before, we need to let
+      // future ContextSwitchingRequestInterceptor known that this intent has
+      // been invoked before
       sessionAttributes[currentIntent.name] = currentIntent
       attributesManager.setSessionAttributes(sessionAttributes)
     }
   }
 }
 
-//TODO: Probably don't get the address unless we need to.
-const NewSessionRequestInterceptor = {
-  async process(handlerInput) {
-    // console.log('request:', JSON.stringify(handlerInput.requestEnvelope.request));
 
 
-
-    if (handlerInput.requestEnvelope.session.new) {
-
-
-
-      const { attributesManager } = handlerInput;
-      const attributes = await attributesManager.getPersistentAttributes() || {};
-
-
-
-    }
-  }
-}
-
-// Not sure this is ever needed since we should always just send the delegate slots from the session attributes?
+/**
+ * This is a response interceptor. Not currently in use but could be used as an
+ * example of how to manipulate the outgoing response.
+ *
+ * The purpose of this interceptor is to detect if the outgoing response
+ * contains a delegateDirective(), and if so, autofill any saved slots for the
+ * intent being delegated to
+ */
 const DelegateDirectiveResponseInterceptor = {
   process(handlerInput, response) {
-    // If there is a delegate directive in the response, replace it with any
-    // saved slots for the intent being delegated
-    console.log(response)
-
+    // console.log(response)
 
     // If the response has dialog delegate directives, add any existing slots from session attributes
     if (response.directives && response.directives[0].updatedIntent && response.directives[0].type === 'Dialog.Delegate') {
@@ -352,6 +337,9 @@ const DelegateDirectiveResponseInterceptor = {
   }
 }
 
+/**
+ * TODO: Ethan - Document this
+ */
 const LocalisationRequestInterceptor = {
   //add new Strings and keys to ns-common.json
   process(handlerInput) {
@@ -366,6 +354,13 @@ const LocalisationRequestInterceptor = {
   }
 }
 
+/** 
+ * This request interceptor tries to get the user's full name from the Alexa API
+ * at the beginning of a session and saves it to persistent attributes
+ * (dynamoDB).
+ * 
+ * FIXME: Figure out why this was breaking for Ronald
+ */
 const PersonalizationRequestInterceptor = {
   async process(handlerInput) {
     if (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest") {
@@ -462,7 +457,7 @@ exports.handler = Alexa.SkillBuilders.custom()
   )
   .addRequestInterceptors(
     // NewSessionRequestInterceptor,
-    // PersonalizationRequestInterceptor, //TODO: Fix whatever was happening on ronald's machine
+    // PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
     LocalisationRequestInterceptor,
     ContextSwitchingRequestInterceptor,
     getLocation.GetLocationRequestInterceptor

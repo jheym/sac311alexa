@@ -2,13 +2,18 @@ const Alexa = require('ask-sdk-core')
 const index = require('./index.js')
 
 /**
- * This file handles the entire GetLocation conversation flow. 
- * Refer to https://lucid.app/lucidchart/d73b0879-d985-45df-8ce2-64a717c08ee9/edit?invitationId=inv_9bbd682a-2890-42f8-ab2f-9d018da6e42e
+ * This file handles the entire GetLocation conversation flow. Most of the logic
+ * is in GetLocationIntentHandler, while the GetLocationIntentInterceptor is
+ * responsible for querying geolocation and address. The GetLocationHelperIntent
+ * is responsible collecting a location from the user's input.
+ * 
+ * For the location conversation flow design, refer to the link below:
+ * https://lucid.app/lucidchart/d73b0879-d985-45df-8ce2-64a717c08ee9/edit?invitationId=inv_9bbd682a-2890-42f8-ab2f-9d018da6e42e
  */
 
 
 /**
- * Gets an address or prompts for an address and then confirms the address is correct
+ * Uses any collected locations or hands the user off to getLocationHelper if none are found
 **/
 const GetLocationIntentHandler = {
   canHandle(handlerInput) {
@@ -94,32 +99,6 @@ const GetLocationIntentHandler = {
   },
 }
 
-//   if (Alexa.getDialogState(requestEnvelope) !== 'COMPLETED') {
-//     return (
-//       responseBuilder
-//         .addDelegateDirective()
-//         .getResponse()
-//     )
-//   }
-
-//   // If the user provided the address with the initial intent, store it in sessionAttributes
-//   if (Alexa.getDialogState(requestEnvelope) === 'COMPLETED') {
-//     // Storing the confirmed address in session attributes. The delegated intent handlers must update their slot value to this value
-//     sessionAttributes.confirmedAddress = Alexa.getSlotValue(requestEnvelope, 'userAddress')
-//     attributesManager.setSessionAttributes(sessionAttributes)
-//     return (
-//       responseBuilder
-//         .addDelegateDirective({
-//           name: reasonForCalling,
-//           confirmationStatus: 'NONE',
-//           slots: sessionAttributes[reasonForCalling].slots
-//         })
-//         .getResponse()
-//     )
-//   }
-// }
-// }
-
 /**
  * If the user says yes to using their current location, delegate their location
  * back to getLocation intent
@@ -202,6 +181,7 @@ const NoUseCurrentLocationIntentHandler = {
     }
   },
 }
+
 /**
  * If the user says yes to using their home address, delegate their address back to getLocation intent
  */
@@ -228,7 +208,7 @@ const YesUseHomeAddressIntentHandler = {
 
     
     // TODO: What happens if locationObj is null?
-    // TODO: Run address against ESRI
+
 
     return responseBuilder
       .addDelegateDirective({
@@ -276,9 +256,12 @@ const NoUseHomeAddressIntentHandler = {
 }
 
 /**
- * AMAZON.SearchQuery slot types seem to only work with "required" slots. With
- * this intent handler, the location slot in the main intent can remain an
- * "optional" slot, which is required for manual dialog control.
+ * This intent handler prompts the user for their location and confirms it.
+ *
+ * Note: AMAZON.SearchQuery slot types seem to only work with "required" slots.
+ * By creating a whole new separate helper intent (GetLocationHelperIntent), the
+ * location slot in the main intent (GetLocationIntent) can remain an "optional"
+ * slot, which is required for manual dialog control (e.g. using confirmationStatus)
  */
 const GetLocationHelperIntentHandler = {
   canHandle(handlerInput) {
@@ -341,8 +324,12 @@ const GetLocationHelperIntentHandler = {
   }
 
 }
+
 /**
- * Intercepts the GetLocationIntent and adds the location to the session attributes.
+ * Intercepts the GetLocationIntent and checks for device geolocation and/or
+ * address from user contact details. If neither are present,
+ * GetLocationIntentHandler will detect this and delegate to
+ * GetLocationHelperIntent
  */
 const GetLocationRequestInterceptor = {
   async process(handlerInput) {
@@ -389,6 +376,9 @@ const GetLocationRequestInterceptor = {
         if (error.name !== 'ServiceError') {
           console.log('Something went wrong.')
         }
+        // It's okay if this reports a 403. That just means the user has not
+        // enabled permissions. In that case, GetLocationIntentHandler will
+        // handle it.
         console.log('There was a service error getting the address ~~~~~\n', error)
       }
       attributesManager.setSessionAttributes(sessionAttributes);
