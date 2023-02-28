@@ -15,8 +15,8 @@ const axios = require("axios")
 
 
 // Flag for checking if we are running in the Alexa-Hosted Lambda Environment
-var awsHostedEnv = false
-var ddbClient
+var awsHostedEnv = false;
+var ddbClient;
 
 
 // Checking environment variables to set dynamoDB client
