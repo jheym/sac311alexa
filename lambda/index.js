@@ -13,11 +13,9 @@ const i18n = require("i18next")
 const axios = require("axios")
 
 
-
 // Flag for checking if we are running in the Alexa-Hosted Lambda Environment
 var awsHostedEnv = false;
 var ddbClient;
-
 
 // Checking environment variables to set dynamoDB client
 if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
@@ -53,15 +51,6 @@ if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
   );
 }
 
-
-// TODO: Remove this later
-console.log(process.env)
-
-// Creating the local dynamoDB client for development
-// You will need to install dynamoDB locally and run it on port 8000
-// https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#DynamoDBLocal.DownloadingAndRunning.title
-
-
 const languageStrings = require("./ns-common.json")
 const strayAnimal = require("./strayAnimal.js")
 const abandonedVehicle = require("./abandoned-vehicle.js")
@@ -73,6 +62,18 @@ const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
 const liveAgent = require("./liveAgent.js")
 
+
+
+
+
+
+/*****************************************************************************/
+/*                               HANDLERS                                    */
+/*****************************************************************************/
+
+/**
+ * This handler is triggered when the user says "Alexa, open Sacramento 311"
+ */
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
@@ -115,6 +116,9 @@ const LaunchRequestHandler = {
   }
 }
 
+/**
+ * This handler is triggered when the user says something like "I want to report an issue"
+ */
 const ReportAnIssueIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -134,7 +138,10 @@ const ReportAnIssueIntentHandler = {
 }
 
 
-// If the user wishes to try rephrasing their intent
+/**
+ * This handler is for handling if the user wants to try reprasing their intent
+ * //TODO: Investigate if this is necessary
+ */
 const YesRetryIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -156,6 +163,7 @@ const YesRetryIntentHandler = {
 
 
 // If the user does not wish to try rephrasing their intent.
+//TODO: Investigate if this is necessary
 const NoRetryIntentHandler = {
   canHandle(handlerInput) {
     return (
