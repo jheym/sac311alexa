@@ -1,6 +1,5 @@
 const Alexa = require("ask-sdk-core")
-const index = require("./index.js")
-
+const helper = require("./helper/helperFunctions.js")
 
 const HomelessCampIntentHandler = {
   canHandle(handlerInput) {
@@ -18,8 +17,8 @@ const HomelessCampIntentHandler = {
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "STARTED") {
       sessionAttributes.reasonForCalling = currentIntent.name // GetAddress needs this
       const speakOutput = handlerInput.t('HOMELESS_CONFIRMATION')
-      index.setQuestion(handlerInput, null)
-      index.setQuestion(handlerInput, 'IsHomelessCampCorrect')
+      helper.setQuestion(handlerInput, null)
+      helper.setQuestion(handlerInput, 'IsHomelessCampCorrect')
       return (
         handlerInput.responseBuilder
           .withShouldEndSession(false)
@@ -67,8 +66,8 @@ const HomelessCampIntentHandler = {
             .getResponse()
         )
       } else {
-        index.setQuestion(handlerInput, null)
-        index.setQuestion(handlerInput, 'AnythingElse?')
+        helper.setQuestion(handlerInput, null)
+        helper.setQuestion(handlerInput, 'AnythingElse?')
         console.log(sessionAttributes.questionAsked)
         return (
           handlerInput.responseBuilder
@@ -93,7 +92,7 @@ const YesHomelessCampIntentHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes()
     // Getting slots from the initial intent if any were included
     homelessCampSlots = sessionAttributes['HomelessCampIntent'].slots
-    index.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, null)
 
     // // If the user provided an address with initial intent, store the address in the userProvidedAddress property
     // if (homelessCampSlots.homelessCampAddress.value) {
@@ -122,8 +121,8 @@ const NoHomelessCampIntentHandler = {
 
   },
   handle(handlerInput) {
-    index.setQuestion(handlerInput, null)
-    index.setQuestion(handlerInput, 'TryAgain')
+    helper.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('UNKNOWN_MSG'))

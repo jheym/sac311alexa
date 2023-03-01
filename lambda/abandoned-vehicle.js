@@ -1,6 +1,6 @@
 
 const Alexa = require("ask-sdk-core")
-const index = require("./index.js")
+const helper = require("./helper/helperFunctions.js")
 
 
 const AbandonedVehicleIntentHandler = {
@@ -17,8 +17,8 @@ const AbandonedVehicleIntentHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes()
 
     if (Alexa.getDialogState(requestEnvelope) === "STARTED") {
-      index.setQuestion(handlerInput, null);
-      index.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
+      helper.setQuestion(handlerInput, null);
+      helper.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
       const speakOutput = handlerInput.t("ABANDONED_VEHICLE_CONFIRMATION")
       return responseBuilder
         .withShouldEndSession(false)
@@ -111,7 +111,7 @@ const AbandonedVehicleIntentHandler = {
         var location = sessionAttributes.confirmedLocation;
         speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS',{color: `${color}`, make: `${make}`, model: `${model}`, location: `${location}`})
 
-        index.clearSlots(handlerInput, requestEnvelope.request.intent) //clear the slots
+        helper.clearSlots(handlerInput, requestEnvelope.request.intent) //clear the slots
         //TODO: Set question for "anything else?" 
         return responseBuilder
           .speak(speakOutput)
@@ -131,8 +131,8 @@ const YesAbandonedVehicleIntentHandler = {
     )
   },
   handle(handlerInput) {
-    index.setQuestion(handlerInput, null)
-    index.setQuestion(handlerInput, 'IsAbandonedTime?')
+    helper.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, 'IsAbandonedTime?')
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
     sessionAttributes.reasonForCalling = 'AbandonedVehicleIntent' // So GetLocationIntent knows where to delegate back to after confirming the address
     return (
@@ -153,7 +153,7 @@ const YesAbandonedVehicleTimeIntentHandler = {
     )
   },
   handle(handlerInput) {
-    index.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
+    helper.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
     const { responseBuilder, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
 
@@ -176,8 +176,8 @@ const NoAbandonedVehicleIntentHandler = {
     )
   },
   handle(handlerInput) {
-    index.setQuestion(handlerInput, null)
-    index.setQuestion(handlerInput, 'TryAgain')
+    helper.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('UNKNOWN_MSG'))
@@ -197,8 +197,8 @@ const NoAbandonedVehicleTimeIntentHandler = {
     )
   },
   handle(handlerInput) {
-    index.setQuestion(handlerInput, null)
-    index.setQuestion(handlerInput, 'TryAgain')
+    helper.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('ABANDONED_VEHICLE_72A'))

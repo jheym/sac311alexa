@@ -5,71 +5,25 @@
  * Team Dinosaur Game 💪
  * */
 
-// blah blah blah a different change
-
+// NPM Packages
 const Alexa = require("ask-sdk")
 const AWS = require("aws-sdk")
 const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter")
 const i18n = require("i18next")
 const axios = require("axios")
 
-
-// Flag for checking if we are running in the Alexa-Hosted Lambda Environment
-var awsHostedEnv = false;
-var ddbClient;
-
-// Checking environment variables to set dynamoDB client
-if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
-  console.log("Running in Alexa-Hosted Lambda Environment")
-  awsHostedEnv = true
-} else {
-  console.log("Not running on Alexa-Hosted Lambda Environment")
-  // TODO: Check to see this works on windows
-  console.log('Importing exec dependencies...')
-  require('dotenv').config()
-  const { exec } = require('child_process');
-  console.log("Starting local dynamoDB server...")
-  exec('java -D"java.library.path=../local_dynamodb/DynamoDBLocal_lib" -jar \
-  ../local_dynamodb/DynamoDBLocal.jar -sharedDb', (err, stdout, stderr) => {
-    if (err) {
-      console.log(`error: ${err.message}`);
-      return;
-    }
-    if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-      }
-      console.log(`stdout: ${stdout}`);
-    });
-  
-  ddbClient = new AWS.DynamoDB(
-    { apiVersion: "latest",
-      region: "us-west-2",
-      endpoint: "http://localhost:8000",
-      accessKeyId: 'fakeMyKeyId',
-      secretAccessKey: 'fakeSecretAccessKey' 
-    }
-  );
-}
-
-const languageStrings = require("./ns-common.json")
-const strayAnimal = require("./strayAnimal.js")
+// Local modules
+const helper = require("./helper/helperFunctions.js")
+const languageStrings = require("./helper/ns-common.json")
 const abandonedVehicle = require("./abandoned-vehicle.js")
-const potHole = require("./pothole.js")
-const petcomplaint = require("./petcomplaint.js")
 const homelessCamp = require("./homeless-encampment.js")
 const getLocation = require("./getLocation")
-const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
-const liveAgent = require("./liveAgent.js")
-
-
-
 
 
 
 /*****************************************************************************/
-/*                               HANDLERS                                    */
+/*                               INTENT HANDLERS                             */
 /*****************************************************************************/
 
 /**
@@ -82,8 +36,9 @@ const LaunchRequestHandler = {
     )
   },
   async handle(handlerInput) {
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-    const attributesManager = handlerInput.attributesManager;
+   
+    const {attributesManager, requestEnvelope } = handlerInput;
+    const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
 
     // DYNAMODB TEST CODE //
     let persistentAttributes = await attributesManager.getPersistentAttributes() || {};
@@ -96,26 +51,18 @@ const LaunchRequestHandler = {
     attributesManager.setPersistentAttributes(persistentAttributes)  // Pay attention to these two lines: set 
     await attributesManager.savePersistentAttributes()           // and then save
     // END DYNAMODB TEST CODE //
+    
+    speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 
-
-    // If we found the user's name in dynamodb, personalize the welcome message
-    if (sessionAttributes.userFullName) {
-      return (
-        handlerInput.responseBuilder
-          .speak(handlerInput.t('PERSONALIZED_WELCOME_MSG', { name: sessionAttributes.userFullName })) // TODO: Trim last name
-          .reprompt(handlerInput.t('WELCOME_REPROMPT'))
-          .getResponse()
-      )
-    } else {
-      return (
-        handlerInput.responseBuilder
-          .speak(handlerInput.t('WELCOME_MSG', { counter: counter })) // TODO: DynamoDB test counter is temporary
-          .reprompt(handlerInput.t('WELCOME_REPROMPT'))
-          .getResponse()
-      )
-    }
+    return (
+      handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(handlerInput.t('WELCOME_REPROMPT'))
+        .getResponse()
+    )
   }
 }
+
 
 /**
  * This handler is triggered when the user says something like "I want to report an issue"
@@ -128,7 +75,7 @@ const ReportAnIssueIntentHandler = {
     )
   },
   handle(handlerInput) {
-    setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, null)
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('REPORT_ISSUE'))
@@ -152,7 +99,7 @@ const YesRetryIntentHandler = {
     )
   },
   handle(handlerInput) {
-    setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
+    helper.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('YES_RETRY'))
@@ -174,7 +121,7 @@ const NoRetryIntentHandler = {
     )
   },
   handle(handlerInput) {
-    setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, null)
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('NO_RETRY'))
@@ -213,6 +160,8 @@ const CancelAndStopIntentHandler = {
     return handlerInput.responseBuilder.speak(handlerInput.t('GOODBYE_MSG')).getResponse()
   },
 }
+
+
 /* *
  * FallbackIntent triggers when a customer says something that doesn’t map to
  * any intents in your skill It must also be defined in the language model (if
@@ -252,6 +201,8 @@ const FallbackIntentHandler = {
       .getResponse()
   },
 }
+
+
 /* *
  * SessionEndedRequest notifies that a session was ended. This handler will be triggered when a currently open
  * session is closed for one of the following reasons: 1) The user says "exit" or "quit". 2) The user does not
@@ -324,6 +275,11 @@ const ErrorHandler = {
 }
 
 
+/*****************************************************************************/
+/*                               INTERCEPTORS                                */
+/*****************************************************************************/
+
+
 /**
  * This request interceptor looks to see if the current intent has any saved
  * slots in session attributes. If so, it will add them to the current intent's
@@ -365,7 +321,6 @@ const ContextSwitchingRequestInterceptor = {
 }
 
 
-
 /**
  * This is a response interceptor. Not currently in use but could be used as an
  * example of how to manipulate the outgoing response.
@@ -396,8 +351,11 @@ const DelegateDirectiveResponseInterceptor = {
   }
 }
 
+
 /**
- * TODO: Ethan - Document this
+ * This interceptor is responsible for initializing the i18n
+ * (internationalization) library and setting up the translation functions for
+ * the handlerInput object.
  */
 const LocalisationRequestInterceptor = {
   //add new Strings and keys to ns-common.json
@@ -412,6 +370,7 @@ const LocalisationRequestInterceptor = {
       //i18n.changeLanguage('es'); //use statement to test fallbackLng and spanish functionality
   }
 }
+
 
 /** 
  * This request interceptor tries to get the user's full name from the Alexa API
@@ -468,22 +427,53 @@ const PersonalizationRequestInterceptor = {
   }
 }
 
-// Stores the asked question in a session attribute for yes and no intent handlers
-function setQuestion(handlerInput, questionAsked) {
-  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-  sessionAttributes.questionAsked = questionAsked;
-  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+
+/*****************************************************************************/
+/*                        DEV ENVIRONMENT SETUP                              */
+/*****************************************************************************/
+
+// Flag for checking if we are running in the Alexa-Hosted Lambda Environment
+var awsHostedEnv = false;
+var ddbClient;
+
+// Checking environment variables to set dynamoDB client
+if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
+  console.log("Running in Alexa-Hosted Lambda Environment")
+  awsHostedEnv = true
+} else {
+  console.log("Not running on Alexa-Hosted Lambda Environment")
+  
+  require('dotenv').config()
+  const { exec } = require('child_process');
+  
+  console.log("Starting local dynamoDB server...")
+  exec('java -D"java.library.path=../local_dynamodb/DynamoDBLocal_lib" -jar \
+  ../local_dynamodb/DynamoDBLocal.jar -sharedDb', (err, stdout, stderr) => {
+    if (err) {
+      console.log(`error: ${err.message}`);
+      return;
+    }
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+      return;
+      }
+      console.log(`stdout: ${stdout}`);
+    });
+  
+  ddbClient = new AWS.DynamoDB(
+    { apiVersion: "latest",
+      region: "us-west-2",
+      endpoint: "http://localhost:8000",
+      accessKeyId: 'fakeMyKeyId',
+      secretAccessKey: 'fakeSecretAccessKey' 
+    }
+  );
 }
-/*
- * Function to clear slots of an intent after submitting ticket
- * Example call in Abandoned vehicle, after output statement is created, before it is returned.
- * call with: 
- * index.clearSlots(handlerInput, requestEnvelope.request.intent)
- */
-function clearSlots(handlerInput, currentIntent) {
-  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-  delete sessionAttributes[currentIntent.name];
-}
+
+
+/*****************************************************************************/
+/*                        ALEXA HANDLER EXPORTS                              */
+/*****************************************************************************/
 
 /**
  * This handler acts as the entry point for your skill, routing all request and response
@@ -492,7 +482,7 @@ function clearSlots(handlerInput, currentIntent) {
  * */
 //arrays can be created prior and passed using ... but there an unintended consequences
 //for now place new Handlers and Interceptors manually, order matters!
-if (!awsHostedEnv) {  // Running Locally
+if (!awsHostedEnv) {
   exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
       LaunchRequestHandler,
@@ -503,7 +493,6 @@ if (!awsHostedEnv) {  // Running Locally
       getLocation.YesUseHomeAddressIntentHandler,
       getLocation.NoUseHomeAddressIntentHandler,
       getLocation.GetLocationHelperIntentHandler,
-      liveAgent.LiveAgentIntentHandler,
       abandonedVehicle.AbandonedVehicleIntentHandler,
       abandonedVehicle.YesAbandonedVehicleIntentHandler,
       abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
@@ -512,11 +501,7 @@ if (!awsHostedEnv) {  // Running Locally
       homelessCamp.HomelessCampIntentHandler,
       homelessCamp.YesHomelessCampIntentHandler,
       homelessCamp.NoHomelessCampIntentHandler,
-      potHole.PotHoleRequestHandler,
-      petcomplaint.petcomplaintHandler,
       trashpickup.TrashPickUpIntentHandler,
-      strayAnimal.strayAnimalHandler,
-      dirtyBathroom.dirtyBathroomHandler,
       YesRetryIntentHandler,
       NoRetryIntentHandler,
       FallbackIntentHandler,
@@ -547,7 +532,11 @@ if (!awsHostedEnv) {  // Running Locally
       })
     )
     .lambda();
-} else { // Alexa-Hosted
+} 
+
+
+/* DO NOT EDIT, THESE ARE FOR ALEXA-HOSTED ENVIRONMENT */
+else {
   exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
@@ -558,7 +547,6 @@ if (!awsHostedEnv) {  // Running Locally
     getLocation.YesUseHomeAddressIntentHandler,
     getLocation.NoUseHomeAddressIntentHandler,
     getLocation.GetLocationHelperIntentHandler,
-    liveAgent.LiveAgentIntentHandler,
     abandonedVehicle.AbandonedVehicleIntentHandler,
     abandonedVehicle.YesAbandonedVehicleIntentHandler,
     abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
@@ -567,11 +555,7 @@ if (!awsHostedEnv) {  // Running Locally
     homelessCamp.HomelessCampIntentHandler,
     homelessCamp.YesHomelessCampIntentHandler,
     homelessCamp.NoHomelessCampIntentHandler,
-    potHole.PotHoleRequestHandler,
-    petcomplaint.petcomplaintHandler,
     trashpickup.TrashPickUpIntentHandler,
-    strayAnimal.strayAnimalHandler,
-    dirtyBathroom.dirtyBathroomHandler,
     YesRetryIntentHandler,
     NoRetryIntentHandler,
     FallbackIntentHandler,
@@ -603,7 +587,3 @@ if (!awsHostedEnv) {  // Running Locally
   )
   .lambda();
 }
-
-// Custom Exports
-exports.setQuestion = setQuestion
-exports.clearSlots = clearSlots
