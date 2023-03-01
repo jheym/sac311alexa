@@ -1,6 +1,6 @@
 /* *
  * 🚨 This is the main file for the Sacramento 311 Alexa Skill 📞
- * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alexa Carrell, Ethan Borg, 
+ * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alexa Carrell, Ethan Borg,
  * Humayoon Rafei, and Justin Heyman
  * Team Dinosaur Game 💪
  * */
@@ -33,7 +33,7 @@ const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-    )
+    );
   },
   async handle(handlerInput) {
    
@@ -41,15 +41,20 @@ const LaunchRequestHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
 
     // DYNAMODB TEST CODE //
-    let persistentAttributes = await attributesManager.getPersistentAttributes() || {};
-    console.log('persistentAttributes: ' + JSON.stringify(persistentAttributes));
-    
-    var counter = persistentAttributes.hasOwnProperty('counter') ? persistentAttributes.counter : 1;
-    console.log('counter: ' + counter)
+    let persistentAttributes =
+      (await attributesManager.getPersistentAttributes()) || {};
+    console.log(
+      "persistentAttributes: " + JSON.stringify(persistentAttributes)
+    );
 
-    persistentAttributes = {"counter": counter + 1}
-    attributesManager.setPersistentAttributes(persistentAttributes)  // Pay attention to these two lines: set 
-    await attributesManager.savePersistentAttributes()           // and then save
+    var counter = persistentAttributes.hasOwnProperty("counter")
+      ? persistentAttributes.counter
+      : 1;
+    console.log("counter: " + counter);
+
+    persistentAttributes = { counter: counter + 1 };
+    attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
+    await attributesManager.savePersistentAttributes(); // and then save
     // END DYNAMODB TEST CODE //
     
     speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
@@ -70,9 +75,10 @@ const LaunchRequestHandler = {
 const ReportAnIssueIntentHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'ReportAnIssueIntent'
-    )
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "ReportAnIssueIntent"
+    );
   },
   handle(handlerInput) {
     helper.setQuestion(handlerInput, null)
@@ -93,10 +99,12 @@ const ReportAnIssueIntentHandler = {
 const YesRetryIntentHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain'
-    )
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AMAZON.YesIntent" &&
+      handlerInput.attributesManager.getSessionAttributes().questionAsked ===
+        "TryAgain"
+    );
   },
   handle(handlerInput) {
     helper.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
@@ -115,10 +123,11 @@ const YesRetryIntentHandler = {
 const NoRetryIntentHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'TryAgain'
-    )
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent" &&
+      handlerInput.attributesManager.getSessionAttributes().questionAsked ===
+        "TryAgain"
+    );
   },
   handle(handlerInput) {
     helper.setQuestion(handlerInput, null)
@@ -129,22 +138,22 @@ const NoRetryIntentHandler = {
         .getResponse()
     )
   },
-}
+};
 
 const HelpIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.HelpIntent"
-    )
+    );
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak(handlerInput.t('HELP_MSG'))
-      .reprompt(handlerInput.t('HELP_MSG'))
-      .getResponse()
+      .speak(handlerInput.t("HELP_MSG"))
+      .reprompt(handlerInput.t("HELP_MSG"))
+      .getResponse();
   },
-}
+};
 
 const CancelAndStopIntentHandler = {
   canHandle(handlerInput) {
@@ -153,11 +162,13 @@ const CancelAndStopIntentHandler = {
       (Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "AMAZON.CancelIntent" ||
         Alexa.getIntentName(handlerInput.requestEnvelope) ===
-        "AMAZON.StopIntent")
-    )
+          "AMAZON.StopIntent")
+    );
   },
   handle(handlerInput) {
-    return handlerInput.responseBuilder.speak(handlerInput.t('GOODBYE_MSG')).getResponse()
+    return handlerInput.responseBuilder
+      .speak(handlerInput.t("GOODBYE_MSG"))
+      .getResponse();
   },
 }
 
@@ -173,32 +184,33 @@ const FallbackIntentHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
-      "AMAZON.FallbackIntent"
-    )
+        "AMAZON.FallbackIntent"
+    );
   },
   // TODO: Add sessionattributes counter for fallbacks. If 3 fallbacks then
   // offer to send to live agent or end the session.
   handle(handlerInput) {
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
 
     if (!sessionAttributes.fallbackCount) {
-      sessionAttributes.fallbackCount = 1
+      sessionAttributes.fallbackCount = 1;
     } else {
-      sessionAttributes.fallbackCount++
+      sessionAttributes.fallbackCount++;
       if (sessionAttributes.fallbackCount >= 3) {
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         return handlerInput.responseBuilder
-          .speak(handlerInput.t('FALLBACK_STILL_MSG'))
-          .reprompt(handlerInput.t('FALLBACK_STILL_MSG_REPROMPT'))
-          .getResponse()
+          .speak(handlerInput.t("FALLBACK_STILL_MSG"))
+          .reprompt(handlerInput.t("FALLBACK_STILL_MSG_REPROMPT"))
+          .getResponse();
       }
     }
 
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     return handlerInput.responseBuilder
-      .speak(handlerInput.t('FALLBACK_MSG'))
-      .reprompt(handlerInput.t('FALLBACK_MSG_REPROMPT'))
-      .getResponse()
+      .speak(handlerInput.t("FALLBACK_MSG"))
+      .reprompt(handlerInput.t("FALLBACK_MSG_REPROMPT"))
+      .getResponse();
   },
 }
 
@@ -213,20 +225,18 @@ const SessionEndedRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
       "SessionEndedRequest"
-    )
+    );
   },
   async handle(handlerInput) {
     // console.log(
     //   `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
     // )
     // Any cleanup logic goes here.
-    console.log("Session ended")
+    console.log("Session ended");
 
-    return handlerInput.responseBuilder
-      .getResponse(); // notice we send an empty response
+    return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
   },
-}
-
+};
 
 /* *
  * The intent reflector is used for interaction model testing and debugging.
@@ -238,21 +248,20 @@ const IntentReflectorHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest"
-    )
+    );
   },
   handle(handlerInput) {
-    const intentName = Alexa.getIntentName(handlerInput.requestEnvelope)
-    const speakOutput = `You just triggered ${intentName}`
+    const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
+    const speakOutput = `You just triggered ${intentName}`;
 
     return (
       handlerInput.responseBuilder
         .speak(speakOutput)
         //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
         .getResponse()
-    )
+    );
   },
-}
-
+};
 
 /**
  * Generic error handling to capture any syntax or routing errors. If you receive an error
@@ -261,16 +270,16 @@ const IntentReflectorHandler = {
  **/
 const ErrorHandler = {
   canHandle() {
-    return true
+    return true;
   },
   handle(handlerInput, error) {
-    console.log(`~~~~ Error handled ~~~~`)
-    console.log(error)
+    console.log(`~~~~ Error handled ~~~~`);
+    console.log(error);
 
     return handlerInput.responseBuilder
-      .speak(handlerInput.t('ERROR_MSG'))
-      .reprompt(handlerInput.t('ERROR_MSG'))
-      .getResponse()
+      .speak(handlerInput.t("ERROR_MSG"))
+      .reprompt(handlerInput.t("ERROR_MSG"))
+      .getResponse();
   },
 }
 
@@ -285,28 +294,29 @@ const ErrorHandler = {
  * slots in session attributes. If so, it will add them to the current intent's
  * slots. This is useful for switching between intents without losing slot
  * values.
- * 
+ *
  * https://developer.amazon.com/blogs/alexa/post/114cec18-4a38-4cbe-8c6b-0fa6d8413f4f/build-for-context-switching-don-t-forget-important-information-when-switching-between-intents
  */
 const ContextSwitchingRequestInterceptor = {
   process(handlerInput) {
-    const { requestEnvelope, attributesManager } = handlerInput
-    const currentIntent = requestEnvelope.request.intent
+    const { requestEnvelope, attributesManager } = handlerInput;
+    const currentIntent = requestEnvelope.request.intent;
 
-    if (requestEnvelope.request.type === 'IntentRequest'
-      && requestEnvelope.request.dialogState !== 'COMPLETED') {
-      
+    if (
+      requestEnvelope.request.type === "IntentRequest" &&
+      requestEnvelope.request.dialogState !== "COMPLETED"
+    ) {
       const sessionAttributes = attributesManager.getSessionAttributes();
-      
+
       // If this intent has been invoked in the session before, it will have an
       // entry in session attributes
       if (sessionAttributes[currentIntent.name]) {
-        let savedSlots = sessionAttributes[currentIntent.name].slots
+        let savedSlots = sessionAttributes[currentIntent.name].slots;
         // This loop will add saved slots to the current intent's slots
         for (let key in savedSlots) {
           // The current intent's slot values take precedence over saved slots
           if (!currentIntent.slots[key].value && savedSlots[key].value) {
-            currentIntent.slots[key] = savedSlots[key]
+            currentIntent.slots[key] = savedSlots[key];
           }
         }
       }
@@ -314,8 +324,8 @@ const ContextSwitchingRequestInterceptor = {
       // Regardless of whether we've seen this intent before, we need to let
       // future ContextSwitchingRequestInterceptor known that this intent has
       // been invoked before
-      sessionAttributes[currentIntent.name] = currentIntent
-      attributesManager.setSessionAttributes(sessionAttributes)
+      sessionAttributes[currentIntent.name] = currentIntent;
+      attributesManager.setSessionAttributes(sessionAttributes);
     }
   }
 }
@@ -334,19 +344,27 @@ const DelegateDirectiveResponseInterceptor = {
     // console.log(response)
 
     // If the response has dialog delegate directives, add any existing slots from session attributes
-    if (response.directives && response.directives[0].updatedIntent && response.directives[0].type === 'Dialog.Delegate') {
-      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
+    if (
+      response.directives &&
+      response.directives[0].updatedIntent &&
+      response.directives[0].type === "Dialog.Delegate"
+    ) {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
       // const currentIntent = handlerInput.requestEnvelope.request.intent
-      const delegatedIntent = response.directives[0].updatedIntent
+      const delegatedIntent = response.directives[0].updatedIntent;
       if (sessionAttributes[delegatedIntent.name]) {
-        let savedSlots = sessionAttributes[delegatedIntent.name].slots
+        let savedSlots = sessionAttributes[delegatedIntent.name].slots;
         for (let key in savedSlots) {
-          if (!response.directives[0].updatedIntent.slots[key].value && savedSlots[key].value) {
-            response.directives[0].updatedIntent.slots[key] = savedSlots[key]
+          if (
+            !response.directives[0].updatedIntent.slots[key].value &&
+            savedSlots[key].value
+          ) {
+            response.directives[0].updatedIntent.slots[key] = savedSlots[key];
           }
         }
       }
-      console.log(response)
+      console.log(response);
     }
   }
 }
@@ -360,72 +378,82 @@ const DelegateDirectiveResponseInterceptor = {
 const LocalisationRequestInterceptor = {
   //add new Strings and keys to ns-common.json
   process(handlerInput) {
-      i18n.init({
-          lng: Alexa.getLocale(handlerInput.requestEnvelope),
-          fallbackLng: 'en',
-          resources: languageStrings
-      }).then((t) => {
-          handlerInput.t = (...args) => t(...args);
+    i18n
+      .init({
+        lng: Alexa.getLocale(handlerInput.requestEnvelope),
+        fallbackLng: "en",
+        resources: languageStrings,
+      })
+      .then((t) => {
+        handlerInput.t = (...args) => t(...args);
       });
       //i18n.changeLanguage('es'); //use statement to test fallbackLng and spanish functionality
   }
 }
 
 
-/** 
+/**
  * This request interceptor tries to get the user's full name from the Alexa API
  * at the beginning of a session and saves it to persistent attributes
  * (dynamoDB).
- * 
+ *
  * FIXME: Figure out why this was breaking for Ronald
  */
 const PersonalizationRequestInterceptor = {
   async process(handlerInput) {
-    if (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest") {
-      const { attributesManager, requestEnvelope } = handlerInput
-      const {apiAccessToken} = requestEnvelope.context.System ? requestEnvelope.context.System : null;
+    if (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+    ) {
+      const { attributesManager, requestEnvelope } = handlerInput;
+      const { apiAccessToken } = requestEnvelope.context.System
+        ? requestEnvelope.context.System
+        : null;
       const sessionAttributes = attributesManager.getSessionAttributes() || {};
-      let persistentAttributes = await attributesManager.getPersistentAttributes() || {};
-      console.log('persistentAttributes: ' + JSON.stringify(persistentAttributes));
-      const userFullName = persistentAttributes.hasOwnProperty('userFullName') ? persistentAttributes.userFullName : null;
-      console.log('userFullName: ' + userFullName)
+      let persistentAttributes =
+        (await attributesManager.getPersistentAttributes()) || {};
+      console.log(
+        "persistentAttributes: " + JSON.stringify(persistentAttributes)
+      );
+      const userFullName = persistentAttributes.hasOwnProperty("userFullName")
+        ? persistentAttributes.userFullName
+        : null;
+      console.log("userFullName: " + userFullName);
 
       // If no full name was in persistent attributes, get it from the API
       if (!userFullName) {
-
-      // Axios config to set headers
+        // Axios config to set headers
         let config = {
           headers: {
-            'Authorization': `Bearer ${apiAccessToken}`
-          }
-        }
+            Authorization: `Bearer ${apiAccessToken}`,
+          },
+        };
 
         try {
           res = await axios.get(
-          'https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name',
-          config
-        )
+            "https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name",
+            config
+          );
         } catch (error) {
-          console.log("There was a problem getting the user's name") 
-          console.log(error)
+          console.log("There was a problem getting the user's name");
+          console.log(error);
         }
 
         if (res.status === 200) {
-          persistentAttributes = {"userFullName":res.data}
-          attributesManager.setPersistentAttributes(persistentAttributes)  // Pay attention to these two lines: set 
-          await attributesManager.savePersistentAttributes()                // and then save
+          persistentAttributes = { userFullName: res.data };
+          attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
+          await attributesManager.savePersistentAttributes(); // and then save
         } else {
-          console.log("There was a problem getting the user's name") 
-          console.log(res)
+          console.log("There was a problem getting the user's name");
+          console.log(res);
         }
-
-      } else {  // Else, if there was a full name in persistent attributes, set it in session attributes  
-        sessionAttributes.userFullName = userFullName
-        attributesManager.setSessionAttributes(sessionAttributes)
+      } else {
+        // Else, if there was a full name in persistent attributes, set it in session attributes
+        sessionAttributes.userFullName = userFullName;
+        attributesManager.setSessionAttributes(sessionAttributes);
       }
     }
-  }
-}
+  },
+};
 
 
 /*****************************************************************************/
@@ -506,7 +534,7 @@ if (!awsHostedEnv) {
       FallbackIntentHandler,
       HelpIntentHandler,
       CancelAndStopIntentHandler,
-      SessionEndedRequestHandler,
+      SessionEndedRequestHandler
       // IntentReflectorHandler,
     )
     .addRequestInterceptors(
@@ -516,18 +544,18 @@ if (!awsHostedEnv) {
       ContextSwitchingRequestInterceptor,
       getLocation.GetLocationRequestInterceptor
     )
-    .addResponseInterceptors(
+    .addResponseInterceptors
     // DelegateDirectiveResponseInterceptor
     // getLocation.DelegateToGetLocationResponseInterceptor
-  )
+    ()
     .withApiClient(new Alexa.DefaultApiClient())
     .addErrorHandlers(ErrorHandler)
     .withCustomUserAgent("BigDino")
     .withPersistenceAdapter(
       new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
-        tableName: 'sac311table',
+        tableName: "sac311table",
         createTable: true,
-        dynamoDBClient: ddbClient
+        dynamoDBClient: ddbClient,
       })
     )
     .lambda();
@@ -537,52 +565,55 @@ if (!awsHostedEnv) {
 /* DO NOT EDIT, THESE ARE FOR ALEXA-HOSTED ENVIRONMENT */
 else {
   exports.handler = Alexa.SkillBuilders.custom()
-  .addRequestHandlers(
-    LaunchRequestHandler,
-    ReportAnIssueIntentHandler,
-    getLocation.GetLocationIntentHandler,
-    getLocation.YesUseCurrentLocationIntentHandler,
-    getLocation.NoUseCurrentLocationIntentHandler,
-    getLocation.YesUseHomeAddressIntentHandler,
-    getLocation.NoUseHomeAddressIntentHandler,
-    getLocation.GetLocationHelperIntentHandler,
-    abandonedVehicle.AbandonedVehicleIntentHandler,
-    abandonedVehicle.YesAbandonedVehicleIntentHandler,
-    abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
-    abandonedVehicle.NoAbandonedVehicleIntentHandler,
-    abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
-    homelessCamp.HomelessCampIntentHandler,
-    homelessCamp.YesHomelessCampIntentHandler,
-    homelessCamp.NoHomelessCampIntentHandler,
-    trashpickup.TrashPickUpIntentHandler,
-    YesRetryIntentHandler,
-    NoRetryIntentHandler,
-    FallbackIntentHandler,
-    HelpIntentHandler,
-    CancelAndStopIntentHandler,
-    SessionEndedRequestHandler,
-    // IntentReflectorHandler,
-  )
-  .addRequestInterceptors(
-    // NewSessionRequestInterceptor,
-    // PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
-    LocalisationRequestInterceptor,
-    ContextSwitchingRequestInterceptor,
-    getLocation.GetLocationRequestInterceptor
-  )
-  .addResponseInterceptors(
-  // DelegateDirectiveResponseInterceptor
-  // getLocation.DelegateToGetLocationResponseInterceptor
-)
-  .withApiClient(new Alexa.DefaultApiClient())
-  .addErrorHandlers(ErrorHandler)
-  .withCustomUserAgent("BigDino")
-  .withPersistenceAdapter(
-    new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
-      tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-      createTable: false,
-      dynamoDBClient: new AWS.DynamoDB({apiVersion: 'latest', region: process.env.DYNAMODB_PERSISTENCE_REGION})
-    })
-  )
-  .lambda();
+    .addRequestHandlers(
+      LaunchRequestHandler,
+      ReportAnIssueIntentHandler,
+      getLocation.GetLocationIntentHandler,
+      getLocation.YesUseCurrentLocationIntentHandler,
+      getLocation.NoUseCurrentLocationIntentHandler,
+      getLocation.YesUseHomeAddressIntentHandler,
+      getLocation.NoUseHomeAddressIntentHandler,
+      getLocation.GetLocationHelperIntentHandler,
+      abandonedVehicle.AbandonedVehicleIntentHandler,
+      abandonedVehicle.YesAbandonedVehicleIntentHandler,
+      abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
+      abandonedVehicle.NoAbandonedVehicleIntentHandler,
+      abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
+      homelessCamp.HomelessCampIntentHandler,
+      homelessCamp.YesHomelessCampIntentHandler,
+      homelessCamp.NoHomelessCampIntentHandler,
+      trashpickup.TrashPickUpIntentHandler,
+      YesRetryIntentHandler,
+      NoRetryIntentHandler,
+      FallbackIntentHandler,
+      HelpIntentHandler,
+      CancelAndStopIntentHandler,
+      SessionEndedRequestHandler
+      // IntentReflectorHandler,
+    )
+    .addRequestInterceptors(
+      // NewSessionRequestInterceptor,
+      // PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
+      LocalisationRequestInterceptor,
+      ContextSwitchingRequestInterceptor,
+      getLocation.GetLocationRequestInterceptor
+    )
+    .addResponseInterceptors
+    // DelegateDirectiveResponseInterceptor
+    // getLocation.DelegateToGetLocationResponseInterceptor
+    ()
+    .withApiClient(new Alexa.DefaultApiClient())
+    .addErrorHandlers(ErrorHandler)
+    .withCustomUserAgent("BigDino")
+    .withPersistenceAdapter(
+      new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
+        tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
+        createTable: false,
+        dynamoDBClient: new AWS.DynamoDB({
+          apiVersion: "latest",
+          region: process.env.DYNAMODB_PERSISTENCE_REGION,
+        }),
+      })
+    )
+    .lambda();
 }

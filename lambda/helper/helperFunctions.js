@@ -48,9 +48,33 @@ async function getAddressCandidate(address) {
       throw new Error(`Failed to find the address. ${error.message}`);
     }
   }
+  /**
+   * This function takes a latitude and longitude and returns an address
+   * //TODO: Addresses must not be POI, they must be full addresses. There is a way to specify this as a param.
+   * @param {float} latitude 
+   * @param {float} longitude 
+   * @returns 
+   */
+  async function reverseGeocode(latitude, longitude) {
+    const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
+  
+    try {
+      const response = await axios.get(url);
+      console.log("Response:", response);
+      const result = response.data;
+      console.log("Result:", result);
+      const address = result?.address?.Match_addr || false;
+      console.log("Address:", address);
+      return address;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
 
 module.exports = {
   setQuestion,
   clearSlots,
-  getAddressCandidate
+  getAddressCandidate,
+  reverseGeocode
 }
