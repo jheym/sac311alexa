@@ -111,7 +111,8 @@ const AbandonedVehicleIntentHandler = {
         var location = sessionAttributes.confirmedLocation;
         speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS',{color: `${color}`, make: `${make}`, model: `${model}`, location: `${location}`})
 
-        helper.clearSlots(handlerInput, requestEnvelope.request.intent) //clear the slots
+        // IMPORTANT: Clear slots after creating a new case so they don't get reused if the caller wants to submit a different ticket
+        helper.clearSlots(handlerInput, requestEnvelope.request.intent) 
         //TODO: Set question for "anything else?" 
         return responseBuilder
           .speak(speakOutput)
