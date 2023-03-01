@@ -59,7 +59,81 @@ const getLocation = require("./getLocation")
 const trashpickup = require("./trash-pickup.js")
 
 
+// async function getAddress(addressParameter) {
+//   const request = {
+//     address: "950 I Street, Sacramento, CA",
+//     outFields: '*',
+//     f: 'pjson',
+//     maxLocations: 10
+//   }
 
+//   const url =`https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${addressParameter}&outFields=*&f=pjson&maxLocations=10`;
+//   try {
+//     const response = await axios.get(url, JSON.stringify(request));
+//     const candidates = response.candidates;
+//     for (const i of candidates) {
+//       const score = i.score;
+//       if (score > 80) {
+//         return i.address;
+//       }
+//     }
+//     if (candidates && candidates.length > 0) {
+//       const address = candidates[0].address;
+//       console.log(`Here is the address you requested: ${response.address}`);
+//       return address;
+//     } else {
+//       console.log("No candidates found for the given address.");
+//       return false;
+//     }
+//   } catch (error) {
+//     if (error.response.status === 403) {
+//       console.error('The user does not have an existing address.');
+//     }
+//     console.error(`Failed to find the address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+//     throw error;
+//   }
+// }
+// async function getAddress(address) {
+//   const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${address}&outFields=*&f=pjson&maxLocations=10`;
+//   try {
+//     const response = await axios.get(url);
+//     const candidates = response.data.candidates;
+//     let chosenCandidate = null;
+//     for (const candidate of candidates) {
+//       if (candidate.score > 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+//         chosenCandidate = candidate;
+//       }
+//     }
+//     return chosenCandidate ? chosenCandidate.address : false;
+//   } catch (error) {
+//     console.error(`Failed to find the address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+//     throw error;
+//   }
+// }
+
+
+async function getAddress(address) {
+  if (!address) {
+    throw new Error('Address parameter is required.');
+  }
+
+  const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${address}&outFields=*&f=pjson&maxLocations=10`;
+
+  try {
+    const response = await axios.get(url);
+    const candidates = response.data.candidates;
+    let chosenCandidate = null;
+    for (const candidate of candidates) {
+      if (candidate.score > 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+        chosenCandidate = candidate;
+      }
+    }
+    return chosenCandidate ? chosenCandidate.address : false;
+  } catch (error) {
+    console.error(`Failed to find the address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+    throw new Error(`Failed to find the address. ${error.message}`);
+  }
+}
 
 
 
@@ -92,23 +166,30 @@ const LaunchRequestHandler = {
     await attributesManager.savePersistentAttributes()           // and then save
     // END DYNAMODB TEST CODE //
 
+    const address = "950 I Street, Sacramento, CA";
+    const result = await getAddress(address);
+    console.log(result)
+
+    let speechOutput;
+    if (result) {
+      speechOutput = `Here is the address you requested: ${result}. `;
+    } else {
+      speechOutput = "No candidates found for the given address. ";
+    }
 
     // If we found the user's name in dynamodb, personalize the welcome message
     if (sessionAttributes.userFullName) {
-      return (
-        handlerInput.responseBuilder
-          .speak(handlerInput.t('PERSONALIZED_WELCOME_MSG', { name: sessionAttributes.userFullName })) // TODO: Trim last name
-          .reprompt(handlerInput.t('WELCOME_REPROMPT'))
-          .getResponse()
-      )
+      speechOutput += handlerInput.t('PERSONALIZED_WELCOME_MSG', { name: sessionAttributes.userFullName });
     } else {
-      return (
-        handlerInput.responseBuilder
-          .speak(handlerInput.t('WELCOME_MSG', { counter: counter })) // TODO: DynamoDB test counter is temporary
-          .reprompt(handlerInput.t('WELCOME_REPROMPT'))
-          .getResponse()
-      )
+      speechOutput += handlerInput.t('WELCOME_MSG', { counter: counter });
     }
+
+    return (
+      handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(handlerInput.t('WELCOME_REPROMPT'))
+        .getResponse()
+    )
   }
 }
 
@@ -427,6 +508,9 @@ const PersonalizationRequestInterceptor = {
       console.log('userFullName: ' + userFullName)
 
       // If no full name was in persistent attributes, get it from the API
+      
+      
+
       if (!userFullName) {
 
       // Axios config to set headers
