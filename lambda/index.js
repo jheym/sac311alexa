@@ -52,16 +52,11 @@ if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
   );
 }
 
-const languageStrings = require("./ns-common.json")
-const strayAnimal = require("./strayAnimal.js")
+const languageStrings = require("./helper/ns-common.json")
 const abandonedVehicle = require("./abandoned-vehicle.js")
-const potHole = require("./pothole.js")
-const petcomplaint = require("./petcomplaint.js")
 const homelessCamp = require("./homeless-encampment.js")
 const getLocation = require("./getLocation")
-const dirtyBathroom = require("./dirty-bathroom.js")
 const trashpickup = require("./trash-pickup.js")
-const liveAgent = require("./liveAgent.js")
 
 
 
@@ -493,7 +488,6 @@ if (!awsHostedEnv) {  // Running Locally
       getLocation.YesUseHomeAddressIntentHandler,
       getLocation.NoUseHomeAddressIntentHandler,
       getLocation.GetLocationHelperIntentHandler,
-      liveAgent.LiveAgentIntentHandler,
       abandonedVehicle.AbandonedVehicleIntentHandler,
       abandonedVehicle.YesAbandonedVehicleIntentHandler,
       abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
@@ -502,11 +496,7 @@ if (!awsHostedEnv) {  // Running Locally
       homelessCamp.HomelessCampIntentHandler,
       homelessCamp.YesHomelessCampIntentHandler,
       homelessCamp.NoHomelessCampIntentHandler,
-      potHole.PotHoleRequestHandler,
-      petcomplaint.petcomplaintHandler,
       trashpickup.TrashPickUpIntentHandler,
-      strayAnimal.strayAnimalHandler,
-      dirtyBathroom.dirtyBathroomHandler,
       YesRetryIntentHandler,
       NoRetryIntentHandler,
       FallbackIntentHandler,
@@ -548,7 +538,6 @@ if (!awsHostedEnv) {  // Running Locally
     getLocation.YesUseHomeAddressIntentHandler,
     getLocation.NoUseHomeAddressIntentHandler,
     getLocation.GetLocationHelperIntentHandler,
-    liveAgent.LiveAgentIntentHandler,
     abandonedVehicle.AbandonedVehicleIntentHandler,
     abandonedVehicle.YesAbandonedVehicleIntentHandler,
     abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
@@ -557,11 +546,7 @@ if (!awsHostedEnv) {  // Running Locally
     homelessCamp.HomelessCampIntentHandler,
     homelessCamp.YesHomelessCampIntentHandler,
     homelessCamp.NoHomelessCampIntentHandler,
-    potHole.PotHoleRequestHandler,
-    petcomplaint.petcomplaintHandler,
     trashpickup.TrashPickUpIntentHandler,
-    strayAnimal.strayAnimalHandler,
-    dirtyBathroom.dirtyBathroomHandler,
     YesRetryIntentHandler,
     NoRetryIntentHandler,
     FallbackIntentHandler,

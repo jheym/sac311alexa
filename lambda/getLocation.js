@@ -1,6 +1,6 @@
 const Alexa = require('ask-sdk-core')
 const index = require('./index.js') // TODO: Can we just import the setQuestion function so we don't need to write index.setQuestion?
-const format = require('./formatAddress.js')
+const format = require('./helper/formatAddress.js')
 /**
  * This file handles the entire GetLocation conversation flow. Most of the logic
  * is in GetLocationIntentHandler, while the GetLocationIntentInterceptor is
