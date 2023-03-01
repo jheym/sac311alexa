@@ -1,5 +1,6 @@
 const Alexa = require('ask-sdk-core')
-const index = require('./index.js') // TODO: Can we just import the setQuestion function so we don't need to write index.setQuestion?
+const axios = require('axios');
+const helper = require("./helper/helperFunctions.js")
 const format = require('./helper/formatAddress.js')
 /**
  * This file handles the entire GetLocation conversation flow. Most of the logic
@@ -31,8 +32,8 @@ const GetLocationIntentHandler = {
       // If we found a geolocation and the user has not been prompted yet
       if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
         var speakOutput = 'Do you want to use your current location?'
-        index.setQuestion(handlerInput, null)
-        index.setQuestion(handlerInput, 'UseCurrentLocation?')
+        helper.setQuestion(handlerInput, null)
+        helper.setQuestion(handlerInput, 'UseCurrentLocation?')
         return responseBuilder
           .speak(speakOutput)
           .withShouldEndSession(false)
@@ -40,8 +41,8 @@ const GetLocationIntentHandler = {
       } else if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
       // If we found an address and the user has not been prompted yet
         var speakOutput = 'Do you want to use your home address?'
-        index.setQuestion(handlerInput, null)
-        index.setQuestion(handlerInput, 'UseHomeAddress?')
+        helper.setQuestion(handlerInput, null)
+        helper.setQuestion(handlerInput, 'UseHomeAddress?')
         return responseBuilder
           .speak(speakOutput)
           .withShouldEndSession(false)
@@ -115,6 +116,14 @@ const GetLocationIntentHandler = {
   },
 }
 
+
+
+
+
+
+
+
+
 /**
  * If the user says yes to using their current location, delegate their location
  * back to getLocation intent
@@ -131,7 +140,7 @@ const YesUseCurrentLocationIntentHandler = {
     const { responseBuilder, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
     var location = sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation
-    index.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, null)
     // TODO: What happens if geolocation is null?
 
     return (
@@ -168,11 +177,11 @@ const NoUseCurrentLocationIntentHandler = {
   handle(handlerInput) {
     const { responseBuilder, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
-    index.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, null)
 
     // If there's a home address
     if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
-      index.setQuestion(handlerInput, 'UseHomeAddress?')
+      helper.setQuestion(handlerInput, 'UseHomeAddress?')
       return responseBuilder
         .speak('Do you want to use your home address?')
         .withShouldEndSession(false)
@@ -212,7 +221,7 @@ const YesUseHomeAddressIntentHandler = {
   handle(handlerInput) {
     const { responseBuilder, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
-    index.setQuestion(handlerInput, null)
+    helper.setQuestion(handlerInput, null)
     console.log(sessionAttributes.questionAsked) 
     
     var address = sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc &&
@@ -475,8 +484,8 @@ const GetLocationRequestInterceptor = {
   // response.reprompt.outputSpeech = {}
   // response.reprompt.outputSpeech.type = "PlainText"
   // response.reprompt.outputSpeech.text = "Would you like to use your current location for the address of your report?"
-  // index.setQuestion(handlerInput, null)
-  // index.setQuestion(handlerInput, 'UseCurrentLocation')
+  // helper.setQuestion(handlerInput, null)
+  // helper.setQuestion(handlerInput, 'UseCurrentLocation')
 // }
 
 
@@ -489,4 +498,5 @@ module.exports = {
   GetLocationHelperIntentHandler,
   // DelegateToGetLocationResponseInterceptor,
   GetLocationRequestInterceptor,
+  
 }

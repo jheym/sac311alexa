@@ -75,8 +75,8 @@ function parseAddress(input){
       }
     }
 //Test input 
-let addy = formatInput("100 I ST Sacramento CA 94203");
-parseAddress(addy);
+//let addy = formatInput("100 I ST Sacramento CA 94203");
+//parseAddress(addy);
 
 
 
