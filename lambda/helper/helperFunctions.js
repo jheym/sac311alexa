@@ -8,6 +8,17 @@ function setQuestion(handlerInput, questionAsked) {
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
 
+/*
+ * Function to clear slots of an intent after submitting ticket
+ * Example call in Abandoned vehicle, after output statement is created, before it is returned.
+ * call with: 
+ * index.clearSlots(handlerInput, requestEnvelope.request.intent)
+ */
+function clearSlots(handlerInput, currentIntent) {
+  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  delete sessionAttributes[currentIntent.name];
+}
+
 /**
  * Gets the highest scoring address candidate from the ArcGIS world geocoder.
  * The returned address will be used to query the sac311gis API for more details.
@@ -40,5 +51,6 @@ async function getAddressCandidate(address) {
 
 module.exports = {
   setQuestion,
+  clearSlots,
   getAddressCandidate
 }
