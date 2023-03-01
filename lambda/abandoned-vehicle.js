@@ -110,6 +110,8 @@ const AbandonedVehicleIntentHandler = {
         var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color');
         var location = sessionAttributes.confirmedLocation;
         speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS',{color: `${color}`, make: `${make}`, model: `${model}`, location: `${location}`})
+
+        index.clearSlots(handlerInput, requestEnvelope.request.intent) //clear the slots
         //TODO: Set question for "anything else?" 
         return responseBuilder
           .speak(speakOutput)

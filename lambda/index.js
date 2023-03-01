@@ -1,6 +1,6 @@
 /* *
  * 🚨 This is the main file for the Sacramento 311 Alexa Skill 📞
- * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alexa Carrell, Ethan Borg, 
+ * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alex Carrell, Ethan Borg, 
  * Humayoon Rafei, and Justin Heyman
  * Team Dinosaur Game 💪
  * */
@@ -474,6 +474,16 @@ function setQuestion(handlerInput, questionAsked) {
   sessionAttributes.questionAsked = questionAsked;
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
+/*
+ * Function to clear slots of an intent after submitting ticket
+ * Example call in Abandoned vehicle, after output statement is created, before it is returned.
+ * call with: 
+ * index.clearSlots(handlerInput, requestEnvelope.request.intent)
+ */
+function clearSlots(handlerInput, currentIntent) {
+  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  delete sessionAttributes[currentIntent.name];
+}
 
 /**
  * This handler acts as the entry point for your skill, routing all request and response
@@ -596,3 +606,4 @@ if (!awsHostedEnv) {  // Running Locally
 
 // Custom Exports
 exports.setQuestion = setQuestion
+exports.clearSlots = clearSlots
