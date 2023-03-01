@@ -1,6 +1,6 @@
 const Alexa = require('ask-sdk-core')
 const index = require('./index.js') // TODO: Can we just import the setQuestion function so we don't need to write index.setQuestion?
-
+const format = require('./formatAddress.js')
 /**
  * This file handles the entire GetLocation conversation flow. Most of the logic
  * is in GetLocationIntentHandler, while the GetLocationIntentInterceptor is
@@ -292,11 +292,12 @@ const GetLocationHelperIntentHandler = {
     if (Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation') &&
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'NONE') {
       console.log('confirmationStatus is NONE')
-      let location = Alexa.getSlotValue(requestEnvelope, 'helperLocation');
+      const addy= Alexa.getSlotValue(requestEnvelope, 'helperLocation');
+      const location = format.formatInput(addy);
       return responseBuilder
         .addConfirmSlotDirective('helperLocation')
-        .speak(`Is the location near ${location}?`)
-        .reprompt(`Is the location near ${location}?`)
+        .speak(`<speak>Is the location near <say-as interpret-as="address">${location}</say-as>?</speak>`)
+        .reprompt(`<speak>Is the location near <say-as interpret-as="address">${location}</say-as>?</speak>`)
         .getResponse();
     }
 
@@ -322,7 +323,8 @@ const GetLocationHelperIntentHandler = {
     if (Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation') &&
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'CONFIRMED') {
       console.log('confirmationStatus is CONFIRMED')
-      let location = Alexa.getSlotValue(requestEnvelope, 'helperLocation')
+      let addy = Alexa.getSlotValue(requestEnvelope, 'helperLocation')
+      let location = format.formatInput(addy);
       return responseBuilder
         .addDelegateDirective({
           name: 'GetLocationIntent',
