@@ -55,6 +55,10 @@ async function getAddressCandidate(address) {
    * @param {float} longitude 
    * @returns 
    */
+
+  //FIXME: Mico - Reverse geocode is giving apartment numbers. Let's try messing
+  //with the url params a bit more to see if we can get a better type of
+  //address.
   async function reverseGeocode(latitude, longitude) {
     const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
   
@@ -63,7 +67,7 @@ async function getAddressCandidate(address) {
       console.log("Response:", response);
       const result = response.data;
       console.log("Result:", result);
-      const address = result?.address?.Match_addr || false;
+      const address = result.address.Match_addr || false; // Is Match_addr the correct address to use?
       console.log("Address:", address);
       return address;
     } catch (error) {

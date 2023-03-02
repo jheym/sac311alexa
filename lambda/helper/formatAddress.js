@@ -28,7 +28,8 @@ function formatInput(input){
         "parkway" : "PKWY",
         "highway" : "HWY",
         "square" : "SQ",
-        "way" : "WAY",  
+        "way" : "WAY",
+        "&" : "and",  
     };
         
     
