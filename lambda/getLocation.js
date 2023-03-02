@@ -29,25 +29,33 @@ const GetLocationIntentHandler = {
     
     // If the location slot is empty.
     if (!Alexa.getSlotValue(requestEnvelope, 'location')) {
+      
       // If we found a geolocation and the user has not been prompted yet
       if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
-        var speakOutput = 'Do you want to use your current location?'
+        var speakOutput = 'Do you want to use your current location for the report?'
         helper.setQuestion(handlerInput, null)
         helper.setQuestion(handlerInput, 'UseCurrentLocation?')
         return responseBuilder
           .speak(speakOutput)
           .withShouldEndSession(false)
           .getResponse();
-      } else if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
-      // If we found an address and the user has not been prompted yet
-        var speakOutput = 'Do you want to use your home address?'
-        helper.setQuestion(handlerInput, null)
-        helper.setQuestion(handlerInput, 'UseHomeAddress?')
-        return responseBuilder
-          .speak(speakOutput)
-          .withShouldEndSession(false)
-          .getResponse();
-      } else {
+      }
+
+      // I'm disabling home address stuff for now. It's confusing for the user imo and would be
+      // hard to implement on a case by case basis. - Justin
+
+      // else if (sessionAttributes.GetLocation && (homeAddress = sessionAttributes.GetLocation.asc)) {
+      // // If we found an address and the user has not been prompted yet
+      //   var speakOutput = 'Would you like us to use your home address as the location for your report?'
+      //   helper.setQuestion(handlerInput, null)
+      //   helper.setQuestion(handlerInput, 'UseHomeAddress?')
+      //   return responseBuilder
+      //     .speak(speakOutput)
+      //     .withShouldEndSession(false)
+      //     .getResponse();
+      // } 
+      
+      else {
         // If no address or geolocation were available from from the user, delegate to the GetLocationHelperIntent
         return responseBuilder
           .speak("What's the location?")
@@ -62,66 +70,55 @@ const GetLocationIntentHandler = {
             }
           })
           .getResponse();
-      }
-
-
-     
-    } else {
-      // If the location slot is filled but unconfirmed.
-      if (Alexa.getSlot(requestEnvelope, 'location') &&
-        Alexa.getSlot(requestEnvelope, 'location').confirmationStatus !== 'CONFIRMED') {
-        console.log('The location slot is filled but unconfirmed')
-        let location = Alexa.getSlotValue(requestEnvelope, 'location')
-        console.log("location: " + location)
-        return responseBuilder
-          .addDelegateDirective({
-            name: 'GetLocationHelperIntent',
-            confirmationStatus: 'NONE',
-            slots: {
-              helperLocation: {
-                name: 'helperLocation',
-                value: location, // FIXME: This doesn't work because it is filling the only slot it needs to delegate for
-                confirmationStatus: 'NONE'
-              }
-            }
-          })
-          .getResponse();
-          
-      }
-
-      // If the location slot is filled and confirmed.
-      if (Alexa.getSlot(requestEnvelope, 'location') &&
-        Alexa.getSlot(requestEnvelope, 'location').confirmationStatus === 'CONFIRMED') {
-        // It is up to the original intent to add this confirmedAddress to its
-        // own address slot, if necessary.
-        sessionAttributes.confirmedLocation = Alexa.getSlotValue(requestEnvelope, 'location')
-        const reasonForCalling = sessionAttributes.reasonForCalling
-        let tempSlots = sessionAttributes[reasonForCalling].slots
-        attributesManager.setSessionAttributes(sessionAttributes)
-        // FIXME: If all slots are filled in initial intent, this fails for
-        // some reason? UPDATE: The workaround was to add an intent
-        // confirmation in the dialog model. Is this the only way?
-        return (
-          handlerInput.responseBuilder
-            .addDelegateDirective({
-              name: reasonForCalling,
-              confirmationStatus: 'NONE',
-              slots: tempSlots
-            })
-            .withShouldEndSession(false)
-            .getResponse()
-        );
-      }
+        }
     }
-  },
+      
+    // If the location slot is filled but unconfirmed.
+    if (Alexa.getSlot(requestEnvelope, 'location') &&
+      Alexa.getSlot(requestEnvelope, 'location').confirmationStatus !== 'CONFIRMED') {
+      console.log('The location slot is filled but unconfirmed')
+      let location = Alexa.getSlotValue(requestEnvelope, 'location')
+      console.log("location: " + location)
+      return responseBuilder
+        .addDelegateDirective({
+          name: 'GetLocationHelperIntent',
+          confirmationStatus: 'NONE',
+          slots: {
+            helperLocation: {
+              name: 'helperLocation',
+              value: location,
+              confirmationStatus: 'NONE'
+            }
+          }
+        })
+        .getResponse();
+    }
+
+    // If the location slot is filled and confirmed.
+    if (Alexa.getSlot(requestEnvelope, 'location') &&
+      Alexa.getSlot(requestEnvelope, 'location').confirmationStatus === 'CONFIRMED') {
+      // It is up to the original intent to add this confirmedAddress to its
+      // own address slot, if necessary.
+      sessionAttributes.confirmedLocation = Alexa.getSlotValue(requestEnvelope, 'location')
+      const reasonForCalling = sessionAttributes.reasonForCalling
+      let tempSlots = sessionAttributes[reasonForCalling].slots
+      attributesManager.setSessionAttributes(sessionAttributes)
+      // FIXME: If all slots are filled in initial intent, this fails for
+      // some reason? UPDATE: The workaround was to add an intent
+      // confirmation in the dialog model. Is this the only way?
+      return (
+        handlerInput.responseBuilder
+          .addDelegateDirective({
+            name: reasonForCalling,
+            confirmationStatus: 'NONE',
+            slots: tempSlots
+          })
+          .withShouldEndSession(false)
+          .getResponse()
+      );
+    }
+  }
 }
-
-
-
-
-
-
-
 
 
 /**
@@ -136,28 +133,47 @@ const YesUseCurrentLocationIntentHandler = {
       && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'UseCurrentLocation?'
     )
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const { responseBuilder, attributesManager } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
     var location = sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation
     helper.setQuestion(handlerInput, null)
-    // TODO: What happens if geolocation is null?
 
-    return (
-      responseBuilder
+    const latitude = location.coordinate.latitudeInDegrees;
+    const longitude = location.coordinate.longitudeInDegrees;
+    let worldAddress = null;
+    if (worldAddress = await helper.reverseGeocode(latitude, longitude)) {
+      return (
+        responseBuilder
+          .addDelegateDirective({
+            name: 'GetLocationIntent',
+            confirmationStatus: 'NONE',
+            slots: {
+              location: {
+                name: 'location',
+                value: worldAddress,
+                confirmationStatus: 'NONE' // No need to have user confirm their geolocation coordinates
+              }
+            }
+          })
+          .getResponse()
+      )
+    } else {
+      const speakOutput = 'There was an issue retrieving your geolocation. Can you please tell me your location?'
+      return responseBuilder
+        .speak(speakOutput)
         .addDelegateDirective({
-          name: 'GetLocationIntent',
+          name: 'GetLocationHelperIntent',
           confirmationStatus: 'NONE',
           slots: {
-            location: {
-              name: 'location',
-              value: location.coordinate.latitudeInDegrees + ' ' + location.coordinate.longitudeInDegrees,
-              confirmationStatus: 'CONFIRMED' // No need to have user confirm their geolocation coordinates
+            helperLocation: {
+              name: 'helperLocation',
+              confirmationStatus: 'NONE'
             }
           }
-        })
         .getResponse()
-    )
+        }) 
+      }
   }
 }
 
@@ -210,75 +226,81 @@ const NoUseCurrentLocationIntentHandler = {
 /**
  * If the user says yes to using their home address, delegate their address back to getLocation intent
  */
-const YesUseHomeAddressIntentHandler = {
-  canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'UseHomeAddress?'
-    )
-  },
-  handle(handlerInput) {
-    const { responseBuilder, attributesManager } = handlerInput
-    const sessionAttributes = attributesManager.getSessionAttributes()
-    helper.setQuestion(handlerInput, null)
-    console.log(sessionAttributes.questionAsked) 
+// const YesUseHomeAddressIntentHandler = {
+//   canHandle(handlerInput) {
+//     return (
+//       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+//       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent'
+//       && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'UseHomeAddress?'
+//     )
+//   },
+//   handle(handlerInput) {
+//     const { responseBuilder, attributesManager, requestEnvelope } = handlerInput
+//     const sessionAttributes = attributesManager.getSessionAttributes()
+//     helper.setQuestion(handlerInput, null)
+//     console.log(sessionAttributes.questionAsked) 
     
-    var address = sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc &&
-      sessionAttributes.GetLocation.asc.address;
-    var postalCode = sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc &&
-      sessionAttributes.GetLocation.asc.postalCode;
-    console.log(address + ' ' + postalCode)
-    let location = address + ' ' + postalCode
+//     var address = sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc &&
+//       sessionAttributes.GetLocation.asc.address;
+//     var postalCode = sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc &&
+//       sessionAttributes.GetLocation.asc.postalCode;
+//     console.log(address + ' ' + postalCode)
+//     let location = address + ' ' + postalCode
 
     
-    // TODO: What happens if locationObj is null?
+//     // TODO: What happens if locationObj is null?
+
+//     if (requestEnvelope.request.intent.confirmationStatus === 'NONE') {
+//       return responseBuilder
+//         .speak('Do you want to use ' + location + '?')
+//         .withShouldEndSession(false)
+//         .getResponse();
+//     }
+
+//     return responseBuilder
+//       .addDelegateDirective({
+//         name: 'GetLocationIntent',
+//         confirmationStatus: 'NONE',
+//         slots: {
+//           location: {
+//             name: 'location',
+//             value: location,
+//             confirmationStatus: 'CONFIRMED'
+//           }
+//         }
+//       })
+//       .getResponse();
+//   }
+// }
 
 
-    return responseBuilder
-      .addDelegateDirective({
-        name: 'GetLocationIntent',
-        confirmationStatus: 'NONE',
-        slots: {
-          location: {
-            name: 'location',
-            value: location,
-            confirmationStatus: 'CONFIRMED'
-          }
-        }
-      })
-      .getResponse();
-  }
-}
-
-
-const NoUseHomeAddressIntentHandler = {
-  canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-      && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'UseHomeAddress?'
-    )
-  },
-  handle(handlerInput) {
-    return handlerInput.responseBuilder
-      .addDelegateDirective({
-        name: 'GetLocationHelperIntent',
-        confirmationStatus: 'NONE',
-        slots: {
-          helperLocation: {
-            name: 'helperLocation',
-            value: null,
-            confirmationStatus: 'NONE'
-          }
-        }
-      })
-      .speak("What's the location?")
-      .withShouldEndSession(false)
-      .reprompt('Reprompt')
-      .getResponse();
-  }
-}
+// const NoUseHomeAddressIntentHandler = {
+//   canHandle(handlerInput) {
+//     return (
+//       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+//       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
+//       && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'UseHomeAddress?'
+//     )
+//   },
+//   handle(handlerInput) {
+//     return handlerInput.responseBuilder
+//       .addDelegateDirective({
+//         name: 'GetLocationHelperIntent',
+//         confirmationStatus: 'NONE',
+//         slots: {
+//           helperLocation: {
+//             name: 'helperLocation',
+//             value: null,
+//             confirmationStatus: 'NONE'
+//           }
+//         }
+//       })
+//       .speak("What's the location?")
+//       .withShouldEndSession(false)
+//       .reprompt('Reprompt')
+//       .getResponse();
+//   }
+// }
 
 /**
  * This intent handler prompts the user for their location and confirms it.
@@ -295,21 +317,60 @@ const GetLocationHelperIntentHandler = {
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationHelperIntent'
     );
   },
-  handle(handlerInput) {
-    const { requestEnvelope, responseBuilder } = handlerInput
+  async handle(handlerInput) {
+    const { requestEnvelope, responseBuilder, attributesManager } = handlerInput
 
+    // If the user has not yet confirmed their location, ask them to confirm it
     if (Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation') &&
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'NONE') {
       console.log('confirmationStatus is NONE')
-      const addy= Alexa.getSlotValue(requestEnvelope, 'helperLocation');
-      const location = format.formatInput(addy);
-      return responseBuilder
+      const addy = format.formatInput(Alexa.getSlotValue(requestEnvelope, 'helperLocation'));
+      
+      let worldAddress;
+      
+      // FIXME: Rayman #DG-1xx
+      if (worldAddress = await helper.getAddressCandidate(addy)) {
+        console.log('worldAddress candidate was found: ' + format.formatInput(worldAddress))
+        return responseBuilder
         .addConfirmSlotDirective('helperLocation')
-        .speak(`<speak>Is the location near <say-as interpret-as="address">${location}</say-as>?</speak>`)
-        .reprompt(`<speak>Is the location near <say-as interpret-as="address">${location}</say-as>?</speak>`)
+        .speak(`<speak>Is the location near <say-as interpret-as="address">${worldAddress}</say-as>?</speak>`)
+        .reprompt(`<speak>Is the location near <say-as interpret-as="address">${worldAddress}</say-as>?</speak>`)
         .getResponse();
+      }
+      else {
+        const sessionAttributes = attributesManager.getSessionAttributes();
+        
+        // If the user has failed to provide a valid address 3 times, switch to live agent
+        if (sessionAttributes.AddressFailCounter > 2) {
+          console.log('Address collection has failed too many times. Switching to live agent.');
+          sessionAttributes.AddressFailCounter = 0;
+          attributesManager.setSessionAttributes(sessionAttributes);
+          helper.setQuestion('LiveAgent?');
+          return responseBuilder
+            .speak(`Apologies, we're having trouble finding your location. Would you like to speak to a live agent?`)
+            .getResponse();
+        }
+        
+        // If the user has failed to provide a valid address less than 3 times, ask them to try again
+        sessionAttributes.AddressFailCounter = sessionAttributes.AddressFailCounter ? sessionAttributes.AddressFailCounter + 1 : 1;
+        console.log('AddressFailCounter: ' + sessionAttributes.AddressFailCounter)
+        attributesManager.setSessionAttributes(sessionAttributes);
+        return responseBuilder
+        .addDelegateDirective({
+          name: 'GetLocationHelperIntent',
+          confirmationStatus: 'NONE',
+          slots: {
+            helperLocation: {
+              name: 'helperLocation',
+              value: null,
+              confirmationStatus: 'NONE'
+            }
+          }
+        })
+      }
     }
-
+    
+    // If the user has denied the location, ask them to try again
     if (Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation') &&
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'DENIED') {
       console.log('confirmationStatus is DENIED')
@@ -326,9 +387,11 @@ const GetLocationHelperIntentHandler = {
           }
         })
         .speak(`Let's try that again. What's the location?`)
+        .reprompt('Please provide an address or nearest cross streets.')
         .getResponse();
     }
 
+    // If the user has confirmed the location, delegate to the main intent
     if (Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation') &&
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'CONFIRMED') {
       console.log('confirmationStatus is CONFIRMED')
@@ -367,12 +430,9 @@ const GetLocationRequestInterceptor = {
       Alexa.getIntentName(requestEnvelope) === 'GetLocationIntent' &&
       !sessionAttributes.GetLocation) { // If the location has already been set, don't do anything
       
-      
       var isGeoSupported = requestEnvelope.context.System.device.supportedInterfaces.Geolocation;
       
       sessionAttributes.GetLocation = {};
-
-
 
       if (isGeoSupported) {
         if (requestEnvelope.context.Geolocation) {
@@ -381,32 +441,33 @@ const GetLocationRequestInterceptor = {
       }
 
       // Getting the home address associated with the user, if it exists. If there is no address,
-      try {
-        const { deviceId } = requestEnvelope.context.System.device;
-        const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
-        // This is why the function is async. We wait for a response from the
-        // serviceClient API before executing the next line of code. 
-        const address = await deviceAddressServiceClient.getFullAddress(deviceId);  // This is an API call to the ASC
+      // try {
+      //   const { deviceId } = requestEnvelope.context.System.device;
+      //   const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
+      //   // This is why the function is async. We wait for a response from the
+      //   // serviceClient API before executing the next line of code. 
+      //   const address = await deviceAddressServiceClient.getFullAddress(deviceId);  // This is an API call to the ASC
 
-        if (address.addressLine1 === null && address.stateOrRegion === null) {
-          console.log('The user does not have an address set.')
-        } else {
-          sessionAttributes.GetLocation.asc = {}
-          sessionAttributes.GetLocation.asc.address = address.addressLine1;
-          sessionAttributes.GetLocation.asc.stateOrRegion = address.stateOrRegion;
-          sessionAttributes.GetLocation.asc.postalCode = address.postalCode;
-          console.log('The address has been stored in session attributes.');
-          console.log(address);
-        }
-      } catch (error) {
-        if (error.name !== 'ServiceError') {
-          console.log('Something went wrong.')
-        }
-        // It's okay if this reports a 403. That just means the user has not
-        // enabled permissions. In that case, GetLocationIntentHandler will
-        // handle it.
-        console.log('There was a service error getting the address ~~~~~\n', error)
-      }
+      //   if (address.addressLine1 === null && address.stateOrRegion === null) {
+      //     console.log('The user does not have an address set.')
+      //   } else {
+      //     sessionAttributes.GetLocation.asc = {}
+      //     sessionAttributes.GetLocation.asc.address = address.addressLine1;
+      //     sessionAttributes.GetLocation.asc.stateOrRegion = address.stateOrRegion;
+      //     sessionAttributes.GetLocation.asc.postalCode = address.postalCode;
+      //     console.log('The address has been stored in session attributes.');
+      //     console.log(address);
+      //   }
+      // } catch (error) {
+      //   if (error.name !== 'ServiceError') {
+      //     console.log('Something went wrong.')
+      //   }
+      //   // It's okay if this reports a 403. That just means the user has not
+      //   // enabled permissions. In that case, GetLocationIntentHandler will
+      //   // handle it.
+      //   console.log('There was a service error getting the address ~~~~~\n', error)
+      // }
+
       attributesManager.setSessionAttributes(sessionAttributes);
     }
   }
@@ -493,8 +554,8 @@ module.exports = {
   GetLocationIntentHandler,
   YesUseCurrentLocationIntentHandler,
   NoUseCurrentLocationIntentHandler,
-  YesUseHomeAddressIntentHandler,
-  NoUseHomeAddressIntentHandler,
+  // YesUseHomeAddressIntentHandler,
+  // NoUseHomeAddressIntentHandler,
   GetLocationHelperIntentHandler,
   // DelegateToGetLocationResponseInterceptor,
   GetLocationRequestInterceptor,
