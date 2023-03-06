@@ -1,6 +1,49 @@
 const axios = require("axios")
 const Alexa = require("ask-sdk")
 
+
+/** //TODO: Get this working on a lambda environment
+ * This function gets an OAuth token for use with the Salesforce API.
+ * It returns a new token and should be used in every request to the Salesforce API.
+ * Be sure to have a valid .env file containing the following variables:
+ * SF_AUTH_URL, SF_USERNAME, SF_PASSWORD, SF_CLIENT_ID, SF_CLIENT_SECRET
+ * 
+ * @returns OAuth bearer token
+ */
+async function getOAuthToken() {
+  const res = await axios.post(process.env.SF_AUTH_URL, {
+    grant_type: "password",
+    username: process.env.SF_USERNAME,
+    password: process.env.SF_PASSWORD,
+    client_id: process.env.SF_CLIENT_ID,
+    client_secret: process.env.SF_CLIENT_SECRET
+  },
+  {
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+  });
+  return res.data.access_token;
+}
+
+/**
+ * This function should be able to make any query to the SF API. Just pass in
+ * the SOQL query you want to use and it will return the data, provided you
+ * formatted correctly.
+ * @param {string} query 
+ * @returns data from the query
+ */
+async function querySFDB(query) {
+  const sf_url = `https://saccity--qa.sandbox.my.salesforce.com/services/data/v57.0/query/?q=${query}`
+  const token = await getOAuthToken();
+  
+  const res = await axios.get(sf_url, { params: { q: query }, 
+    headers: { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/x-www-form-urlencoded' // This formats the query to be url encoded
+    } } )
+  return res.data;
+}
+
+
 // Stores the asked question in a session attribute for yes and no intent handlers
 function setQuestion(handlerInput, questionAsked) {
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
@@ -78,6 +121,8 @@ async function getWorldAddressCandidate(address) {
   }
 
 module.exports = {
+  getOAuthToken,
+  querySFDB,
   setQuestion,
   clearSlots,
   getWorldAddressCandidate,

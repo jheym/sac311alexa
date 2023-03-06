@@ -21,7 +21,6 @@ const getLocation = require("./getLocation")
 const trashpickup = require("./trash-pickup.js")
 
 
-
 /*****************************************************************************/
 /*                               INTENT HANDLERS                             */
 /*****************************************************************************/
@@ -56,6 +55,15 @@ const LaunchRequestHandler = {
     attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
     await attributesManager.savePersistentAttributes(); // and then save
     // END DYNAMODB TEST CODE //
+    
+    // // Query SFDB TEST CODE //
+    // // This is an example of making a query to the Salesforce database. 
+    // const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
+    //   LastName='mouse') LIMIT 5`;
+    // const contactDetails = await helper.querySFDB(query);
+    // console.log('Name: ' + contactDetails.records[0].Name);
+    // console.log('Phone: ' + contactDetails.records[0].Phone)
+    // // END QUERY SFDB TEST CODE //
     
     speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 
