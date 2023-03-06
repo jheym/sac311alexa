@@ -8,7 +8,7 @@ function setQuestion(handlerInput, questionAsked) {
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
 
-/*
+/** 
  * Function to clear slots of an intent after submitting ticket
  * Example call in Abandoned vehicle, after output statement is created, before it is returned.
  * call with: 
@@ -30,7 +30,8 @@ async function getAddressCandidate(address) {
     if (!address) {
       throw new Error('Address parameter is required.');
     }
-  
+    
+    // Put URL in a map
     const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${address}&outFields=*&f=pjson&maxLocations=10`;
   
     try {
@@ -67,7 +68,7 @@ async function getAddressCandidate(address) {
       console.log("Response:", response);
       const result = response.data;
       console.log("Result:", result);
-      const address = result.address.Match_addr || false; // Is Match_addr the correct address to use?
+      const address = result.address.Address || false; // Will this err is no address field?
       console.log("Address:", address);
       return address;
     } catch (error) {

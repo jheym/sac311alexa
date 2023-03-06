@@ -15,52 +15,50 @@ const AbandonedVehicleIntentHandler = {
     const { attributesManager, requestEnvelope, responseBuilder } = handlerInput
     const currentIntent = requestEnvelope.request.intent;
     const sessionAttributes = attributesManager.getSessionAttributes()
-    if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)['Alexa.Presentation.APL'])
     
-    {
-      console.log("The user's device supports APL");
-    
-      handlerInput.responseBuilder.addDirective({
-      "type": "Alexa.Presentation.APL.RenderDocument",
-      "token": "documentToken",
-      "document": {
-          "src": "doc://alexa/apl/documents/QuickResponse",
-          "type": "Link"
-      },
-      "datasources": {
-          "multipleChoiceTemplateData": {
-              "type": "object",
-              "properties": {
-                  "backgroundImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png",
-                  "titleText": "311",
-                  "primaryText": "Just to confirm, are you reporting an abandoned vehicle?",
-                  "choices": [
-                      "Yes ",
-                      "No"
-                  ],
-                  "choiceListType": "none",
-                  "headerAttributionImage": "311",
-                  "footerHintText": ""
-              }
-          }
-      }
-    
-    });
-  }
-  else {
-    // Just log the fact that the device doesn't support APL.
-    // In a real skill, you might provide different speech to the user.
-    console.log("The user's device doesn't support APL. Retest on a device with a screen")
-}
-
     if (Alexa.getDialogState(requestEnvelope) === "STARTED") {
       helper.setQuestion(handlerInput, null);
       helper.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
       const speakOutput = handlerInput.t("ABANDONED_VEHICLE_CONFIRMATION")
-      return responseBuilder
-        .withShouldEndSession(false)
-        .speak(speakOutput)
-        .getResponse();
+
+      // Check if the device supports APL
+      if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)['Alexa.Presentation.APL']) {
+        console.log("The user's device supports APL");
+        
+        responseBuilder.addDirective({ // Don't need handlerInput.responseBuilder because resonseBuilder is already defined above
+        "type": "Alexa.Presentation.APL.RenderDocument",
+        "token": "documentToken", // Change this to something unique and informative
+        "document": {
+            "src": "doc://alexa/apl/documents/QuickResponse",
+            "type": "Link"
+        },
+        "datasources": {
+            "multipleChoiceTemplateData": {
+                "type": "object",
+                "properties": {
+                    "backgroundImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png",
+                    "titleText": "311",
+                    "primaryText": speakOutput, // use speakOutput variable here
+                    "choices": [
+                        "Yes ",
+                        "No"
+                    ],
+                    "choiceListType": "none",
+                    "headerAttributionImage": "311",
+                    "footerHintText": ""
+                }
+            }
+          }
+        });
+      } else {
+        // The device does not support APL
+        console.log("The user's device does not support APL");
+      }
+      
+      return responseBuilder 
+      .withShouldEndSession(false)
+      .speak(speakOutput)
+      .getResponse();
     }
 
     // if (Alexa.getDialogState(requestEnvelope) === 'COMPLETED') {
