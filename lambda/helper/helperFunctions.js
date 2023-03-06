@@ -26,7 +26,7 @@ function clearSlots(handlerInput, currentIntent) {
  * @param {string} address 
  * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
  */
-async function getAddressCandidate(address) {
+async function getWorldAddressCandidate(address) {
     if (!address) {
       throw new Error('Address parameter is required.');
     }
@@ -43,7 +43,7 @@ async function getAddressCandidate(address) {
           chosenCandidate = candidate;
         }
       }
-      return chosenCandidate ? chosenCandidate.address : false;
+      return chosenCandidate ? chosenCandidate : false;
     } catch (error) {
       console.error(`Failed to find the address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
       throw new Error(`Failed to find the address. ${error.message}`);
@@ -80,6 +80,6 @@ async function getAddressCandidate(address) {
 module.exports = {
   setQuestion,
   clearSlots,
-  getAddressCandidate,
+  getWorldAddressCandidate,
   reverseGeocode
 }

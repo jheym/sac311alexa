@@ -15,6 +15,7 @@
             "ERROR_MSG": "Sorry, I had trouble doing what you asked. Please try again.",
             "UNKNOWN_MSG": "Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.",
             "UNKNOWN_MSG_REPROMPT": "I'm still here. Do you want to try reporting your issue again?",
+            "INTENT_REFLECTOR": "You just triggered {{intentName}}",
             "GENERIC_REPROMPT": "Reprompt",
             "GOODBYE_MSG": "Goodbye!",
             "LIVEAGENT_CONFIRM": "Calling customer service",
@@ -32,11 +33,15 @@
   
             "LOCATION_GET_ADDRESS": "What is the address of the incident you are reporting?",
             "LOCATION_GET_LOCATION": "What's the location?",
-            "LOCATION_USE_CURRENT": "Do you want to use your current location?",
-            "LOCATION_USE_HOME": "Do you want to use your home address?",
+            "LOCATION_USE_CURRENT": "Do you want to use your current location for the report?",
+            "LOCATION_USE_HOME": "Would you like us to use your home address as the location for your report?",
+            "LOCATION_GEO_ISSUE": "There was an issue retrieving your geolocation. Can you please tell me your location?",
             "LOCATION_CONFIRM": "Is the location near {{location}}?",
-            "LOCATION_RETRY": "Let's try that again. What's the location?"
-      }
+            "LOCATION_RETRY": "Let's try that again. What's the location?",
+            "LOCATION_RETRY_REPROMPT": "Please provide an address or nearest cross streets.",
+            "LOCATION_RETRY_REDIRECT": "Apologies, we're having trouble finding your location. Would you like to speak to a live agent?",
+            "LOCATION_REPEAT_ADDRESS": "<speak>Is the location near <say-as interpret-as='address'>{{worldAddress}}</say-as>?</speak>"
+        }
     },
     "es": {
         "translation": {

@@ -32,11 +32,10 @@ const GetLocationIntentHandler = {
       
       // If we found a geolocation and the user has not been prompted yet
       if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.Geolocation) {
-        var speakOutput = 'Do you want to use your current location for the report?'
         helper.setQuestion(handlerInput, null)
         helper.setQuestion(handlerInput, 'UseCurrentLocation?')
         return responseBuilder
-          .speak(speakOutput)
+          .speak(handlerInput.t("LOCATION_USE_CURRENT"))
           .withShouldEndSession(false)
           .getResponse();
       }
@@ -46,11 +45,10 @@ const GetLocationIntentHandler = {
 
       // else if (sessionAttributes.GetLocation && (homeAddress = sessionAttributes.GetLocation.asc)) {
       // // If we found an address and the user has not been prompted yet
-      //   var speakOutput = 'Would you like us to use your home address as the location for your report?'
       //   helper.setQuestion(handlerInput, null)
       //   helper.setQuestion(handlerInput, 'UseHomeAddress?')
       //   return responseBuilder
-      //     .speak(speakOutput)
+      //     .speak(handlerInput.t("LOCATION_USE_HOME"))
       //     .withShouldEndSession(false)
       //     .getResponse();
       // } 
@@ -58,7 +56,7 @@ const GetLocationIntentHandler = {
       else {
         // If no address or geolocation were available from from the user, delegate to the GetLocationHelperIntent
         return responseBuilder
-          .speak("What's the location?")
+          .speak(handlerInput.t("LOCATION_GET_LOCATION"))
           .addDelegateDirective({
             name: 'GetLocationHelperIntent',
             confirmationStatus: 'NONE',
@@ -159,9 +157,8 @@ const YesUseCurrentLocationIntentHandler = {
           .getResponse()
       )
     } else {
-      const speakOutput = 'There was an issue retrieving your geolocation. Can you please tell me your location?'
       return responseBuilder
-        .speak(speakOutput)
+        .speak(handlerInput.t("LOCATION_GEO_ISSUE"))
         .addDelegateDirective({
           name: 'GetLocationHelperIntent',
           confirmationStatus: 'NONE',
@@ -199,7 +196,7 @@ const NoUseCurrentLocationIntentHandler = {
     if (sessionAttributes.GetLocation && sessionAttributes.GetLocation.asc) {
       helper.setQuestion(handlerInput, 'UseHomeAddress?')
       return responseBuilder
-        .speak('Do you want to use your home address?')
+        .speak(handlerInput.t("LOCATION_USE_HOME"))
         .withShouldEndSession(false)
         .getResponse();
     } else {
@@ -215,9 +212,9 @@ const NoUseCurrentLocationIntentHandler = {
             }
           }
         })
-        .speak("What's the location?")
+        .speak(handlerInput.t("LOCATION_GET_LOCATION"))
         .withShouldEndSession(false)
-        .reprompt('Reprompt')
+        .reprompt(handlerInput.t("GENERIC_REPROMPT"))
         .getResponse();
     }
   },
@@ -295,9 +292,9 @@ const NoUseCurrentLocationIntentHandler = {
 //           }
 //         }
 //       })
-//       .speak("What's the location?")
+//       .speak(handlerInput.t("LOCATION_GET_LOCATION"))
 //       .withShouldEndSession(false)
-//       .reprompt('Reprompt')
+//       .reprompt(handlerInput.t("GENERIC_REPROMPT"))
 //       .getResponse();
 //   }
 // }
@@ -325,16 +322,15 @@ const GetLocationHelperIntentHandler = {
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'NONE') {
       console.log('confirmationStatus is NONE')
       const addy = format.formatInput(Alexa.getSlotValue(requestEnvelope, 'helperLocation'));
+      let worldAddressCandidate;
       
-      let worldAddress;
-      
-      // FIXME: Rayman #DG-1xx
-      if (worldAddress = await helper.getAddressCandidate(addy)) {
-        console.log('worldAddress candidate was found: ' + format.formatInput(worldAddress))
+      if (worldAddressCandidate = await helper.getWorldAddressCandidate(addy)) {
+        console.log(worldAddressCandidate)
+        //console.log('worldAddress candidate was found: ' + format.formatInput(worldAddressCandidate.address))
         return responseBuilder
         .addConfirmSlotDirective('helperLocation')
-        .speak(`<speak>Is the location near <say-as interpret-as="address">${worldAddress}</say-as>?</speak>`)
-        .reprompt(`<speak>Is the location near <say-as interpret-as="address">${worldAddress}</say-as>?</speak>`)
+        .speak(handlerInput.t("LOCATION_REPEAT_ADDRESS",{worldAddress: worldAddressCandidate.address}))
+        .reprompt(handlerInput.t("LOCATION_REPEAT_ADDRESS",{worldAddress: worldAddressCandidate.address}))
         .getResponse();
       }
       else {
@@ -347,7 +343,7 @@ const GetLocationHelperIntentHandler = {
           attributesManager.setSessionAttributes(sessionAttributes);
           helper.setQuestion('LiveAgent?');
           return responseBuilder
-            .speak(`Apologies, we're having trouble finding your location. Would you like to speak to a live agent?`)
+            .speak(handlerInput.t("LOCATION_RETRY_REDIRECT"))
             .getResponse();
         }
         
@@ -386,8 +382,8 @@ const GetLocationHelperIntentHandler = {
             }
           }
         })
-        .speak(`Let's try that again. What's the location?`)
-        .reprompt('Please provide an address or nearest cross streets.')
+        .speak(handlerInput.t("LOCATION_RETRY"))
+        .reprompt(handlerInput.t("LOCATION_RETRY_REPROMPT"))
         .getResponse();
     }
 

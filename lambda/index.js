@@ -1,6 +1,6 @@
 /* *
  * 🚨 This is the main file for the Sacramento 311 Alexa Skill 📞
- * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alexa Carrell, Ethan Borg,
+ * Written by Andy Chung, Rayman Thandi, Ronald Her, Mico Barcelona, Alex Carrell, Ethan Borg,
  * Humayoon Rafei, and Justin Heyman
  * Team Dinosaur Game 💪
  * */
@@ -251,12 +251,9 @@ const IntentReflectorHandler = {
     );
   },
   handle(handlerInput) {
-    const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
-    const speakOutput = `You just triggered ${intentName}`;
-
     return (
       handlerInput.responseBuilder
-        .speak(speakOutput)
+        .speak(handlerInput.t('INTENT_REFLECTOR',{intentName: Alexa.getIntentName(handlerInput.requestEnvelope)}))
         //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
         .getResponse()
     );
@@ -372,8 +369,8 @@ const DelegateDirectiveResponseInterceptor = {
 
 /**
  * This interceptor is responsible for initializing the i18n
- * (internationalization) library and setting up the translation functions for
- * the handlerInput object.
+ * (internationalization) library and binds the translation function
+ * to the handlerInput object.
  */
 const LocalisationRequestInterceptor = {
   //add new Strings and keys to ns-common.json
