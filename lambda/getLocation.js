@@ -1,5 +1,4 @@
 const Alexa = require('ask-sdk-core')
-const axios = require('axios');
 const helper = require("./helper/helperFunctions.js")
 const format = require('./helper/formatAddress.js')
 /**
@@ -11,7 +10,6 @@ const format = require('./helper/formatAddress.js')
  * For the location conversation flow design, refer to the link below:
  * https://lucid.app/lucidchart/d73b0879-d985-45df-8ce2-64a717c08ee9/edit?invitationId=inv_9bbd682a-2890-42f8-ab2f-9d018da6e42e
  */
-
 
 /**
  * Uses any collected locations or hands the user off to getLocationHelper if none are found
@@ -322,15 +320,16 @@ const GetLocationHelperIntentHandler = {
       Alexa.getSlot(handlerInput.requestEnvelope, 'helperLocation').confirmationStatus === 'NONE') {
       console.log('confirmationStatus is NONE')
       const addy = format.formatInput(Alexa.getSlotValue(requestEnvelope, 'helperLocation'));
-      let worldAddressCandidate;
-      
-      if (worldAddressCandidate = await helper.getWorldAddressCandidate(addy)) {
-        console.log(worldAddressCandidate)
-        //console.log('worldAddress candidate was found: ' + format.formatInput(worldAddressCandidate.address))
+      let addressCandidate;
+
+      //get a candidate from world gis to compare against local gis. returns false if no suitable address
+      if (addressCandidate = await helper.getInternalAddressCandidate(await helper.getWorldAddressCandidate(addy))) {
+        console.log(addressCandidate)
+        //console.log('addressCandidate was found: ' + format.formatInput(addressCandidate.address))
         return responseBuilder
         .addConfirmSlotDirective('helperLocation')
-        .speak(handlerInput.t("LOCATION_REPEAT_ADDRESS",{worldAddress: worldAddressCandidate.address}))
-        .reprompt(handlerInput.t("LOCATION_REPEAT_ADDRESS",{worldAddress: worldAddressCandidate.address}))
+        .speak(handlerInput.t("LOCATION_REPEAT_ADDRESS",{worldAddress: addressCandidate.address}))
+        .reprompt(handlerInput.t("LOCATION_REPEAT_ADDRESS",{worldAddress: addressCandidate.address}))
         .getResponse();
       }
       else {
@@ -555,5 +554,4 @@ module.exports = {
   GetLocationHelperIntentHandler,
   // DelegateToGetLocationResponseInterceptor,
   GetLocationRequestInterceptor,
-  
 }

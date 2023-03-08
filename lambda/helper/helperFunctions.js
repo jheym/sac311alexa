@@ -1,6 +1,4 @@
 const axios = require("axios")
-const Alexa = require("ask-sdk")
-
 
 /** //TODO: Get this working on a lambda environment
  * This function gets an OAuth token for use with the Salesforce API.
@@ -70,55 +68,92 @@ function clearSlots(handlerInput, currentIntent) {
  * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
  */
 async function getWorldAddressCandidate(address) {
-    if (!address) {
-      throw new Error('Address parameter is required.');
-    }
-    
-    // Put URL in a map
-    const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${address}&outFields=*&f=pjson&maxLocations=10`;
-  
-    try {
-      const response = await axios.get(url);
-      const candidates = response.data.candidates;
-      let chosenCandidate = null;
-      for (const candidate of candidates) {
-        if (candidate.score > 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
-          chosenCandidate = candidate;
-        }
-      }
-      return chosenCandidate ? chosenCandidate : false;
-    } catch (error) {
-      console.error(`Failed to find the address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
-      throw new Error(`Failed to find the address. ${error.message}`);
-    }
+  if (!address) {
+    throw new Error('Address parameter is required.');
   }
-  /**
-   * This function takes a latitude and longitude and returns an address
-   * //TODO: Addresses must not be POI, they must be full addresses. There is a way to specify this as a param.
-   * @param {float} latitude 
-   * @param {float} longitude 
-   * @returns 
-   */
 
-  //FIXME: Mico - Reverse geocode is giving apartment numbers. Let's try messing
-  //with the url params a bit more to see if we can get a better type of
-  //address.
-  async function reverseGeocode(latitude, longitude) {
-    const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
-  
-    try {
-      const response = await axios.get(url);
-      console.log("Response:", response);
-      const result = response.data;
-      console.log("Result:", result);
-      const address = result.address.Address || false; // Will this err is no address field?
-      console.log("Address:", address);
-      return address;
-    } catch (error) {
-      console.error(error);
-      return false;
+  // Put URL in a map
+  const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${address}&outFields=*&f=pjson&maxLocations=10`;
+
+  try {
+    const response = await axios.get(url);
+    const candidates = response.data.candidates;
+    let chosenCandidate = null;
+    for (const candidate of candidates) {
+      if (candidate.score === 100) {
+        chosenCandidate = candidate;
+        break;
+      }
+      if (candidate.score >= 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+        chosenCandidate = candidate;
+      }
     }
+    //chosenCandidate = getInternalAddressCandidate(chosenCandidate);
+    return chosenCandidate ? chosenCandidate : false;
+  } catch (error) {
+    console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+    throw new Error(`Failed to find suitable address. ${error.message}`);
   }
+}
+
+/* Takes a candidate object from world gis to compare against sac311 gis
+ * Returns a candidate object or false if no suitable candidate
+ * Automatically accepts a candidate if score equal to 100
+*/
+
+async function getInternalAddressCandidate(potentialCandidate) {
+  if (!potentialCandidate) {
+    throw new Error('No Candidate was found.');
+  }
+  const url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates?Street=${potentialCandidate.attributes.ShortLabel}&City=${potentialCandidate.attributes.City}&ZIP=${potentialCandidate.attributes.Postal}&SingleLine=${potentialCandidate.attributes.ShortLabel}&category=&outFields=*&outSR=4326&searchExtent=&location=&distance=&magicKey=&f=pjson`
+  
+  try {
+    const response = await axios.get(url);
+    const candidates = response.data.candidates;
+    let chosenCandidate = null;
+    for (const candidate of candidates) {
+      if (candidate.score === 100) {
+        chosenCandidate = candidate;
+        break;
+      }
+      if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+        chosenCandidate = candidate;
+      }
+    }
+    return chosenCandidate ? chosenCandidate : false;
+  } catch (error) {
+    console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+    throw new Error(`Failed to find suitable address. ${error.message}`);
+  }
+}
+
+/**
+ * This function takes a latitude and longitude and returns an address
+ * //TODO: Addresses must not be POI, they must be full addresses. There is a way to specify this as a param.
+ * @param {float} latitude 
+ * @param {float} longitude 
+ * @returns 
+ */
+
+//FIXME: Mico - Reverse geocode is giving apartment numbers. Let's try messing
+//with the url params a bit more to see if we can get a better type of
+//address.
+async function reverseGeocode(latitude, longitude) {
+  const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
+  
+  try {
+    const response = await axios.get(url);
+    console.log("Response:", response);
+    const result = response.data;
+    console.log("Result:", result);
+    const address = result.address.Address || false; // Will this err is no address field?
+    console.log("Address:", address);
+    return address;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
 
 module.exports = {
   getOAuthToken,
@@ -126,5 +161,6 @@ module.exports = {
   setQuestion,
   clearSlots,
   getWorldAddressCandidate,
+  getInternalAddressCandidate,
   reverseGeocode
 }
