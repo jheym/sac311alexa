@@ -63,16 +63,15 @@ function clearSlots(handlerInput, currentIntent) {
 
 /**
  * Gets the highest scoring address candidate from the ArcGIS world geocoder.
- * The returned address will be used to query the sac311gis API for more details.
- * TODO: Find out which return address we should be using from the response.
+ * The returned candidate object will be used to query the sac311gis API for more details.
  * @param {string} address 
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
  */
 async function getWorldAddressCandidate(address) {
   if (!address) {
     throw new Error('Address parameter is required.');
   }
-   
+  
   try {
     const response = await axios.get(process.env.WORLD_GEOCODER_URL, { 
       params: { 
@@ -81,18 +80,7 @@ async function getWorldAddressCandidate(address) {
         f: 'pjson',
         maxLocations: 10
       }});
-    const candidates = response.data.candidates;
-    let chosenCandidate = null;
-    for (let candidate of candidates) {
-      if (candidate.score === 100) {
-        chosenCandidate = candidate;
-        break;
-      }
-      if (candidate.score >= 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
-        chosenCandidate = candidate;
-      }
-    }
-    //chosenCandidate = getInternalAddressCandidate(chosenCandidate);
+    let chosenCandidate = findSuitableCandidate(response.data.candidates);
     return chosenCandidate ? chosenCandidate : false;
   } catch (error) {
     console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
@@ -102,10 +90,8 @@ async function getWorldAddressCandidate(address) {
 
 /**
  * Takes a candidate object from world gis to compare against sac311 gis
- * Returns a candidate object or false if no suitable candidate
- * Automatically accepts a candidate if score equal to 100
  * @param {object} potentialCandidate
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
 */
 async function getInternalAddressCandidate(potentialCandidate) {
   if (!potentialCandidate) {
@@ -124,22 +110,30 @@ async function getInternalAddressCandidate(potentialCandidate) {
         f: 'pjson'
       }
     });
-    const candidates = response.data.candidates;
-    let chosenCandidate = null;
-    for (let candidate of candidates) {
-      if (candidate.score === 100) {
-        chosenCandidate = candidate;
-        break;
-      }
-      if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
-        chosenCandidate = candidate;
-      }
-    }
+    let chosenCandidate = findSuitableCandidate(response.data.candidates);
     return chosenCandidate ? chosenCandidate : false;
   } catch (error) {
     console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
     throw new Error(`Failed to find suitable address. ${error.message}`);
   }
+}
+
+/**
+ * Takes an array of candidate objects and returns best one based on score
+ * @param {Array} candidateArray 
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
+ */
+function findSuitableCandidate(candidateArray) {
+  let chosenCandidate = null;
+  for (let candidate of candidateArray) {
+    if (candidate.score === 100) {
+      return candidate;
+    }
+    if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+      chosenCandidate = candidate;
+    }
+  }
+  return chosenCandidate;
 }
 
 /**
