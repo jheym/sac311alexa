@@ -65,6 +65,12 @@ const LaunchRequestHandler = {
     // console.log('Phone: ' + contactDetails.records[0].Phone)
     // // END QUERY SFDB TEST CODE //
     
+    // Testing gis endpoints
+      // const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
+      // const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
+      // console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
+      // console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
+
     speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 
     return (

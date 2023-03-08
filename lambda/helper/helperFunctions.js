@@ -17,7 +17,7 @@ async function getOAuthToken() {
     client_secret: process.env.SF_CLIENT_SECRET
   },
   {
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'} // Important for password grant type
   });
   return res.data.access_token;
 }
@@ -30,14 +30,15 @@ async function getOAuthToken() {
  * @returns data from the query
  */
 async function querySFDB(query) {
-  const sf_url = `https://saccity--qa.sandbox.my.salesforce.com/services/data/v57.0/query/?q=${query}`
+  const endpoint = `${process.env.SALESFORCE_URL}/query`
   const token = await getOAuthToken();
   
-  const res = await axios.get(sf_url, { params: { q: query }, 
+  const res = await axios.get(endpoint, { 
+    params: { q: query }, 
     headers: { 
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/x-www-form-urlencoded' // This formats the query to be url encoded
-    } } )
+    }});
   return res.data;
 }
 
@@ -71,15 +72,18 @@ async function getWorldAddressCandidate(address) {
   if (!address) {
     throw new Error('Address parameter is required.');
   }
-
-  // Put URL in a map
-  const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/findAddressCandidates?&address=${address}&outFields=*&f=pjson&maxLocations=10`;
-
+   
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(process.env.WORLD_GEOCODER_URL, { 
+      params: { 
+        address: address,
+        outFields: '*',
+        f: 'pjson',
+        maxLocations: 10
+      }});
     const candidates = response.data.candidates;
     let chosenCandidate = null;
-    for (const candidate of candidates) {
+    for (let candidate of candidates) {
       if (candidate.score === 100) {
         chosenCandidate = candidate;
         break;
@@ -96,22 +100,33 @@ async function getWorldAddressCandidate(address) {
   }
 }
 
-/* Takes a candidate object from world gis to compare against sac311 gis
+/**
+ * Takes a candidate object from world gis to compare against sac311 gis
  * Returns a candidate object or false if no suitable candidate
  * Automatically accepts a candidate if score equal to 100
+ * @param {object} potentialCandidate
+ * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
 */
-
 async function getInternalAddressCandidate(potentialCandidate) {
   if (!potentialCandidate) {
     throw new Error('No Candidate was found.');
   }
-  const url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates?Street=${potentialCandidate.attributes.ShortLabel}&City=${potentialCandidate.attributes.City}&ZIP=${potentialCandidate.attributes.Postal}&SingleLine=${potentialCandidate.attributes.ShortLabel}&category=&outFields=*&outSR=4326&searchExtent=&location=&distance=&magicKey=&f=pjson`
   
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+      params: {
+        Street: potentialCandidate.attributes.ShortLabel,
+        City: potentialCandidate.attributes.City,
+        ZIP: potentialCandidate.attributes.Postal,
+        SingleLine: potentialCandidate.attributes.ShortLabel,
+        outFields: '*',
+        outSR: 4326,
+        f: 'pjson'
+      }
+    });
     const candidates = response.data.candidates;
     let chosenCandidate = null;
-    for (const candidate of candidates) {
+    for (let candidate of candidates) {
       if (candidate.score === 100) {
         chosenCandidate = candidate;
         break;
