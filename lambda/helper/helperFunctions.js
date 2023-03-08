@@ -80,7 +80,7 @@ async function getWorldAddressCandidate(address) {
         f: 'pjson',
         maxLocations: 10
       }});
-    let chosenCandidate = findSuitableCandidate(response.data.candidates);
+    let chosenCandidate = findSuitableCandidate(response.data.candidates,80);
     return chosenCandidate ? chosenCandidate : false;
   } catch (error) {
     console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
@@ -110,7 +110,7 @@ async function getInternalAddressCandidate(potentialCandidate) {
         f: 'pjson'
       }
     });
-    let chosenCandidate = findSuitableCandidate(response.data.candidates);
+    let chosenCandidate = findSuitableCandidate(response.data.candidates,85);
     return chosenCandidate ? chosenCandidate : false;
   } catch (error) {
     console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
@@ -119,17 +119,18 @@ async function getInternalAddressCandidate(potentialCandidate) {
 }
 
 /**
- * Takes an array of candidate objects and returns best one based on score
- * @param {Array} candidateArray 
+ * Takes an array of candidate objects and returns best one based on score which satisifies score threshold
+ * @param {Array} candidateArray
+ * @param {Number} scoreThreshold World is 80, Internal is 85
  * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
  */
-function findSuitableCandidate(candidateArray) {
+function findSuitableCandidate(candidateArray,scoreThreshold) {
   let chosenCandidate = null;
   for (let candidate of candidateArray) {
     if (candidate.score === 100) {
       return candidate;
     }
-    if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+    if (candidate.score >= scoreThreshold && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
       chosenCandidate = candidate;
     }
   }
