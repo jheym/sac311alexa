@@ -12,14 +12,14 @@
 ## **Jump to Section**
 * [Synopsis](#Synopsis)
 * [Project Overview](#Project-Overview)
-* [Install & Documentation](#Install-&-Documentation)
 * [Main Features](#Main-Features)
-* [Configuration](#Configuration)
-* [Testing](#Testing)
+* [Timeline](#Timeline)
 * [Deployment](#Deployment)
 * [Developer Instructions](#Developer-Instructions)
-* [Flow Charts](#Flow-Charts)
-* [Timeline](#Timeline)
+* [Testing](#Testing)
+
+
+
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>
@@ -60,27 +60,72 @@ The Sacramento 311 Alexa Skill makes use of the Alexa Skills Kit SDK for Node.js
 * Alexa Presentation Language for multimodal user interaction on compatible Alexa-enabled devices
 * User-associated persistence with AWS DynamoDB and ASK SDK DynamoDB Persistence Adapter
 * Integrates with AWS Chime SIP Media Application for handling and routing Alexa Skill VoIP to PSTN/SIP
-* Account linking - Sign in to City of Sacramento user account via Alexa Skill
 * Support for adding dialog models in different languages/dialects
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>
 <br></br>
 
-##  **Testing**
-Reserved
+## **Timeline**
+<img src="doc_resources/timeline.png"/>
+<br></br>
 
-Our skill will involve the use of beta testers throughout the iterative development lifecycle of the product. This capability will be possible for future versions following the published product on the Amazon Skill Store.
+### Base Functionality
+- [x] Basic use case for an abandoned vehicle service request
+	- [x] Identify caller's intent from a wide variety of inputs
+	- [x] Verify the caller's intent before collecting details
+	- [x] Collect service-specific details from the caller
+- [x] Location retrieval
+	- [x] Get geocoordinates from geolocation-enabled devices
+	- [x] Get home address from caller's Amazon contact details
+	- [x] Get location from caller speech input
+- [ ]   Get a candidate from the internal geocoder using address collected from caller
+	- [x] Get candidate from world geocoder
+	- [ ] Pick the world candidate with the highest score, or ask the user for another address if no candidates found
+	- [x] Run world geocoder candidate against internal geocoder
+	- [ ] Pick the internal candidate with the highest score, or ask for address again if no internal geocoder candidate was found
+- [ ] Salesforce Integration
+	- [x] Get OAuth Token
+	- [x] Support making any query in the SFDB
+	- [ ] Create a new case
+		- [ ] Collect the caller's phone number
+			- [ ] via caller's Amazon contact details
+			- [ ] via caller speech input
+		- [ ] Query SFDB contacts for a matching phone number
+			- [ ] Verify caller contact details, if false then submit anonymous case
+		- [ ] Collect all necessary location details based on the service type
+		- [ ] Store the case number in DynamoDB
+- [x] Working Production-like Environment
+	- [x] Connect AWS Lambda function to Alexa Skill
+	- [x] Attach a public IP address to Lambda function using AWS VPC (for internal geocoder whitelist)
 
-The dialog model is tested against Alexa's NLU engine via the Alexa Development Console Utterance Profiler for conflicts and resolutions.
-<img src="doc_resources/image.png" width="450"/>
+### Additional Functionality
+- [x] DynamoDB persistent storage
+- [ ] Visual and touch UI
+	- [x] Support for adding ALP directives
+	- [ ] ALP directives for all caller interactions
+- [ ] Get case status information about a previously-submitted case
+- [ ] Get city information from knowledgebase
+- [ ] AWS Chime Integration (Transfer to live agent)
+	- [x] Support transferring caller to any US Phone number
+	- [ ] Integrate with Sac311 SIP
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>
 <br></br>
 
 ## **Deployment**
-Reserved
+Deployment instructions for setting up the production environment will include the following:
+1. Setting up the Alexa Skill on the Alexa Developer Console
+2. Adding our interaction model to the skill
+3. Setting up the Lambda function on AWS Console
+4. Attaching a public IP to the Lambda Function using AWS VPC
+5. Setting the environment variables
+6. Using Cloudwatch for troubleshooting logging info
+
+### Production Environment Architecture
+<img src="doc_resources/awsarchitecture.png"/>
+
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>
@@ -91,96 +136,34 @@ Reserved
 2. In the Alexa Dev Console, click the "create skill" button
 3. Select `Custom` for the model and `Alexa-hosted(Node.js)` for the hosting method
 4. For the template, select `Start from Scratch`
-5. Once the skill has built, go to the `code` tab and import code. Upload a zip of the lambda folder from this repository and then click `Deploy`.
-<img src="doc_resources/devsetup1.png"/>
-
-
-6. <img align="left" src="doc_resources/devsetup2.png" width="175"/>
+5. <img align="left" src="doc_resources/devsetup2.png" width="175" style="padding: 10px" />
 Go to the `build` tab and in the side menu, expand `interaction model`. Select `JSON Editor`, then replace everything with the json from this repo's `./skill-package/interactionModels/en-US.json`.
 <br clear="left"/>
 
 7. Click the `Save Model` button and then click `Build Model`
-8. Wait for the model to finish building then go to the `test` tab and change the dropdown menu from `off` to `Development`.
-9. In the text box, type `Open Sacramento Three One One` to invoke the skill and interact with it. Alternatively, you can test the skill on any Alexa enabled device if you are signed in to your developer account.
-10. To contribute to the project, working in VSCode with the ASK Toolkit Extension is recommended. For more info on setting that up, follow the documentation [here](https://developer.amazon.com/en-US/docs/alexa/ask-toolkit/get-started-with-the-ask-toolkit-for-visual-studio-code.html)
 
+TODO: Add instructions for local vscode dev setup using ask-sdk-local-debugger using the modified debugger npm package and our launch.json configuration 
 
-
-### Steps for Alexa Skills Toolkit
-
-1. Sign into your Amazon Alexa Account on Alexa Skills Toolkit
-2. Click on the drop down menu on the "Skills Management" and select "Download Edit Skill" 
-3. Select the default profile and click on the correct Skill, which will then clone the repository to your workspace
-4. Run `npm install` in the lambda directory using the terminal
-
-> Optional: Install Ask Dialog run the program on terminal (Might need to change the permissions through powershell)
-> 
-> `npm install -g ask-cli`
-
-5. Run the debugger and go onto the Alexa Simulator. Set skill stage to "development" and then type or use the alexa voice detection to say "open sacramento three one one." Then alexa will ask you which intent to handle.
-
-Sample utterances to activate the intents:
-
-Homeless Camp: 
-> `"There's a homeless camp at J Street"`
-> 
-> `"Tent on J Street"`
-
-Abandoned Vehicle 
-> `"Report an abandoned honda accord at I Street"`
-> 
-> `"There's a deserted car at I Street"`
-> 
-> `"Someone ditched their camry in a field"`
+8. Run the debugger
+9. Go back to the Alexa Developer Console. Go to the test tab and in the text box type type `Open Sacramento Three One One` to invoke the skill and interact with it. Alternatively, you can test the skill on any Alexa enabled device provided you are signed into an associated Alexa developer account on the device.
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>
 <br></br>
 
-## **Flow Charts**
-<!-- ![image](md/Sac311AlexaHighLevelProcessFlow.png) -->
-### **Sac 311 Alexa High Level Process Workflow**
-The high-level workflow diagram gives an overall idea of how the Sacramento 311 skills extension framework works and the process that the user undergoes. 
-![highlevel.png](doc_resources/highlevel.png)
+##  **Testing**
 
-### **Generic Ticket Request WorkFlow**
-The generic ticket intent workflow displays how a user’s ticket issue is processed and the requirements needed for the agents to handle it.
-![GenericIntentWorkflow.png](doc_resources/GenericIntentWorkflow.png)
+We constantly test the flow of dialog throughout the iterative development lifecycle of the product.
 
-### **Homeless Camp Intent Workflow**
-The homeless camp workflow showed the team the user's process and features, providing the team with a better understanding of developing the intent on our Alexa Skills Kit.
-![HomelessCamp.png](doc_resources/HomelessCamp.png)
+In addition, the dialog model is tested against Alexa's NLU engine via the Alexa Development Console Utterance Profiler for conflicts and resolutions.
+<img src="doc_resources/image.png" width="450"/>
 
-### **Address Retrieval Workflow**
-The address retrieval workflow shows the framework for retrieving the user’s location, requesting the address, confirming the address, integrating Geolocation services and ESRI, and how the address retrieval will implement to the intents developed.
-![locationworkflow.png](doc_resources/locationworkflow.png)
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>
 <br></br>
 
-## **Timeline**
-### **What we've done**
-* Custom Dialog Model for Alexa NLU to train on
-* Intent handlers for:
-	* Reporting abandoned vehicles
-	* Reporting homeless encampments
-* Slot collection system for filling all required ticket criteria (e.g. make, model, color of vehicle)
-	* Persists data between intents throughout the session
-* Built a system for handling yes/no questions
-* Built a system for collecting user location via device geolocation, Amazon user address, or input from user
-* Built a system for collecting any input from the user and storing it as text using AMAZON.SearchQuery slot type
-* Integrated with AWS Chime for routing calls from Alexa Skill to any phone number
-
-### **What's left to do**
-* Set up DynamoDB and persist data between sessions
-* Integrate with 311 Ersi system
-* Integrate with 311 SF CRM for ticket submission/retrieval and knowledgebase
-* Integrate with 311 SIP CRM for routing calls to live agents
-* Create use case for knowledgebase
-* Multimodal UI with Alexa Presentaion Language
-* Create a few more popular use cases for service requests such as trash pickup. Each use case requires different logic.
-* Set up account linking with OAuth for users to sign into their City of Sacramento Account
-* Implement Skill Personalization so multiple people using the same Alexa device can be recognized
-* Implement internationalization (i18n) for multi-language support in the future.
-* Make the software more maintainable and modular by finalizing all abstracted systems designed in Lambda function for future developers to use in new use cases. We won't be able to make all 200 ticket types as each use case requires tailored functionality.
+<figure>
+<img src="doc_resources/debcec9d6f978037280e44cd5ddace87.png" width="200"/>
+	<figcaption align="left"><b>A project by team Dinosaur Game, CSU Sacramento</b></figcaption>
+</figure>
