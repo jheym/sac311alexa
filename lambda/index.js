@@ -58,8 +58,8 @@ const LaunchRequestHandler = {
     
     // // Query SFDB TEST CODE //
     // // This is an example of making a query to the Salesforce database. 
-    // const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
-    //   LastName='mouse') LIMIT 5`;
+   //  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
+   //  LastName='mouse') LIMIT 5`;
     // const contactDetails = await helper.querySFDB(query);
     // console.log('Name: ' + contactDetails.records[0].Name);
     // console.log('Phone: ' + contactDetails.records[0].Phone)
@@ -70,6 +70,16 @@ const LaunchRequestHandler = {
       // const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
       // console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
       // console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
+
+      //Submit the ticket
+      const ticketTest = await helper.openCase();
+      console.log('ticketTest: ' + JSON.stringify(ticketTest));
+
+      //Search for CaseNumber using CaseId
+      const query1 = 'SELECT casenumber,id FROM Case WHERE (id = \'' + ticketTest.id + '\') LIMIT 1';
+      const caseNumber = await helper.querySFDB(query1);
+      console.log('caseNumber: ' + caseNumber.records[0].CaseNumber);
+
 
     speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 
