@@ -171,6 +171,43 @@ const YesAbandonedVehicleIntentHandler = {
     helper.setQuestion(handlerInput, 'IsAbandonedTime?')
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
     sessionAttributes.reasonForCalling = 'AbandonedVehicleIntent' // So GetLocationIntent knows where to delegate back to after confirming the address
+    
+    if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)['Alexa.Presentation.APL']) {
+      console.log("The user's device supports APL");
+      
+      responseBuilder.addDirective({
+    
+      "type": "Alexa.Presentation.APL.RenderDocument",
+      "token": "documentToken",
+      "document": {
+          "src": "doc://alexa/apl/documents/AnswersYesNo",
+          "type": "Link"
+      },
+      "datasources": {
+          "multipleChoiceTemplateData": {
+              "type": "object",
+              "properties": {
+                  "backgroundImage": "arn:aws:s3:::f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2/Media/311.jpg",
+                  "titleText": "311 Sacarmento",
+                  "primaryText": "Has the vehicle been abandoned for more than seventy-two hours?",
+                  "choices": [
+                      "Yes",
+                      "No"
+                  ],
+                  "choiceListType": "alphabet",
+                  "headerAttributionImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.jpg",
+                  "footerHintText": ""
+              }
+          }
+      }
+  
+        }); 
+        
+      }else {
+  // The device does not support APL
+      console.log("The user's device does not support APL");
+            }
+  
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('ABANDONED_VEHICLE_72Q'))
