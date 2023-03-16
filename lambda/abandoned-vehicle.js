@@ -1,6 +1,7 @@
 
 const Alexa = require("ask-sdk-core")
 const helper = require("./helper/helperFunctions.js")
+const Util = require('./util.js');
 
 
 const AbandonedVehicleIntentHandler = {
@@ -15,6 +16,8 @@ const AbandonedVehicleIntentHandler = {
     const { attributesManager, requestEnvelope, responseBuilder } = handlerInput
     const currentIntent = requestEnvelope.request.intent;
     const sessionAttributes = attributesManager.getSessionAttributes()
+    const pictureUrl = Util.getS3PreSignedUrl("Media/sac state.jpg");     //https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png
+
     
     if (Alexa.getDialogState(requestEnvelope) === "STARTED") {
       helper.setQuestion(handlerInput, null);
@@ -36,7 +39,7 @@ const AbandonedVehicleIntentHandler = {
             "multipleChoiceTemplateData": {
                 "type": "object",
                 "properties": {
-                    "backgroundImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png",
+                    "backgroundImage": pictureUrl,
                     "titleText": "311",
                     "primaryText": speakOutput, // use speakOutput variable here
                     "choices": [
@@ -199,7 +202,7 @@ const YesAbandonedVehicleIntentHandler = {
                   "footerHintText": ""
               }
           }
-      }
+        
   
         }); 
         
