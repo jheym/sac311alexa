@@ -170,6 +170,42 @@ async function reverseGeocode(latitude, longitude) {
   }
 }
 
+/*
+getQA
+
+Puts together slot questions and values.
+Returns an object in key: value form
+
+Will be mapped so that the slot questions match SalesForce questions
+
+example call: 
+helper.getQA(handlerInput, requestEnvelope.request.intent);
+
+*/
+function getQA(handlerInput, currentIntent)
+{
+  if(currentIntent.name == 'AbandonedVehicleIntent')
+  {
+    sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    var location = sessionAttributes.confirmedLocation;
+    var make = handlerInput.requestEnvelope.request.intent.slots.make.value;
+    var model = handlerInput.requestEnvelope.request.intent.slots.model.value;
+    var color = handlerInput.requestEnvelope.request.intent.slots.color.value;
+
+    let result = {
+      make,
+      model,
+      color,
+      location
+    };
+    console.log("getQA result:");
+    console.log(result);
+    return result;
+  }
+
+  
+}
+
 module.exports = {
   getOAuthToken,
   querySFDB,
@@ -177,5 +213,6 @@ module.exports = {
   clearSlots,
   getWorldAddressCandidate,
   getInternalAddressCandidate,
-  reverseGeocode
+  reverseGeocode,
+  getQA
 }
