@@ -1,7 +1,10 @@
 
 const Alexa = require("ask-sdk-core")
 const helper = require("./helper/helperFunctions.js")
-const Util = require('./util.js');
+const Util = require('./helper/util.js'); 
+// TODO: Humayoon, I added the dependencies so our app no longer crashes.
+// Background is still not showing up in APL preview. Please investigate
+// further.
 
 
 const AbandonedVehicleIntentHandler = {
@@ -18,7 +21,6 @@ const AbandonedVehicleIntentHandler = {
     const sessionAttributes = attributesManager.getSessionAttributes()
     const pictureUrl = Util.getS3PreSignedUrl("Media/sac state.jpg");     //https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png
 
-    
     if (Alexa.getDialogState(requestEnvelope) === "STARTED") {
       helper.setQuestion(handlerInput, null);
       helper.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
@@ -179,37 +181,34 @@ const YesAbandonedVehicleIntentHandler = {
       console.log("The user's device supports APL");
       
       responseBuilder.addDirective({
-    
-      "type": "Alexa.Presentation.APL.RenderDocument",
-      "token": "documentToken",
-      "document": {
-          "src": "doc://alexa/apl/documents/AnswersYesNo",
-          "type": "Link"
-      },
-      "datasources": {
+        "type": "Alexa.Presentation.APL.RenderDocument",
+        "token": "documentToken",
+        "document": {
+            "src": "doc://alexa/apl/documents/AnswersYesNo",
+            "type": "Link"
+        },
+        "datasources": {
           "multipleChoiceTemplateData": {
-              "type": "object",
-              "properties": {
-                  "backgroundImage": "arn:aws:s3:::f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2/Media/311.jpg",
-                  "titleText": "311 Sacarmento",
-                  "primaryText": "Has the vehicle been abandoned for more than seventy-two hours?",
-                  "choices": [
-                      "Yes",
-                      "No"
-                  ],
-                  "choiceListType": "alphabet",
-                  "headerAttributionImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.jpg",
-                  "footerHintText": ""
+            "type": "object",
+            "properties": {
+              "backgroundImage": "arn:aws:s3:::f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2/Media/311.jpg",
+              "titleText": "311 Sacarmento",
+              "primaryText": "Has the vehicle been abandoned for more than seventy-two hours?",
+              "choices": [
+                "Yes",
+                "No"
+              ],
+              "choiceListType": "alphabet",
+              "headerAttributionImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.jpg",
+              "footerHintText": ""
               }
-          }
-        
-  
-        }); 
-        
-      }else {
-  // The device does not support APL
-      console.log("The user's device does not support APL");
             }
+        }
+      })  
+    } else {
+      // The device does not support APL
+      console.log("The user's device does not support APL");
+      }
   
     return (
       handlerInput.responseBuilder
