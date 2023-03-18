@@ -17,7 +17,8 @@ async function getOAuthToken() {
     client_secret: process.env.SF_CLIENT_SECRET
   },
   {
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'} // Important for password grant type
+    headers: {'Content-Type': 'application/x-www-form-urlencoded',
+  'Accept-Encoding': 'application/json'} // Important for password grant type
   });
   return res.data.access_token;
 }
@@ -37,7 +38,8 @@ async function querySFDB(query) {
     params: { q: query }, 
     headers: { 
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded' // This formats the query to be url encoded
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept-Encoding': 'application/json', // This formats the query to be url encoded
     }});
   return res.data;
 }
@@ -164,6 +166,74 @@ async function reverseGeocode(latitude, longitude) {
     return false;
   }
 }
+async function openCase() {
+  const sfUrl = `https://saccity--qa.sandbox.my.salesforce.com/services/data/v57.0/sobjects/Case`;
+  const token = await getOAuthToken();
+
+//Create a case body with axios
+const headers = {
+  'Authorization': `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  'Accept-Encoding': 'application/json',
+ 
+
+};
+const data = {
+  Sub_Service_type__c: "a0Om0000005vZ7JEAU",
+  Subject: "Review->ASK Review-unverified",
+  Status: "DRAFT",
+  Service_Type__c: "",
+  Origin: "Alexa",
+  ContactId: "",
+  Description: "Test Through Code",
+  Email_Web_Notes__c: "Test Through Code",
+  Anonymous_Contact__c: true,
+};
+const config = {
+  headers,
+  maxBodyLength: Infinity,
+};
+const response = await axios.post(sfUrl, data, config);
+return response.data;
+}
+    
+
+
+/*
+getQA
+
+Puts together slot questions and values.
+Returns an object in key: value form
+
+Will be mapped so that the slot questions match SalesForce questions
+
+example call: 
+helper.getQA(handlerInput, requestEnvelope.request.intent);
+
+*/
+function getQA(handlerInput, currentIntent)
+{
+  if(currentIntent.name == 'AbandonedVehicleIntent')
+  {
+    sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    var location = sessionAttributes.confirmedLocation;
+    var make = handlerInput.requestEnvelope.request.intent.slots.make.value;
+    var model = handlerInput.requestEnvelope.request.intent.slots.model.value;
+    var color = handlerInput.requestEnvelope.request.intent.slots.color.value;
+
+    let result = {
+      make,
+      model,
+      color,
+      location
+    };
+    console.log("getQA result:");
+    console.log(result);
+    return result;
+  }
+
+  
+}
 
 module.exports = {
   getOAuthToken,
@@ -172,5 +242,7 @@ module.exports = {
   clearSlots,
   getWorldAddressCandidate,
   getInternalAddressCandidate,
-  reverseGeocode
+  reverseGeocode,
+  openCase,
+  getQA
 }

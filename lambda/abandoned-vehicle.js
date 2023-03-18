@@ -146,6 +146,10 @@ const AbandonedVehicleIntentHandler = {
         var location = sessionAttributes.confirmedLocation;
         speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS',{color: `${color}`, make: `${make}`, model: `${model}`, location: `${location}`})
 
+        //call getQA to form key: value object with slot values
+        //helper.getQA(handlerInput, requestEnvelope.request.intent);
+
+      
         // IMPORTANT: Clear slots after creating a new case so they don't get reused if the caller wants to submit a different ticket
         helper.clearSlots(handlerInput, requestEnvelope.request.intent) 
         //TODO: Set question for "anything else?" 
