@@ -172,6 +172,7 @@ const YesAbandonedVehicleIntentHandler = {
     )
   },
   handle(handlerInput) {
+    const {responseBuilder} = handlerInput
     helper.setQuestion(handlerInput, null)
     helper.setQuestion(handlerInput, 'IsAbandonedTime?')
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
