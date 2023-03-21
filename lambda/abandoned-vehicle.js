@@ -19,8 +19,8 @@ const AbandonedVehicleIntentHandler = {
     const { attributesManager, requestEnvelope, responseBuilder } = handlerInput
     const currentIntent = requestEnvelope.request.intent;
     const sessionAttributes = attributesManager.getSessionAttributes()
-    const pictureUrl = Util.getS3PreSignedUrl("Media/sac state.jpg");     //https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png
-
+         //https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/311.png
+    
     if (Alexa.getDialogState(requestEnvelope) === "STARTED") {
       helper.setQuestion(handlerInput, null);
       helper.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
@@ -29,7 +29,9 @@ const AbandonedVehicleIntentHandler = {
       // Check if the device supports APL
       if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)['Alexa.Presentation.APL']) {
         console.log("The user's device supports APL");
-        
+        const {Viewport} = handlerInput.requestEnvelope.context;
+        const resolution = Viewport.pixelWidth + 'X' +Viewport.pixelHeight;
+
         responseBuilder.addDirective({ // Don't need handlerInput.responseBuilder because resonseBuilder is already defined above
         "type": "Alexa.Presentation.APL.RenderDocument",
         "token": "documentToken", // Change this to something unique and informative
@@ -41,7 +43,7 @@ const AbandonedVehicleIntentHandler = {
             "multipleChoiceTemplateData": {
                 "type": "object",
                 "properties": {
-                    "backgroundImage": pictureUrl,
+                    "backgroundImage": Util.getS3PreSignedUrl('https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/background'+resolution+'.jpg'),
                     "titleText": "311",
                     "primaryText": speakOutput, // use speakOutput variable here
                     "choices": [
@@ -49,7 +51,7 @@ const AbandonedVehicleIntentHandler = {
                         "No"
                     ],
                     "choiceListType": "none",
-                    "headerAttributionImage": "311",
+                    "headerAttributionImage": "background",
                     "footerHintText": ""
                 }
             }
@@ -192,7 +194,7 @@ const YesAbandonedVehicleIntentHandler = {
           "multipleChoiceTemplateData": {
             "type": "object",
             "properties": {
-              "backgroundImage": "arn:aws:s3:::f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2/Media/311.jpg",
+              "backgroundImage": "https://f6032016-9dec-44c4-96c1-31a7ae92d22c-us-west-2.s3.us-west-2.amazonaws.com/Media/background.jpg",
               "titleText": "311 Sacarmento",
               "primaryText": "Has the vehicle been abandoned for more than seventy-two hours?",
               "choices": [
