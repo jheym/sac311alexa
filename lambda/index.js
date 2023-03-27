@@ -14,6 +14,7 @@ const axios = require("axios")
 
 // Local modules
 const helper = require("./helper/helperFunctions.js")
+const sfCase = require("./helper/Salesforce_Case_object.js")
 const languageStrings = require("./helper/ns-common.json")
 const abandonedVehicle = require("./abandoned-vehicle.js")
 const homelessCamp = require("./homeless-encampment.js")
@@ -34,6 +35,7 @@ const LaunchRequestHandler = {
       Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
     );
   },
+
   async handle(handlerInput) {
    
     const {attributesManager, requestEnvelope } = handlerInput;
@@ -71,14 +73,25 @@ const LaunchRequestHandler = {
       // console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
       // console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
 
-      //Submit the ticket
-      const ticketTest = await helper.openCase();
-      console.log('ticketTest: ' + JSON.stringify(ticketTest));
+      // //Submit the ticket
+      // const ticketTest = await helper.openCase();
+      // console.log('ticketTest: ' + JSON.stringify(ticketTest));
 
-      //Search for CaseNumber using CaseId
-      const query1 = 'SELECT casenumber,id FROM Case WHERE (id = \'' + ticketTest.id + '\') LIMIT 1';
-      const caseNumber = await helper.querySFDB(query1);
-      console.log('caseNumber: ' + caseNumber.records[0].CaseNumber);
+      // //Search for CaseNumber using CaseId
+      // const query1 = 'SELECT casenumber,id FROM Case WHERE (id = \'' + ticketTest.id + '\') LIMIT 1';
+      // const caseNumber = await helper.querySFDB(query1);
+      // console.log('caseNumber: ' + caseNumber.records[0].CaseNumber);
+
+      // SALESFORCE CASE OBJECT TEST CODE //
+      
+      const token = await helper.getOAuthToken();
+      const myCase = new sfCase(token); // Creating a new case object with a new token
+      const contactID = await myCase.get_contact('9165551111'); // Getting contact details from phone number
+      const serviceIDs = await myCase.service_details('Vehicle On Street') // Getting service details from service name
+      console.log('myCase: ' + JSON.stringify(myCase)); // Print out all case details stored in the case object so far
+
+      // END SALESFORCE CASE OBJECT TEST CODE //
+
 
 
     speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });

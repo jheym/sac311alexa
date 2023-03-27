@@ -17,8 +17,10 @@ async function getOAuthToken() {
     client_secret: process.env.SF_CLIENT_SECRET
   },
   {
-    headers: {'Content-Type': 'application/x-www-form-urlencoded',
-  'Accept-Encoding': 'application/json'} // Important for password grant type
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept-Encoding': 'application/json'
+    } // Important for password grant type
   });
   return res.data.access_token;
 }
@@ -39,7 +41,7 @@ async function querySFDB(query) {
     headers: { 
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept-Encoding': 'application/json', // This formats the query to be url encoded
+      'Accept-Encoding': 'application/json'
     }});
   return res.data;
 }
