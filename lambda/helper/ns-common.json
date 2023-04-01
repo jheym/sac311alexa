@@ -23,7 +23,7 @@
             "TRASH_THANKS": "Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
   
             "ABANDONED_VEHICLE_CONFIRMATION": "Just to confirm, are you reporting an abandoned vehicle?",
-            "ABANDONED_VEHICLE_THANKS": "Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
+            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. Your case number is <say-as interpret-as='digits'>{{case_number}}</say-as>. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?</speak>",
             "ABANDONED_VEHICLE_72Q": "Has the vehicle been abandoned for more than seventy-two hours?",
             "ABANDONED_VEHICLE_72A": "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. Is there anything else I can help you with?",
   
@@ -40,7 +40,7 @@
             "LOCATION_RETRY": "Let's try that again. What's the location?",
             "LOCATION_RETRY_REPROMPT": "Please provide an address or nearest cross streets.",
             "LOCATION_RETRY_REDIRECT": "Apologies, we're having trouble finding your location. Would you like to speak to a live agent?",
-            "LOCATION_REPEAT_ADDRESS": "<speak>Is the location near <say-as interpret-as='address'>{{worldAddress}}</say-as>?</speak>"
+            "LOCATION_REPEAT_ADDRESS": "<speak>Is the location near <say-as interpret-as='address'>{{address}}</say-as>?</speak>"
         }
     },
     "es": {

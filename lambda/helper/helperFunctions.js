@@ -27,23 +27,28 @@ async function getOAuthToken() {
 
 /**
  * This function should be able to make any query to the SF API. Just pass in
- * the SOQL query you want to use and it will return the data, provided you
- * formatted correctly.
+ * the SOQL query you want to use. No URL encoding required.
  * @param {string} query 
- * @returns data from the query
+ * @param {string} token
+ * @returns http response from SF API
  */
-async function querySFDB(query) {
-  const endpoint = `${process.env.SALESFORCE_URL}/query`
-  const token = await getOAuthToken();
-  
-  const res = await axios.get(endpoint, { 
-    params: { q: query }, 
-    headers: { 
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept-Encoding': 'application/json'
-    }});
-  return res.data;
+async function querySFDB(query, token) {
+  const url = encodeURI(`${process.env.SALESFORCE_URL}/query/?q=${query}`)
+  try {
+    const res = await axios.get(url, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept-Encoding': 'application/json'
+      }});
+    return res;
+  } catch (error) {
+    if (!error.response) {
+      throw new Error(`querySFDB Error: ${error.message}`);
+    } else {
+      return error.response // return the 4xx response regardless
+    }
+  }
 }
 
 
@@ -105,6 +110,36 @@ async function getWorldAddressCandidate(address) {
 }
 
 /**
+ * Gets the highest scoring address candidate from the ArcGIS world geocoder.
+ * The returned address will be used to query the sac311gis API for more details.
+ * TODO: Find out which return address we should be using from the response.
+ * @param {string} address 
+ * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ */
+async function getWorldAddressResponse(address) {
+  if (!address) {
+    throw new Error('Address parameter is required.');
+  }
+   
+  try {
+    const response = await axios.get(process.env.WORLD_GEOCODER_URL, { 
+      params: { 
+        address: address,
+        outFields: '*',
+        f: 'pjson',
+        maxLocations: 10
+      }});
+    return response
+  } catch (error) {
+    if (!error.response) {
+      throw new Error(`World Address Geocoder Error: ${error.message}`);
+    } else {
+      return error.response // return the 4xx response regardless
+    }
+  }
+}
+
+/**
  * Takes a candidate object from world gis to compare against sac311 gis
  * Returns a candidate object or false if no suitable candidate
  * Automatically accepts a candidate if score equal to 100
@@ -146,6 +181,33 @@ async function getInternalAddressCandidate(potentialCandidate) {
   }
 }
 
+async function getInternalAddressResponse(candidate) {
+  if (!candidate) {
+    throw new Error('No Candidate was found.');
+  }
+  
+  try {
+    const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+      params: {
+        Street: candidate.attributes.ShortLabel,
+        City: candidate.attributes.City,
+        ZIP: candidate.attributes.Postal,
+        SingleLine: candidate.attributes.ShortLabel,
+        outFields: '*',
+        outSR: 4326,
+        f: 'pjson'
+      }
+    });
+    return response
+  } catch (error) {
+    if (!error.response) {
+      throw new Error(`World Address Geocoder Error: ${error.message}`);
+    } else {
+      return error.response // return the 4xx response regardless
+    }
+  }
+}
+
 /**
  * This function takes a latitude and longitude and returns an address
  * //TODO: Addresses must not be POI, they must be full addresses. There is a way to specify this as a param.
@@ -173,6 +235,7 @@ async function reverseGeocode(latitude, longitude) {
     return false;
   }
 }
+
 async function openCase() {
   const sfUrl = `https://saccity--qa.sandbox.my.salesforce.com/services/data/v57.0/sobjects/Case`;
   const token = await getOAuthToken();
@@ -182,8 +245,6 @@ const headers = {
   'Authorization': `Bearer ${token}`,
   'Content-Type': 'application/json',
   'Accept-Encoding': 'application/json',
- 
-
 };
 const data = {
   Sub_Service_type__c: "a0Om0000005vZ7JEAU",
@@ -238,8 +299,6 @@ function getQA(handlerInput, currentIntent)
     console.log(result);
     return result;
   }
-
-  
 }
 
 module.exports = {
@@ -248,7 +307,9 @@ module.exports = {
   setQuestion,
   clearSlots,
   getWorldAddressCandidate,
+  getWorldAddressResponse,
   getInternalAddressCandidate,
+  getInternalAddressResponse,
   reverseGeocode,
   openCase,
   getQA
