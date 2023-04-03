@@ -5,14 +5,14 @@ const intentFlags = {
         intentName : 'AbandonedVehicleIntent',
         flags : {
             getGeolocation : true,
-            getAddress : true
+            getHomeAddress : false
         }
     },
     HomelessCampIntent : {
         intentName : 'HomelessCampIntent',
         flags : {
             getGeolocation : true,
-            getAddress : false
+            getHomeAddress : false
         }
     }
 }

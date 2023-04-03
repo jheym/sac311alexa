@@ -14,12 +14,12 @@ const axios = require("axios")
 
 // Local modules
 const helper = require("./helper/helperFunctions.js")
-const sfCase = require("./helper/Salesforce_Case_object.js")
-const languageStrings = require("./helper/ns-common.json")
-const abandonedVehicle = require("./abandoned-vehicle.js")
-const homelessCamp = require("./homeless-encampment.js")
-const getLocation = require("./getLocation")
-const trashpickup = require("./trash-pickup.js")
+const sfCase = require("./helper/SalesforceCaseObject.js")
+const languageStrings = require("./helper/nsCommon.json")
+const abandonedVehicle = require("./abandonedVehicle.js")
+const homelessCamp = require("./homelessEncampment.js")
+const getLocation = require("./addressCollectionFlow")
+const trashpickup = require("./trashPickup.js")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 
 
@@ -34,22 +34,16 @@ const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = 
  */
 const LaunchRequestHandler = {
 	canHandle(handlerInput) {
-		return (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-		);
+		return (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest");
 	},
-
 	async handle(handlerInput) {
-
 		const { attributesManager, requestEnvelope } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
 
 		// DYNAMODB TEST CODE //
 		let persistentAttributes =
 			(await attributesManager.getPersistentAttributes()) || {};
-		console.log(
-			"persistentAttributes: " + JSON.stringify(persistentAttributes)
-		);
+		console.log("persistentAttributes: " + JSON.stringify(persistentAttributes));
 
 		var counter = persistentAttributes.hasOwnProperty("counter")
 			? persistentAttributes.counter
@@ -108,19 +102,12 @@ const LaunchRequestHandler = {
 		// const serviceIDs = await myCase.get_service_details('Vehicle On Street') // Getting service details from service name
 		// console.log('myCase: ' + JSON.stringify(myCase)); // Print out all case details stored in the case object so far
 
-
 		// END SALESFORCE CASE OBJECT TEST CODE //
-
-
-
 		speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
-
-		return (
-			handlerInput.responseBuilder
-				.speak(speechOutput)
-				.reprompt(handlerInput.t('WELCOME_REPROMPT'))
-				.getResponse()
-		)
+		return handlerInput.responseBuilder
+		.speak(speechOutput)
+		.reprompt(handlerInput.t('WELCOME_REPROMPT'))
+		.getResponse()
 	}
 }
 
@@ -159,7 +146,7 @@ const yn_RetryIntentHandler = {
 		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
 		return (requestType === "IntentRequest" && 
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === "TryAgain");
+			questionAsked === "TryAgain?");
 	},
 	handle(handlerInput) {
 		helper.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
@@ -293,10 +280,11 @@ const SessionEndedRequestHandler = {
 		);
 	},
 	async handle(handlerInput) {
-		// console.log(
-		//   `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
-		// )
-		// Any cleanup logic goes here.
+		if (handlerInput.requestEnvelope.request.error) {
+			let type = handlerInput.requestEnvelope.request.error.type;
+			let message = handlerInput.requestEnvelope.request.error.message;
+			console.log(`SessionEnded Error: ${type}: ${message}`);
+		}
 		console.log("Session ended");
 
 		return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
@@ -363,10 +351,12 @@ const ContextSwitchingRequestInterceptor = {
 	process(handlerInput) {
 		const { requestEnvelope, attributesManager } = handlerInput;
 		const currentIntent = requestEnvelope.request.intent;
+		const sessionAttributes = attributesManager.getSessionAttributes();
 
 		if (
 			requestEnvelope.request.type === "IntentRequest" &&
-			requestEnvelope.request.dialogState !== "COMPLETED"
+			requestEnvelope.request.dialogState !== "COMPLETED" &&
+			!sessionAttributes.hasDummyValues
 		) {
 			const sessionAttributes = attributesManager.getSessionAttributes();
 
@@ -388,6 +378,8 @@ const ContextSwitchingRequestInterceptor = {
 			// been invoked before
 			sessionAttributes[currentIntent.name] = currentIntent;
 			attributesManager.setSessionAttributes(sessionAttributes);
+
+
 		}
 	}
 }
@@ -403,16 +395,35 @@ const ContextSwitchingRequestInterceptor = {
  */
 const SetIntentFlagsRequestInterceptor = {
 	process(handlerInput) {
-		const { requestEnvelope, attributesManager } = handlerInput;
-		const currentIntent = requestEnvelope.request.intent;
-		if (requestEnvelope.request.type === "IntentRequest" && currentIntent.name in intentFlags) {
+		if (handlerInput.requestEnvelope.request.type === "IntentRequest" && 
+		handlerInput.requestEnvelope.request.intent.name in intentFlags) {
+			const { requestEnvelope, attributesManager } = handlerInput;
+			const currentIntent = requestEnvelope.request.intent;
 			const sessionAttributes = attributesManager.getSessionAttributes();
 			if (!sessionAttributes.intentFlags)
 				sessionAttributes.intentFlags = {}
 			if (currentIntent.name !== sessionAttributes.intentFlags.intentName) {
-				sessionAttributes.intentFlags = intentFlags[currentIntent.name];
+				sessionAttributes.intentFlags = intentFlags[currentIntent.name].flags;
 				attributesManager.setSessionAttributes(sessionAttributes);
 			}
+		}
+	}
+}
+
+/**
+ * This interceptor restores the slots values when the switchIntent() function
+ * is used.
+ */
+const RestoreDummyValuesRequestInterceptor = {
+	process(handlerInput) {
+		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+		handlerInput.attributesManager.getSessionAttributes().hasDummyValues) {
+			const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+			handlerInput.requestEnvelope.request.dialogState = "IN_PROGRESS";
+			const dummyIntent = handlerInput.requestEnvelope.request.intent;
+			handlerInput.requestEnvelope.request.intent = sessionAttributes[dummyIntent.name];
+			delete sessionAttributes.hasDummyValues;
+			handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 		}
 	}
 }
@@ -596,54 +607,47 @@ if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
 //arrays can be created prior and passed using ... but there an unintended consequences
 //for now place new Handlers and Interceptors manually, order matters!
 
-
-
 var requestHandlers = [
 	LaunchRequestHandler,
+	SessionEndedRequestHandler,
+	HelpIntentHandler,
+	CancelAndStopIntentHandler,
+	FallbackIntentHandler,
 	ReportAnIssueIntentHandler,
+	abandonedVehicle.StartedAbandonedVehicleIntentHandler,
+	getLocation.GetLocationIntentHandler,
+	getLocation.SIPGetLocationFromUserIntentHandler,
+	getLocation.yn_IsAddressCorrectIntentHandler,
 	yn_AnythingElseIntentHandler,
 	yn_RetryIntentHandler,
-	getLocation.GetLocationIntentHandler,
-	// getLocation.YesUseCurrentLocationIntentHandler,
-	// getLocation.NoUseCurrentLocationIntentHandler,
-	// getLocation.YesUseHomeAddressIntentHandler,
-	// getLocation.NoUseHomeAddressIntentHandler,
+	getLocation.yn_UseGeoLocationIntentHandler,
 	getLocation.yn_TryAnotherAddress,
-	getLocation.yn_UseCurrentLocationIntentHandler,
-	getLocation.GetLocationHelperIntentHandler,
-	getLocation.yn_TryAnotherAddress,
-	abandonedVehicle.AbandonedVehicleIntentHandler,
-	abandonedVehicle.YesAbandonedVehicleIntentHandler,
-	abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
-	abandonedVehicle.NoAbandonedVehicleIntentHandler,
-	abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
+	abandonedVehicle.InProgressAbandonedVehicleIntentHandler,
+	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
+	abandonedVehicle.yn_IsAbandonedVehicleIntentHandler,
+	abandonedVehicle.yn_ConfirmVehicleDescriptionIntentHandler,
+	abandonedVehicle.yn_ConfirmLicensePlateIntentHandler,
+	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	homelessCamp.HomelessCampIntentHandler,
 	homelessCamp.YesHomelessCampIntentHandler,
 	homelessCamp.NoHomelessCampIntentHandler,
 	trashpickup.TrashPickUpIntentHandler,
-	FallbackIntentHandler,
-	HelpIntentHandler,
-	CancelAndStopIntentHandler,
-	SessionEndedRequestHandler
 ]
 
 var requestInterceptors = [
-	// NewSessionRequestInterceptor,
-	// PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
 	LocalisationRequestInterceptor,
+	RestoreDummyValuesRequestInterceptor,
 	ContextSwitchingRequestInterceptor,
 	getLocation.GetLocationRequestInterceptor,
 	SetIntentFlagsRequestInterceptor,
-	// YesNoIntentRequestInterceptor
 ]
 
 const skillBuilder = Alexa.SkillBuilders.custom();
 
 skillBuilder
-	// .addRequestHandler(LaunchRequestHandler)
 	.addRequestHandlers(...requestHandlers)
 	.addRequestInterceptors(...requestInterceptors)
-	.withApiClient(new Alexa.DefaultApiClient())
+	.withApiClient(new Alexa.DefaultApiClient()) // TODO: No longer using address API. Remove?
 	.addErrorHandlers(ErrorHandler)
 	.withCustomUserAgent("BigDino")
 
@@ -655,7 +659,7 @@ if (process.env.DEVELOPMENT === "true") {
 			dynamoDBClient: ddbClient,
 		})
 	)
-} else { // Lambda hosted environment
+} else { // Lambda hosted environment // TODO: Make this an if statement to check for AWS_EXECUTION_ENV, else return error
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
