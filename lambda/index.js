@@ -12,6 +12,7 @@ const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter
 const i18n = require("i18next")
 const axios = require("axios")
 
+
 // Local modules
 const helper = require("./helper/helperFunctions.js")
 const sfCase = require("./helper/SalesforceCaseObject.js")
@@ -20,7 +21,9 @@ const abandonedVehicle = require("./abandonedVehicle.js")
 const homelessCamp = require("./homelessEncampment.js")
 const getLocation = require("./addressCollectionFlow")
 const trashpickup = require("./trashPickup.js")
-const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
+const getPhoneNumber = require("./getPhoneNum.js")
+const intentFlagsFile = require("./helper/intentFlags.js"); 
+const intentFlags = intentFlagsFile.intentFlags;
 
 
 
@@ -50,25 +53,38 @@ const LaunchRequestHandler = {
 			: 1;
 		console.log("counter: " + counter);
 
-		persistentAttributes = { counter: counter + 1 };
-		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
-		await attributesManager.savePersistentAttributes(); // and then save
-		// END DYNAMODB TEST CODE //
+    persistentAttributes = { counter: counter + 1 };
+    attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
+    await attributesManager.savePersistentAttributes(); // and then save
 
-		// // Query SFDB TEST CODE //
-		// // This is an example of making a query to the Salesforce database. 
-		//  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
-		//  LastName='mouse') LIMIT 5`;
-		// const contactDetails = await helper.querySFDB(query);
-		// console.log('Name: ' + contactDetails.records[0].Name);
-		// console.log('Phone: ' + contactDetails.records[0].Phone)
-		// // END QUERY SFDB TEST CODE //
+    //Get the user's phone number
+    const phoneNumber = await getPhoneNumber.getPhoneNumber(handlerInput);
+    //const speechOutput = `Your phone number is ${phoneNumber}. How can I assist you today?`;
+    // END DYNAMODB TEST CODE //
 
-		// Testing gis endpoints
-		// const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
-		// const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
-		// console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
-		// console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
+	//Get the user's phone number
+	if(phoneNumber == null){
+    console.log("phoneNumber: " + phoneNumber);
+	}else{
+		console.log("phoneNumber: " + phoneNumber);
+	
+	}
+    //Output phonenumber to console
+   
+    // // Query SFDB TEST CODE //
+    // // This is an example of making a query to the Salesforce database. 
+   //  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
+   //  LastName='mouse') LIMIT 5`;
+    // const contactDetails = await helper.querySFDB(query);
+    // console.log('Name: ' + contactDetails.records[0].Name);
+    // console.log('Phone: ' + contactDetails.records[0].Phone)
+    // // END QUERY SFDB TEST CODE //
+    
+    // Testing gis endpoints
+      // const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
+      // const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
+      // console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
+      // console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
 
 		// //Submit the ticket
 		// const ticketTest = await helper.openCase();

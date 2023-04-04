@@ -1,5 +1,5 @@
 const axios = require("axios")
-
+const Alexa = require('ask-sdk-core');
 /** //TODO: Get this working on a lambda environment
  * This function gets an OAuth token for use with the Salesforce API.
  * It returns a new token and should be used in every request to the Salesforce API.
@@ -451,6 +451,42 @@ function getQA(handlerInput, currentIntent) {
 	}
 }
 
+// Helper function to retrieve the user's phone number and save it in session attribute called phone else return null but do not throw an error
+async function getPhoneNumber(handlerInput) {
+	const { deviceId } = handlerInput.requestEnvelope.context.System.device;
+	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
+	const url = `${apiEndpoint}/v1/devices/${deviceId}/settings/alexa.settings.profile.mobileNumber`;
+
+	try {
+		let res = await axios.get(url, {
+			headers: {
+				'Host': `api.amazonalexa.com`,
+				'Authorization': `Bearer ${apiAccessToken}`,
+				'Accept': 'application/json'
+
+			}
+		});
+	
+	
+		if (res.status === 200)
+			return res.data;
+		else
+			return null;
+	} catch (error) {
+		if (error.response.status === 403) {
+			console.log('The user has not given permission to access their full address.')
+			return null;
+		}
+		else if (error.response.status) {
+			console.log('Error retrieving phone from device API: ', error.status, error.message);
+			return null;
+		}
+		else 
+			return null;
+	}
+  }
+  
+
 module.exports = {
 	getOAuthToken,
 	querySFDB,
@@ -472,5 +508,6 @@ module.exports = {
 	createIntentFromSlots,
 	switchIntent,
 	getGeolocation,
-	getHomeAddress
+	getHomeAddress,
+	getPhoneNumber
 }
