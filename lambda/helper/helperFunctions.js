@@ -231,10 +231,9 @@ function switchIntent(handlerInput, intentName) {
 
 /**
  * Gets the highest scoring address candidate from the ArcGIS world geocoder.
- * The returned address will be used to query the sac311gis API for more details.
- * TODO: Find out which return address we should be using from the response.
+ * The returned candidate object will be used to query the sac311gis API for more details.
  * @param {string} address 
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
  */
 async function getWorldAddressCandidate(address) {
 	if (!address) {
@@ -302,10 +301,8 @@ async function getWorldAddressResponse(address) {
 
 /**
  * Takes a candidate object from world gis to compare against sac311 gis
- * Returns a candidate object or false if no suitable candidate
- * Automatically accepts a candidate if score equal to 100
  * @param {object} potentialCandidate
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
 */
 async function getInternalAddressCandidate(potentialCandidate) {
 	if (!potentialCandidate) {
