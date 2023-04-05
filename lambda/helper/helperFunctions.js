@@ -112,22 +112,26 @@ async function getHomeAddress(handlerInput) {
 	}
 }
 
-/**
- * Checks whether the user has given permission for the skill to access their geolocation.
- * @param {Object} handlerInput 
- * @returns 
+/** 
+ * checks if Geo Location is accurate and authorized to be used from device
+ * @param {Object} handlerInput
+ * @returns string describing the error or returns "supported"
  */
 function isGeolocationAvailable(handlerInput) {
 	const isGeoSupported = handlerInput.requestEnvelope.context.System.device.supportedInterfaces.Geolocation;
 	if (isGeoSupported) {
 		const geoObject = handlerInput.requestEnvelope.context.Geolocation;
 		const ACCURACY_THRESHOLD = 100; // accuracy of 100 meters required
-		if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD )
-			return true;
+		if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD) {
+			return "supported";
+		}
+		else if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters > ACCURACY_THRESHOLD) {
+			return "not-accurate";
+		}
 		else
-			return false;
+			return "not-authorized";
 	} else {
-		return false;
+		return "not-available";
 	}
 }
 
