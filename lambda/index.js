@@ -13,6 +13,7 @@ const i18n = require("i18next")
 const axios = require("axios")
 
 
+
 // Local modules
 const helper = require("./helper/helperFunctions.js")
 const sfCase = require("./helper/SalesforceCaseObject.js")
@@ -23,8 +24,8 @@ const getLocation = require("./addressCollectionFlow")
 const trashpickup = require("./trashPickup.js")
 const getPhoneNumber = require("./getPhoneNum.js")
 const intentFlagsFile = require("./helper/intentFlags.js"); 
+const getServiceName = require("./helper/getServiceName.js")
 const intentFlags = intentFlagsFile.intentFlags;
-
 
 
 
@@ -67,8 +68,10 @@ const LaunchRequestHandler = {
     console.log("phoneNumber: " + phoneNumber);
 	}else{
 		console.log("phoneNumber: " + phoneNumber);
-	
 	}
+	
+
+	
     //Output phonenumber to console
    
     // // Query SFDB TEST CODE //
@@ -131,6 +134,7 @@ const LaunchRequestHandler = {
 /**
  * This handler is triggered when the user says something like "I want to report an issue"
  */
+
 const ReportAnIssueIntentHandler = {
 	canHandle(handlerInput) {
 		return (
@@ -138,9 +142,12 @@ const ReportAnIssueIntentHandler = {
 			Alexa.getIntentName(handlerInput.requestEnvelope) ===
 			"ReportAnIssueIntent"
 		);
+
+
 	},
 	handle(handlerInput) {
-		helper.setQuestion(handlerInput, null)
+	
+		helper.setQuestion(handlerInput, null);
 		return (
 			handlerInput.responseBuilder
 				.speak(handlerInput.t('REPORT_ISSUE'))

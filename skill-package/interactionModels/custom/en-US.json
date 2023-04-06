@@ -1,1559 +1,2648 @@
 {
   "interactionModel": {
-      "languageModel": {
-          "invocationName": "sacramento three one one",
-          "intents": [
-              {
-                  "name": "AMAZON.YesIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.NoIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.CancelIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.HelpIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.StopIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.NavigateHomeIntent",
-                  "samples": []
-              },
-              {
-                  "name": "PotHoleIntent",
-                  "slots": [
-                      {
-                          "name": "potholeAddress",
-                          "type": "AMAZON.StreetAddress",
-                          "samples": [
-                              "Its on {potholeAddress}",
-                              "{potholeAddress}"
-                          ]
-                      }
-                  ],
-                  "samples": [
-                      "I would like to report a pothole on {potholeAddress}",
-                      "I would like to report a pothole",
-                      "There is a pothole {potholeAddress}",
-                      "Pothole",
-                      "There is a pothole"
-                  ]
-              },
-              {
-                  "name": "PetComplaintIntent",
-                  "slots": [
-                      {
-                          "name": "animal",
-                          "type": "animalType",
-                          "samples": [
-                              "It's a {animal}",
-                              "The {animal} I saw is",
-                              "{animal} is "
-                          ]
-                      }
-                  ],
-                  "samples": [
-                      "pet complaint",
-                      "Report pet complaint",
-                      "I would like to report a pet complaint",
-                      "There is an {animal} in the street"
-                  ]
-              },
-              {
-                  "name": "AbandonedVehicleIntent",
-                  "slots": [
-                      {
-                          "name": "abandoned",
-                          "type": "abandonedSynonymsType"
-                      },
-                      {
-                          "name": "vehicle",
-                          "type": "vehicleSynonymsType"
-                      },
-                      {
-                          "name": "make",
-                          "type": "vehicleMakeType",
-                          "samples": [
-                              "It's a {make}",
-                              "{make}",
-                              "a {make}",
-                              "{make} is the make"
-                          ]
-                      },
-                      {
-                          "name": "model",
-                          "type": "vehicleModelType",
-                          "samples": [
-                              "{model}",
-                              "It's a {make} {model}",
-                              "It's a {model}",
-                              "It's a {color} {make} {model}"
-                          ]
-                      },
-                      {
-                          "name": "color",
-                          "type": "colorType",
-                          "samples": [
-                              "{color}",
-                              "It's {color}",
-                              "The {vehicle} is {color}"
-                          ]
-                      },
-                      {
-                          "name": "nullRequired",
-                          "type": "nullRequiredType"
-                      },
-                      {
-                          "name": "timePeriod",
-                          "type": "AMAZON.DURATION"
-                      },
-                      {
-                          "name": "licensePlate",
-                          "type": "AMAZON.SearchQuery"
-                      }
-                  ],
-                  "samples": [
-                      "{color} {abandoned} {make}",
-                      "id like to report an {color} {vehicle}",
-                      "Someone left their {color} {model}",
-                      "I'd like to report a {abandoned} {make} {model}",
-                      "I'd like to report a {abandoned} {make}",
-                      "I'd like to report a {abandoned} {vehicle}",
-                      "Someone left their {color} {make} {model}",
-                      "Someone left their {color} {vehicle}",
-                      "Someone left their {make} {model}",
-                      "Someone left their {model}",
-                      "Someone left their {make}",
-                      "Someone left their {vehicle}",
-                      "There's an {abandoned} {vehicle}",
-                      "There's a {abandoned} {model}",
-                      "There's a {abandoned} {color} {model}",
-                      "someone {abandoned} their {vehicle} ",
-                      "A {vehicle} has no owner",
-                      "{color} {abandoned} {vehicle}",
-                      "{abandoned} {color} {make} {model}",
-                      "{color} {abandoned} {make} {model}",
-                      "{color} {abandoned} {model}",
-                      "{abandoned} {color} {model}",
-                      "{abandoned} {color} {vehicle}",
-                      "{abandoned} {make} {model}",
-                      "{abandoned} {model}",
-                      "{abandoned} {make}",
-                      "{abandoned} {vehicle}"
-                  ]
-              },
-              {
-                  "name": "StrayAnimalIntent",
-                  "slots": [
-                      {
-                          "name": "stray",
-                          "type": "straySynonymsType"
-                      },
-                      {
-                          "name": "strayAnimalSlot",
-                          "type": "animalType"
-                      },
-                      {
-                          "name": "strayAnimalAddress",
-                          "type": "AMAZON.PostalAddress",
-                          "samples": [
-                              "The {strayAnimalSlot} is at {strayAnimalAddress}",
-                              "{strayAnimalAddress}",
-                              "It is located at {strayAnimalAddress}"
-                          ]
-                      }
-                  ],
-                  "samples": [
-                      "Report a {stray} {strayAnimalSlot}",
-                      "{stray} {strayAnimalSlot}",
-                      "There's a {stray} {strayAnimalSlot}"
-                  ]
-              },
-              {
-                  "name": "ReportAnIssueIntent",
-                  "slots": [],
-                  "samples": [
-                      "Report a complant",
-                      "Report an incident",
-                      "Report an issue"
-                  ]
-              },
-              {
-                  "name": "HomelessCampIntent",
-                  "slots": [
-                      {
-                          "name": "homelessCamp",
-                          "type": "homelessSynonymsType"
-                      },
-                      {
-                          "name": "propertyType",
-                          "type": "propertySynonymsType",
-                          "samples": [
-                              "It is on {propertyType}",
-                              "{propertyType}"
-                          ]
-                      },
-                      {
-                          "name": "numPeople",
-                          "type": "AMAZON.NUMBER",
-                          "samples": [
-                              "About {numPeople} people",
-                              "{numPeople} persons",
-                              "{numPeople} people",
-                              "There are {numPeople} people",
-                              "{numPeople}"
-                          ]
-                      },
-                      {
-                          "name": "isChildren",
-                          "type": "yesNoType",
-                          "samples": [
-                              "{isChildren}"
-                          ]
-                      },
-                      {
-                          "name": "isAnimals",
-                          "type": "yesNoType"
-                      },
-                      {
-                          "name": "campDescription",
-                          "type": "AMAZON.SearchQuery",
-                          "samples": [
-                              "{campDescription}"
-                          ]
-                      },
-                      {
-                          "name": "isTrash",
-                          "type": "yesNoType",
-                          "samples": [
-                              "{isTrash}"
-                          ]
-                      }
-                  ],
-                  "samples": [
-                      "Report a {homelessCamp} on {propertyType}",
-                      "Report a {homelessCamp}",
-                      "There is a {homelessCamp} on {propertyType}",
-                      "There is a {homelessCamp}",
-                      "{homelessCamp} on {propertyType}",
-                      "{homelessCamp}",
-                      "Help me report a {homelessCamp}  ticket",
-                      "Reporting {homelessCamp}  on {propertyType}",
-                      "Reporting {homelessCamp} on  {propertyType}",
-                      "Report {homelessCamp} ",
-                      "There is a {homelessCamp}  on {propertyType}"
-                  ]
-              },
-              {
-                  "name": "GetLocationIntent",
-                  "slots": [
-                      {
-                          "name": "location",
-                          "type": "AMAZON.PostalAddress"
-                      }
-                  ],
-                  "samples": []
-              },
-              {
-                  "name": "TrashPickupIntent",
-                  "slots": [
-                      {
-                          "name": "trashType",
-                          "type": "AMAZON.SearchQuery",
-                          "samples": [
-                              "{trashType}"
-                          ]
-                      }
-                  ],
-                  "samples": []
-              },
-              {
-                  "name": "DeadAnimalIntent",
-                  "slots": [
-                      {
-                          "name": "deadAnimalAddress",
-                          "type": "AMAZON.PostalAddress",
-                          "samples": [
-                              "{deadAnimalAddress}",
-                              "The address is {deadAnimalAddress}"
-                          ]
-                      },
-                      {
-                          "name": "deadAnimal",
-                          "type": "animalType",
-                          "samples": [
-                              "it is a {deadAnimal}",
-                              "{deadAnimal}"
-                          ]
-                      }
-                  ],
-                  "samples": [
-                      "dead {deadAnimal} at {deadAnimalAddress}",
-                      "a dead {deadAnimal}",
-                      "I would like to report a dead {deadAnimal} on {deadAnimalAddress}"
-                  ]
-              },
-              {
-                  "name": "TrafficLightIntent",
-                  "slots": [
-                      {
-                          "name": "intersectionAddress",
-                          "type": "AMAZON.StreetName",
-                          "multipleValues": {
-                              "enabled": true
-                          }
-                      }
-                  ],
-                  "samples": [
-                      "Traffic light",
-                      "Traffic light broken at {intersectionAddress} {intersectionAddress}",
-                      "Traffic light broken on {intersectionAddress}",
-                      "Traffic light broken at intersection of {intersectionAddress} and {intersectionAddress}",
-                      "Traffic light down at the intersection of {intersectionAddress} and {intersectionAddress}"
-                  ]
-              },
-              {
-                  "name": "DirtyParkBathroomIntent",
-                  "slots": [
-                      {
-                          "name": "dirtyType",
-                          "type": "dirtyType"
-                      },
-                      {
-                          "name": "bathroomType",
-                          "type": "bathroomType"
-                      },
-                      {
-                          "name": "cleaningType",
-                          "type": "cleaningType"
-                      },
-                      {
-                          "name": "towelType",
-                          "type": "towelType"
-                      }
-                  ],
-                  "samples": [
-                      "The {bathroomType} is missing {towelType}",
-                      "The park {bathroomType} needs {towelType}",
-                      "The park {bathroomType} needs {cleaningType}",
-                      "The park {bathroomType} is {dirtyType}",
-                      "Our local park {bathroomType} is {dirtyType}",
-                      "There is a {dirtyType} park {bathroomType}"
-                  ]
-              },
-              {
-                  "name": "GetLocationHelperIntent",
-                  "slots": [
-                      {
-                          "name": "helperLocation",
-                          "type": "AMAZON.SearchQuery",
-                          "samples": [
-                              "{helperLocation}"
-                          ]
-                      }
-                  ],
-                  "samples": []
-              },
-              {
-                  "name": "LiveAgentIntent",
-                  "slots": [],
-                  "samples": [
-                      "Speak to live agent",
-                      "Live agent"
-                  ]
-              },
-              {
-                  "name": "AMAZON.FallbackIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.StartOverIntent",
-                  "samples": []
-              },
-              {
-                  "name": "AMAZON.RepeatIntent",
-                  "samples": []
-              }
+    "languageModel": {
+      "invocationName": "sacramento three one one",
+      "intents": [
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AbandonedVehicleIntent",
+          "slots": [
+            {
+              "name": "abandoned",
+              "type": "abandonedSynonymsType"
+            },
+            {
+              "name": "vehicle",
+              "type": "vehicleSynonymsType"
+            },
+            {
+              "name": "make",
+              "type": "vehicleMakeType"
+            },
+            {
+              "name": "model",
+              "type": "vehicleModelType"
+            },
+            {
+              "name": "color",
+              "type": "colorType"
+            },
+            {
+              "name": "timePeriod",
+              "type": "AMAZON.DURATION"
+            },
+            {
+              "name": "licensePlate",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{licensePlate}"
+              ]
+            },
+            {
+              "name": "brokenType",
+              "type": "brokenType"
+            }
           ],
-          "types": [
-              {
-                  "name": "vehicleSynonymsType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "vehicle",
-                              "synonyms": [
-                                  "motor vehicle",
-                                  "automobile",
-                                  "car"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "vehicleMakeType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "Honda"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Ford"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Saturn"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Mazda"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Dodge"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Toyota"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "vehicleModelType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "Malibu"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Civic"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Corrolla"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Camry"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Tahoe"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "Accord"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "abandonedSynonymsType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "abandoned",
-                              "synonyms": [
-                                  "neglected",
-                                  "unused",
-                                  "uninhabited",
-                                  "forsaken",
-                                  "dumped",
-                                  "ditched",
-                                  "deserted"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "colorType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "pink"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "silver"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "brown"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "teal"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "gray",
-                              "synonyms": [
-                                  "grey"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "burgundy",
-                              "synonyms": [
-                                  "maroon"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "purple",
-                              "synonyms": [
-                                  "violet"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "orange"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "white"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "black"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "yellow"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "green"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "blue"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "red"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "straySynonymsType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "stray",
-                              "synonyms": [
-                                  "disowned",
-                                  "loose",
-                                  "lost",
-                                  "feral"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "animalType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "bird"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "cow",
-                              "synonyms": [
-                                  "cattle",
-                                  "bull"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "horse",
-                              "synonyms": [
-                                  "mare"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "chicken",
-                              "synonyms": [
-                                  "hen"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "fish"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "dog",
-                              "synonyms": [
-                                  "canine"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "cat",
-                              "synonyms": [
-                                  "feline"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "homelessSynonymsType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "homeless Camp",
-                              "synonyms": [
-                                  "homeless encampment",
-                                  "unhoused",
-                                  "homeless tent",
-                                  "homeless tents",
-                                  "homeless camp",
-                                  "campsite",
-                                  "transient",
-                                  "encampment",
-                                  "camp",
-                                  "tents",
-                                  "tent"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "propertySynonymsType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "private property",
-                              "synonyms": [
-                                  "private",
-                                  "privately owned property",
-                                  "privately owned land",
-                                  "private land"
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "public property",
-                              "synonyms": [
-                                  "public",
-                                  "publicly owned land",
-                                  "publicly own property",
-                                  "public land "
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "yesNoType",
-                  "values": [
-                      {
-                          "id": "FALSE",
-                          "name": {
-                              "value": "no",
-                              "synonyms": [
-                                  "naw",
-                                  "not",
-                                  "negative",
-                                  "nope"
-                              ]
-                          }
-                      },
-                      {
-                          "id": "TRUE",
-                          "name": {
-                              "value": "yes",
-                              "synonyms": [
-                                  "yup",
-                                  "of course",
-                                  "for sure",
-                                  "absolutely",
-                                  "affirmative",
-                                  "correct",
-                                  "yep",
-                                  "yeah"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "trash",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "trash",
-                              "synonyms": [
-                                  "scraps",
-                                  "rubbish",
-                                  "junk",
-                                  "debris",
-                                  "garbage",
-                                  "litter",
-                                  "waste"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "bathroomType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "bathroom",
-                              "synonyms": [
-                                  "powder room",
-                                  "restroom",
-                                  "bath",
-                                  "toilet",
-                                  "lavatory",
-                                  "outhouse",
-                                  "washroom"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "cleaningType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "to be cleaned"
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "cleaning",
-                              "synonyms": [
-                                  "sponged",
-                                  "wiped",
-                                  "scrubbed"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "towelType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "toilet paper",
-                              "synonyms": [
-                                  "toilet roll",
-                                  "toilet tissue",
-                                  "T.P."
-                              ]
-                          }
-                      },
-                      {
-                          "name": {
-                              "value": "paper towels",
-                              "synonyms": [
-                                  "hand towels"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "dirtyType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "dirty",
-                              "synonyms": [
-                                  "awful",
-                                  "off-putting",
-                                  "repulsive",
-                                  "nauseating",
-                                  "revolting",
-                                  "disgusting",
-                                  "filthy"
-                              ]
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "nullRequiredType",
-                  "values": [
-                      {
-                          "name": {
-                              "value": "supercalifragilisticexpialidocious"
-                          }
-                      }
-                  ]
-              }
+          "samples": [
+            "There is a vehicle that is {brokenType} and left behind",
+            "There is a {vehicle} left unattended",
+            "Want to report a {vehicle} that is {abandoned}",
+            "I want to report a {vehicle} that seems to be left {abandoned}",
+            "There is a {vehicle} left {abandoned}",
+            "There is an {abandoned} {vehicle} parked on the street",
+            "{color} {abandoned} {make}",
+            "id like to report an {color} {vehicle}",
+            "Someone left their {color} {model}",
+            "I'd like to report a {abandoned} {make} {model}",
+            "I'd like to report a {abandoned} {make}",
+            "I'd like to report a {abandoned} {vehicle}",
+            "Someone left their {color} {make} {model}",
+            "Someone left their {color} {vehicle}",
+            "Someone left their {make} {model}",
+            "Someone left their {model}",
+            "Someone left their {make}",
+            "Someone left their {vehicle}",
+            "There's an {abandoned} {vehicle}",
+            "There's a {abandoned} {model}",
+            "There's a {abandoned} {color} {model}",
+            "someone {abandoned} their {vehicle} ",
+            "A {vehicle} has no owner",
+            "{color} {abandoned} {vehicle}",
+            "{abandoned} {color} {make} {model}",
+            "{color} {abandoned} {make} {model}",
+            "{color} {abandoned} {model}",
+            "{abandoned} {color} {model}",
+            "{abandoned} {color} {vehicle}",
+            "{abandoned} {make} {model}",
+            "{abandoned} {model}",
+            "{abandoned} {make}",
+            "{abandoned} {vehicle}"
           ]
-      },
-      "dialog": {
-          "intents": [
-              {
-                  "name": "PotHoleIntent",
-                  "delegationStrategy": "SKILL_RESPONSE",
-                  "confirmationRequired": true,
-                  "prompts": {
-                      "confirmation": "Confirm.Intent.816362722612"
-                  },
-                  "slots": [
-                      {
-                          "name": "potholeAddress",
-                          "type": "AMAZON.StreetAddress",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.816362722612.1301769605493"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "AbandonedVehicleIntent",
-                  "delegationStrategy": "SKILL_RESPONSE",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "abandoned",
-                          "type": "abandonedSynonymsType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      },
-                      {
-                          "name": "vehicle",
-                          "type": "vehicleSynonymsType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      },
-                      {
-                          "name": "make",
-                          "type": "vehicleMakeType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.159243950675.45262955813"
-                          }
-                      },
-                      {
-                          "name": "model",
-                          "type": "vehicleModelType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.159243950675.1214583905306"
-                          }
-                      },
-                      {
-                          "name": "color",
-                          "type": "colorType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.159243950675.1551161405556"
-                          }
-                      },
-                      {
-                          "name": "nullRequired",
-                          "type": "nullRequiredType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      }
-                  ]
-              },
-              {
-                  "name": "StrayAnimalIntent",
-                  "confirmationRequired": true,
-                  "prompts": {
-                      "confirmation": "Confirm.Intent.88351892471"
-                  },
-                  "slots": [
-                      {
-                          "name": "stray",
-                          "type": "straySynonymsType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      },
-                      {
-                          "name": "strayAnimalSlot",
-                          "type": "animalType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      },
-                      {
-                          "name": "strayAnimalAddress",
-                          "type": "AMAZON.PostalAddress",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.221614793867.602172036702"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "PetComplaintIntent",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "animal",
-                          "type": "animalType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.1176709426849.1317643299465"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "HomelessCampIntent",
-                  "delegationStrategy": "SKILL_RESPONSE",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "homelessCamp",
-                          "type": "homelessSynonymsType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      },
-                      {
-                          "name": "propertyType",
-                          "type": "propertySynonymsType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.409468368967.699702184701"
-                          }
-                      },
-                      {
-                          "name": "numPeople",
-                          "type": "AMAZON.NUMBER",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.478901083922.774744802323"
-                          }
-                      },
-                      {
-                          "name": "isChildren",
-                          "type": "yesNoType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.478901083922.677574959232"
-                          }
-                      },
-                      {
-                          "name": "isAnimals",
-                          "type": "yesNoType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.478901083922.331242269140"
-                          }
-                      },
-                      {
-                          "name": "campDescription",
-                          "type": "AMAZON.SearchQuery",
-                          "confirmationRequired": true,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "confirmation": "Confirm.Slot.591693848777.1646553018457",
-                              "elicitation": "Elicit.Slot.409468368967.625938744990"
-                          }
-                      },
-                      {
-                          "name": "isTrash",
-                          "type": "yesNoType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.1100716015297.948173215885"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "GetLocationIntent",
-                  "delegationStrategy": "SKILL_RESPONSE",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "location",
-                          "type": "AMAZON.PostalAddress",
-                          "confirmationRequired": false,
-                          "elicitationRequired": false,
-                          "prompts": {}
-                      }
-                  ]
-              },
-              {
-                  "name": "TrashPickupIntent",
-                  "delegationStrategy": "SKILL_RESPONSE",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "trashType",
-                          "type": "AMAZON.SearchQuery",
-                          "confirmationRequired": true,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "confirmation": "Confirm.Slot.695582460385.101077360916",
-                              "elicitation": "Elicit.Slot.695582460385.101077360916"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "DeadAnimalIntent",
-                  "delegationStrategy": "SKILL_RESPONSE",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "deadAnimalAddress",
-                          "type": "AMAZON.PostalAddress",
-                          "confirmationRequired": true,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "confirmation": "Confirm.Slot.926509532094.1564036416986",
-                              "elicitation": "Elicit.Slot.926509532094.1564036416986"
-                          }
-                      },
-                      {
-                          "name": "deadAnimal",
-                          "type": "animalType",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.926509532094.455346598984"
-                          }
-                      }
-                  ]
-              },
-              {
-                  "name": "GetLocationHelperIntent",
-                  "confirmationRequired": false,
-                  "prompts": {},
-                  "slots": [
-                      {
-                          "name": "helperLocation",
-                          "type": "AMAZON.SearchQuery",
-                          "confirmationRequired": false,
-                          "elicitationRequired": true,
-                          "prompts": {
-                              "elicitation": "Elicit.Slot.1349433291344.1451233083949"
-                          }
-                      }
-                  ]
+        },
+        {
+          "name": "ReportAnIssueIntent",
+          "slots": [],
+          "samples": [
+            "Report a complant",
+            "Report an incident",
+            "Report an issue"
+          ]
+        },
+        {
+          "name": "GetLocationFromUserIntent",
+          "slots": [
+            {
+              "name": "userGivenAddress",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{userGivenAddress}"
+              ]
+            }
+          ],
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StartOverIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "vehicle",
+                "synonyms": [
+                  "motor vehicle",
+                  "automobile",
+                  "car"
+                ]
               }
+            }
+          ],
+          "name": "vehicleSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "Volvo"
+              }
+            },
+            {
+              "name": {
+                "value": "Volkswagen"
+              }
+            },
+            {
+              "name": {
+                "value": "Tesla"
+              }
+            },
+            {
+              "name": {
+                "value": "Subaru"
+              }
+            },
+            {
+              "name": {
+                "value": "Rolls-Royce"
+              }
+            },
+            {
+              "name": {
+                "value": "RAM"
+              }
+            },
+            {
+              "name": {
+                "value": "Porsche"
+              }
+            },
+            {
+              "name": {
+                "value": "Nissan"
+              }
+            },
+            {
+              "name": {
+                "value": "Mitsubishi"
+              }
+            },
+            {
+              "name": {
+                "value": "Mercedes-Benz"
+              }
+            },
+            {
+              "name": {
+                "value": "McLaren"
+              }
+            },
+            {
+              "name": {
+                "value": "Maserati"
+              }
+            },
+            {
+              "name": {
+                "value": "Lincoln"
+              }
+            },
+            {
+              "name": {
+                "value": "Lexus"
+              }
+            },
+            {
+              "name": {
+                "value": "Land Rover"
+              }
+            },
+            {
+              "name": {
+                "value": "Lamborghini"
+              }
+            },
+            {
+              "name": {
+                "value": "Kia"
+              }
+            },
+            {
+              "name": {
+                "value": "Jeep"
+              }
+            },
+            {
+              "name": {
+                "value": "Jaguar"
+              }
+            },
+            {
+              "name": {
+                "value": "Infiniti"
+              }
+            },
+            {
+              "name": {
+                "value": "GMC"
+              }
+            },
+            {
+              "name": {
+                "value": "Genesis"
+              }
+            },
+            {
+              "name": {
+                "value": "Fiat"
+              }
+            },
+            {
+              "name": {
+                "value": "Ferrari"
+              }
+            },
+            {
+              "name": {
+                "value": "Chrysler"
+              }
+            },
+            {
+              "name": {
+                "value": "Chevrolet"
+              }
+            },
+            {
+              "name": {
+                "value": "Cadillac"
+              }
+            },
+            {
+              "name": {
+                "value": "Buick"
+              }
+            },
+            {
+              "name": {
+                "value": "Bugatti"
+              }
+            },
+            {
+              "name": {
+                "value": "BMW"
+              }
+            },
+            {
+              "name": {
+                "value": "Bentley"
+              }
+            },
+            {
+              "name": {
+                "value": "Audi"
+              }
+            },
+            {
+              "name": {
+                "value": "Acura"
+              }
+            },
+            {
+              "name": {
+                "value": "Honda"
+              }
+            },
+            {
+              "name": {
+                "value": "Ford"
+              }
+            },
+            {
+              "name": {
+                "value": "Saturn"
+              }
+            },
+            {
+              "name": {
+                "value": "Mazda"
+              }
+            },
+            {
+              "name": {
+                "value": "Dodge"
+              }
+            },
+            {
+              "name": {
+                "value": "Toyota"
+              }
+            }
+          ],
+          "name": "vehicleMakeType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "ID.4"
+              }
+            },
+            {
+              "name": {
+                "value": "Atlas Cross Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Atlas"
+              }
+            },
+            {
+              "name": {
+                "value": "Tiguan"
+              }
+            },
+            {
+              "name": {
+                "value": "Arteon"
+              }
+            },
+            {
+              "name": {
+                "value": "Passat"
+              }
+            },
+            {
+              "name": {
+                "value": "Jetta"
+              }
+            },
+            {
+              "name": {
+                "value": "Golf"
+              }
+            },
+            {
+              "name": {
+                "value": "Tundra"
+              }
+            },
+            {
+              "name": {
+                "value": "Tacoma"
+              }
+            },
+            {
+              "name": {
+                "value": "Sequoia"
+              }
+            },
+            {
+              "name": {
+                "value": "4Runner"
+              }
+            },
+            {
+              "name": {
+                "value": "Highlander"
+              }
+            },
+            {
+              "name": {
+                "value": "RAV4"
+              }
+            },
+            {
+              "name": {
+                "value": "Mirai"
+              }
+            },
+            {
+              "name": {
+                "value": "Prius"
+              }
+            },
+            {
+              "name": {
+                "value": "Avalon"
+              }
+            },
+            {
+              "name": {
+                "value": "Corolla"
+              }
+            },
+            {
+              "name": {
+                "value": "Model Y"
+              }
+            },
+            {
+              "name": {
+                "value": "Model X "
+              }
+            },
+            {
+              "name": {
+                "value": "Model 3 "
+              }
+            },
+            {
+              "name": {
+                "value": "Model S"
+              }
+            },
+            {
+              "name": {
+                "value": "Phantom"
+              }
+            },
+            {
+              "name": {
+                "value": "Cullian"
+              }
+            },
+            {
+              "name": {
+                "value": "Dawn"
+              }
+            },
+            {
+              "name": {
+                "value": "Wraith"
+              }
+            },
+            {
+              "name": {
+                "value": "Ghost"
+              }
+            },
+            {
+              "name": {
+                "value": "Cayenne"
+              }
+            },
+            {
+              "name": {
+                "value": "Macan"
+              }
+            },
+            {
+              "name": {
+                "value": "Panamera"
+              }
+            },
+            {
+              "name": {
+                "value": "Taycan"
+              }
+            },
+            {
+              "name": {
+                "value": "911"
+              }
+            },
+            {
+              "name": {
+                "value": "GT-R"
+              }
+            },
+            {
+              "name": {
+                "value": "Titan"
+              }
+            },
+            {
+              "name": {
+                "value": "Frontier"
+              }
+            },
+            {
+              "name": {
+                "value": "Armada"
+              }
+            },
+            {
+              "name": {
+                "value": "Pathfinder"
+              }
+            },
+            {
+              "name": {
+                "value": "Murano"
+              }
+            },
+            {
+              "name": {
+                "value": "Rogue"
+              }
+            },
+            {
+              "name": {
+                "value": "Rogue Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Kicks"
+              }
+            },
+            {
+              "name": {
+                "value": "Leaf"
+              }
+            },
+            {
+              "name": {
+                "value": "Maxima"
+              }
+            },
+            {
+              "name": {
+                "value": "Altima"
+              }
+            },
+            {
+              "name": {
+                "value": "Sentra"
+              }
+            },
+            {
+              "name": {
+                "value": "Versa"
+              }
+            },
+            {
+              "name": {
+                "value": "Outlander PHEV"
+              }
+            },
+            {
+              "name": {
+                "value": "Outlander"
+              }
+            },
+            {
+              "name": {
+                "value": "Eclipse Cross"
+              }
+            },
+            {
+              "name": {
+                "value": "Mirage G4"
+              }
+            },
+            {
+              "name": {
+                "value": "Mirage"
+              }
+            },
+            {
+              "name": {
+                "value": "G-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLS-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLE-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLC-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLB-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLA-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "SL-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "SLC-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "CLS-CLass"
+              }
+            },
+            {
+              "name": {
+                "value": "CLA-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "S-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "E-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "C-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "A-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "Artura"
+              }
+            },
+            {
+              "name": {
+                "value": "Elva"
+              }
+            },
+            {
+              "name": {
+                "value": "Speedtail"
+              }
+            },
+            {
+              "name": {
+                "value": "GT"
+              }
+            },
+            {
+              "name": {
+                "value": "720S"
+              }
+            },
+            {
+              "name": {
+                "value": "600LT"
+              }
+            },
+            {
+              "name": {
+                "value": "570GT"
+              }
+            },
+            {
+              "name": {
+                "value": "570S"
+              }
+            },
+            {
+              "name": {
+                "value": "540C"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-9"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-5"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-30"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-3"
+              }
+            },
+            {
+              "name": {
+                "value": "MX-5 Miata"
+              }
+            },
+            {
+              "name": {
+                "value": "Mazda6"
+              }
+            },
+            {
+              "name": {
+                "value": "Mazda3"
+              }
+            },
+            {
+              "name": {
+                "value": "GranCabrio"
+              }
+            },
+            {
+              "name": {
+                "value": "GranTurismo"
+              }
+            },
+            {
+              "name": {
+                "value": "Levante"
+              }
+            },
+            {
+              "name": {
+                "value": "Quattroporte"
+              }
+            },
+            {
+              "name": {
+                "value": "Ghibli"
+              }
+            },
+            {
+              "name": {
+                "value": "Navigator"
+              }
+            },
+            {
+              "name": {
+                "value": "Nautilus"
+              }
+            },
+            {
+              "name": {
+                "value": "Corsair"
+              }
+            },
+            {
+              "name": {
+                "value": "Aviator"
+              }
+            },
+            {
+              "name": {
+                "value": "LX"
+              }
+            },
+            {
+              "name": {
+                "value": "GX"
+              }
+            },
+            {
+              "name": {
+                "value": "RX"
+              }
+            },
+            {
+              "name": {
+                "value": "NX"
+              }
+            },
+            {
+              "name": {
+                "value": "UX"
+              }
+            },
+            {
+              "name": {
+                "value": "LC"
+              }
+            },
+            {
+              "name": {
+                "value": "RC"
+              }
+            },
+            {
+              "name": {
+                "value": "LS"
+              }
+            },
+            {
+              "name": {
+                "value": "ES"
+              }
+            },
+            {
+              "name": {
+                "value": "IS"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover Velar"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover Evoque"
+              }
+            },
+            {
+              "name": {
+                "value": "Discovery"
+              }
+            },
+            {
+              "name": {
+                "value": "Discovery Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Defender"
+              }
+            },
+            {
+              "name": {
+                "value": "Carnival"
+              }
+            },
+            {
+              "name": {
+                "value": "Sorento"
+              }
+            },
+            {
+              "name": {
+                "value": "Sportage"
+              }
+            },
+            {
+              "name": {
+                "value": "Seltos"
+              }
+            },
+            {
+              "name": {
+                "value": "Soul"
+              }
+            },
+            {
+              "name": {
+                "value": "Stinger"
+              }
+            },
+            {
+              "name": {
+                "value": "K5"
+              }
+            },
+            {
+              "name": {
+                "value": "Forte"
+              }
+            },
+            {
+              "name": {
+                "value": "Rio"
+              }
+            },
+            {
+              "name": {
+                "value": "Renegade"
+              }
+            },
+            {
+              "name": {
+                "value": "Compass"
+              }
+            },
+            {
+              "name": {
+                "value": "Grand Cherokee"
+              }
+            },
+            {
+              "name": {
+                "value": "Cherokee"
+              }
+            },
+            {
+              "name": {
+                "value": "Gladiator"
+              }
+            },
+            {
+              "name": {
+                "value": "Wrangler"
+              }
+            },
+            {
+              "name": {
+                "value": "I-Pace"
+              }
+            },
+            {
+              "name": {
+                "value": "F-Pace"
+              }
+            },
+            {
+              "name": {
+                "value": "E-Pace"
+              }
+            },
+            {
+              "name": {
+                "value": "F-Type"
+              }
+            },
+            {
+              "name": {
+                "value": "XJ"
+              }
+            },
+            {
+              "name": {
+                "value": "XF"
+              }
+            },
+            {
+              "name": {
+                "value": "XE"
+              }
+            },
+            {
+              "name": {
+                "value": "QX80"
+              }
+            },
+            {
+              "name": {
+                "value": "QX60"
+              }
+            },
+            {
+              "name": {
+                "value": "QX50"
+              }
+            },
+            {
+              "name": {
+                "value": "Q60"
+              }
+            },
+            {
+              "name": {
+                "value": "Q50"
+              }
+            },
+            {
+              "name": {
+                "value": "Nexo"
+              }
+            },
+            {
+              "name": {
+                "value": "Palisade"
+              }
+            },
+            {
+              "name": {
+                "value": "Santa Fe"
+              }
+            },
+            {
+              "name": {
+                "value": "Tucson"
+              }
+            },
+            {
+              "name": {
+                "value": "Kona"
+              }
+            },
+            {
+              "name": {
+                "value": "Ioniq"
+              }
+            },
+            {
+              "name": {
+                "value": "Veloster"
+              }
+            },
+            {
+              "name": {
+                "value": "Sonata"
+              }
+            },
+            {
+              "name": {
+                "value": "Elantra"
+              }
+            },
+            {
+              "name": {
+                "value": "Accent"
+              }
+            },
+            {
+              "name": {
+                "value": "Ridgeline"
+              }
+            },
+            {
+              "name": {
+                "value": "Odessey"
+              }
+            },
+            {
+              "name": {
+                "value": "Pilot"
+              }
+            },
+            {
+              "name": {
+                "value": "Passport"
+              }
+            },
+            {
+              "name": {
+                "value": "CR-V"
+              }
+            },
+            {
+              "name": {
+                "value": "HR-V"
+              }
+            },
+            {
+              "name": {
+                "value": "Clarity"
+              }
+            },
+            {
+              "name": {
+                "value": "Insight"
+              }
+            },
+            {
+              "name": {
+                "value": "Savana"
+              }
+            },
+            {
+              "name": {
+                "value": "Yukon"
+              }
+            },
+            {
+              "name": {
+                "value": "Terrain"
+              }
+            },
+            {
+              "name": {
+                "value": "Acadia"
+              }
+            },
+            {
+              "name": {
+                "value": "Sierra HD"
+              }
+            },
+            {
+              "name": {
+                "value": "Sierra 1500"
+              }
+            },
+            {
+              "name": {
+                "value": "Canyon"
+              }
+            },
+            {
+              "name": {
+                "value": "Super Duty"
+              }
+            },
+            {
+              "name": {
+                "value": "F-150"
+              }
+            },
+            {
+              "name": {
+                "value": "Expedition"
+              }
+            },
+            {
+              "name": {
+                "value": "Explorer"
+              }
+            },
+            {
+              "name": {
+                "value": "Edge"
+              }
+            },
+            {
+              "name": {
+                "value": "Bronco Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Escape"
+              }
+            },
+            {
+              "name": {
+                "value": "EcoSport"
+              }
+            },
+            {
+              "name": {
+                "value": "Taurus"
+              }
+            },
+            {
+              "name": {
+                "value": "Fusion"
+              }
+            },
+            {
+              "name": {
+                "value": "Mustang"
+              }
+            },
+            {
+              "name": {
+                "value": "488 Spider"
+              }
+            },
+            {
+              "name": {
+                "value": "488 Pista"
+              }
+            },
+            {
+              "name": {
+                "value": "F8 Spider"
+              }
+            },
+            {
+              "name": {
+                "value": "F8 Tributo"
+              }
+            },
+            {
+              "name": {
+                "value": "SF90 Spider"
+              }
+            },
+            {
+              "name": {
+                "value": "SF90 Stradale"
+              }
+            },
+            {
+              "name": {
+                "value": "Roma"
+              }
+            },
+            {
+              "name": {
+                "value": "Portofino M"
+              }
+            },
+            {
+              "name": {
+                "value": "812 GTS"
+              }
+            },
+            {
+              "name": {
+                "value": "812 Superfast"
+              }
+            },
+            {
+              "name": {
+                "value": "Journey"
+              }
+            },
+            {
+              "name": {
+                "value": "Durango"
+              }
+            },
+            {
+              "name": {
+                "value": "Challenger"
+              }
+            },
+            {
+              "name": {
+                "value": "Charger"
+              }
+            },
+            {
+              "name": {
+                "value": "Voyager"
+              }
+            },
+            {
+              "name": {
+                "value": "Pacifica"
+              }
+            },
+            {
+              "name": {
+                "value": "300"
+              }
+            },
+            {
+              "name": {
+                "value": "Silverado"
+              }
+            },
+            {
+              "name": {
+                "value": "Colorado"
+              }
+            },
+            {
+              "name": {
+                "value": "Suburban"
+              }
+            },
+            {
+              "name": {
+                "value": "Traverse"
+              }
+            },
+            {
+              "name": {
+                "value": "Blazer"
+              }
+            },
+            {
+              "name": {
+                "value": "Equinox"
+              }
+            },
+            {
+              "name": {
+                "value": "Trax"
+              }
+            },
+            {
+              "name": {
+                "value": "Trailblazer"
+              }
+            },
+            {
+              "name": {
+                "value": "Corvette"
+              }
+            },
+            {
+              "name": {
+                "value": "Camaro"
+              }
+            },
+            {
+              "name": {
+                "value": "Impala"
+              }
+            },
+            {
+              "name": {
+                "value": "Sonic"
+              }
+            },
+            {
+              "name": {
+                "value": "Spark"
+              }
+            },
+            {
+              "name": {
+                "value": "Escalade"
+              }
+            },
+            {
+              "name": {
+                "value": "XT6"
+              }
+            },
+            {
+              "name": {
+                "value": "XT5"
+              }
+            },
+            {
+              "name": {
+                "value": "XT4"
+              }
+            },
+            {
+              "name": {
+                "value": "CT6"
+              }
+            },
+            {
+              "name": {
+                "value": "CT5"
+              }
+            },
+            {
+              "name": {
+                "value": "CT4"
+              }
+            },
+            {
+              "name": {
+                "value": "Regal TourX"
+              }
+            },
+            {
+              "name": {
+                "value": "Regal Sportback"
+              }
+            },
+            {
+              "name": {
+                "value": "Enclave"
+              }
+            },
+            {
+              "name": {
+                "value": "Envision"
+              }
+            },
+            {
+              "name": {
+                "value": "Encore GX"
+              }
+            },
+            {
+              "name": {
+                "value": "Encore"
+              }
+            },
+            {
+              "name": {
+                "value": "Chiron Super Sport 300+"
+              }
+            },
+            {
+              "name": {
+                "value": "Chiron Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Chiron"
+              }
+            },
+            {
+              "name": {
+                "value": "i8"
+              }
+            },
+            {
+              "name": {
+                "value": "i3 "
+              }
+            },
+            {
+              "name": {
+                "value": "X6 M"
+              }
+            },
+            {
+              "name": {
+                "value": "X5 M"
+              }
+            },
+            {
+              "name": {
+                "value": "X4 M"
+              }
+            },
+            {
+              "name": {
+                "value": "X3 M"
+              }
+            },
+            {
+              "name": {
+                "value": "M6"
+              }
+            },
+            {
+              "name": {
+                "value": "M5"
+              }
+            },
+            {
+              "name": {
+                "value": "M4"
+              }
+            },
+            {
+              "name": {
+                "value": "M3"
+              }
+            },
+            {
+              "name": {
+                "value": "M2"
+              }
+            },
+            {
+              "name": {
+                "value": "Z4"
+              }
+            },
+            {
+              "name": {
+                "value": "X7"
+              }
+            },
+            {
+              "name": {
+                "value": "X6"
+              }
+            },
+            {
+              "name": {
+                "value": "X5"
+              }
+            },
+            {
+              "name": {
+                "value": "X4"
+              }
+            },
+            {
+              "name": {
+                "value": "X3"
+              }
+            },
+            {
+              "name": {
+                "value": "X2"
+              }
+            },
+            {
+              "name": {
+                "value": "X1"
+              }
+            },
+            {
+              "name": {
+                "value": "e-tron"
+              }
+            },
+            {
+              "name": {
+                "value": "R8"
+              }
+            },
+            {
+              "name": {
+                "value": "TT"
+              }
+            },
+            {
+              "name": {
+                "value": "Q8"
+              }
+            },
+            {
+              "name": {
+                "value": "Q7"
+              }
+            },
+            {
+              "name": {
+                "value": "Q5"
+              }
+            },
+            {
+              "name": {
+                "value": "Q3"
+              }
+            },
+            {
+              "name": {
+                "value": "A8"
+              }
+            },
+            {
+              "name": {
+                "value": "A7"
+              }
+            },
+            {
+              "name": {
+                "value": "A6"
+              }
+            },
+            {
+              "name": {
+                "value": "A5"
+              }
+            },
+            {
+              "name": {
+                "value": "A4"
+              }
+            },
+            {
+              "name": {
+                "value": "A3"
+              }
+            },
+            {
+              "name": {
+                "value": "NSX"
+              }
+            },
+            {
+              "name": {
+                "value": "MDX"
+              }
+            },
+            {
+              "name": {
+                "value": "RDX"
+              }
+            },
+            {
+              "name": {
+                "value": "RLX"
+              }
+            },
+            {
+              "name": {
+                "value": "TLX"
+              }
+            },
+            {
+              "name": {
+                "value": "ILX"
+              }
+            },
+            {
+              "name": {
+                "value": "PoleStar 2"
+              }
+            },
+            {
+              "name": {
+                "value": "Polestar 1"
+              }
+            },
+            {
+              "name": {
+                "value": "XC90"
+              }
+            },
+            {
+              "name": {
+                "value": "XC60"
+              }
+            },
+            {
+              "name": {
+                "value": "XC40"
+              }
+            },
+            {
+              "name": {
+                "value": "V90"
+              }
+            },
+            {
+              "name": {
+                "value": "V60"
+              }
+            },
+            {
+              "name": {
+                "value": "S90"
+              }
+            },
+            {
+              "name": {
+                "value": "S60"
+              }
+            },
+            {
+              "name": {
+                "value": "Malibu"
+              }
+            },
+            {
+              "name": {
+                "value": "Civic"
+              }
+            },
+            {
+              "name": {
+                "value": "Corrolla"
+              }
+            },
+            {
+              "name": {
+                "value": "Camry"
+              }
+            },
+            {
+              "name": {
+                "value": "Tahoe"
+              }
+            },
+            {
+              "name": {
+                "value": "Accord"
+              }
+            }
+          ],
+          "name": "vehicleModelType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "abandoned",
+                "synonyms": [
+                  "unattended",
+                  "neglected",
+                  "unused",
+                  "uninhabited",
+                  "forsaken",
+                  "dumped",
+                  "ditched",
+                  "deserted"
+                ]
+              }
+            }
+          ],
+          "name": "abandonedSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "pink"
+              }
+            },
+            {
+              "name": {
+                "value": "silver"
+              }
+            },
+            {
+              "name": {
+                "value": "brown"
+              }
+            },
+            {
+              "name": {
+                "value": "teal"
+              }
+            },
+            {
+              "name": {
+                "value": "gray",
+                "synonyms": [
+                  "grey"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "burgundy",
+                "synonyms": [
+                  "maroon"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "purple",
+                "synonyms": [
+                  "violet"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "orange"
+              }
+            },
+            {
+              "name": {
+                "value": "white"
+              }
+            },
+            {
+              "name": {
+                "value": "black"
+              }
+            },
+            {
+              "name": {
+                "value": "yellow"
+              }
+            },
+            {
+              "name": {
+                "value": "green"
+              }
+            },
+            {
+              "name": {
+                "value": "blue"
+              }
+            },
+            {
+              "name": {
+                "value": "red"
+              }
+            }
+          ],
+          "name": "colorType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "stray",
+                "synonyms": [
+                  "disowned",
+                  "loose",
+                  "lost",
+                  "feral"
+                ]
+              }
+            }
+          ],
+          "name": "straySynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "bird"
+              }
+            },
+            {
+              "name": {
+                "value": "cow",
+                "synonyms": [
+                  "cattle",
+                  "bull"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "horse",
+                "synonyms": [
+                  "mare"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "chicken",
+                "synonyms": [
+                  "hen"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "fish"
+              }
+            },
+            {
+              "name": {
+                "value": "dog",
+                "synonyms": [
+                  "canine"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "cat",
+                "synonyms": [
+                  "feline"
+                ]
+              }
+            }
+          ],
+          "name": "animalType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "homeless Camp",
+                "synonyms": [
+                  "homeless encampment",
+                  "unhoused",
+                  "homeless tent",
+                  "homeless tents",
+                  "homeless camp",
+                  "campsite",
+                  "transient",
+                  "encampment",
+                  "camp",
+                  "tents",
+                  "tent"
+                ]
+              }
+            }
+          ],
+          "name": "homelessSynonymsType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "private property",
+                "synonyms": [
+                  "private",
+                  "privately owned property",
+                  "privately owned land",
+                  "private land"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "public property",
+                "synonyms": [
+                  "public",
+                  "publicly owned land",
+                  "publicly own property",
+                  "public land "
+                ]
+              }
+            }
+          ],
+          "name": "propertySynonymsType"
+        },
+        {
+          "values": [
+            {
+              "id": "FALSE",
+              "name": {
+                "value": "no",
+                "synonyms": [
+                  "naw",
+                  "not",
+                  "negative",
+                  "nope"
+                ]
+              }
+            },
+            {
+              "id": "TRUE",
+              "name": {
+                "value": "yes",
+                "synonyms": [
+                  "yup",
+                  "of course",
+                  "for sure",
+                  "absolutely",
+                  "affirmative",
+                  "correct",
+                  "yep",
+                  "yeah"
+                ]
+              }
+            }
+          ],
+          "name": "yesNoType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "trash",
+                "synonyms": [
+                  "scraps",
+                  "rubbish",
+                  "junk",
+                  "debris",
+                  "garbage",
+                  "litter",
+                  "waste"
+                ]
+              }
+            }
+          ],
+          "name": "trash"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "bathroom",
+                "synonyms": [
+                  "powder room",
+                  "restroom",
+                  "bath",
+                  "toilet",
+                  "lavatory",
+                  "outhouse",
+                  "washroom"
+                ]
+              }
+            }
+          ],
+          "name": "bathroomType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "to be cleaned"
+              }
+            },
+            {
+              "name": {
+                "value": "cleaning",
+                "synonyms": [
+                  "sponged",
+                  "wiped",
+                  "scrubbed"
+                ]
+              }
+            }
+          ],
+          "name": "cleaningType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "toilet paper",
+                "synonyms": [
+                  "toilet roll",
+                  "toilet tissue",
+                  "T.P."
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "paper towels",
+                "synonyms": [
+                  "hand towels"
+                ]
+              }
+            }
+          ],
+          "name": "towelType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "dirty",
+                "synonyms": [
+                  "awful",
+                  "off-putting",
+                  "repulsive",
+                  "nauseating",
+                  "revolting",
+                  "disgusting",
+                  "filthy"
+                ]
+              }
+            }
+          ],
+          "name": "dirtyType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "supercalifragilisticexpialidocious"
+              }
+            }
+          ],
+          "name": "nullRequiredType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "broken",
+                "synonyms": [
+                  "uncared",
+                  "dismantled",
+                  "broken"
+                ]
+              }
+            }
+          ],
+          "name": "brokenType"
+        }
+      ],
+      "modelConfiguration": {
+        "fallbackIntentSensitivity": {
+          "level": "HIGH"
+        }
+      }
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "AbandonedVehicleIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "abandoned",
+              "type": "abandonedSynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "vehicle",
+              "type": "vehicleSynonymsType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "make",
+              "type": "vehicleMakeType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "model",
+              "type": "vehicleModelType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "color",
+              "type": "colorType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "timePeriod",
+              "type": "AMAZON.DURATION",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.576909764561.1383880134578"
+              }
+            },
+            {
+              "name": "licensePlate",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.576909764561.780414875025"
+              }
+            },
+            {
+              "name": "brokenType",
+              "type": "brokenType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
           ],
           "delegationStrategy": "SKILL_RESPONSE"
-      },
-      "prompts": [
+        },
+        {
+          "name": "GetLocationFromUserIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "userGivenAddress",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1359792393904.1219368899061"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "SKILL_RESPONSE"
+    },
+    "prompts": [
+      {
+        "id": "Confirm.Slot.154427404203.1012344692963",
+        "variations": [
           {
-              "id": "Confirm.Slot.154427404203.1012344692963",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.537774412930.108680342923",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What is the make of the {vehicle} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What is the vehicle make or manufacturer name?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the make of the vehicle?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1305732446753.1509393653544",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "In a few words, can you describe the issue you're reporting?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.635431382682",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, is your issue {ticketCategory} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.816362722612",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Did you say the pothole was located on {potholeAddress} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.816362722612.1301769605493",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What street is it located on?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What is the address?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.347766119927",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, you're reporting an abandoned {color} {make} {model} , is that right?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.347766119927.878483551565",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What's the model of the {make} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the model of the {vehicle} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.486647140061.760696688304",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What's the color of the {make} {model} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the color of the vehicle?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the color of the {vehicle} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1377301254532.794869357877",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What is the address of the trash?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Slot.1377301254532.794869357877",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, the address is at {address} , correct?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.1415835869966",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, are you reporting an {abandoned} {make} {model} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, are you reporting an {abandoned} {model} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, are you reporting an {abandoned} {make} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, are you reporting an {abandoned} {vehicle} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, are you calling about an abandoned vehicle?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.221614793867.602172036702",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Where is the {stray} {strayAnimalSlot} located?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "Where is the {strayAnimalSlot} located?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the address?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1176709426849.1317643299465",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What kind of {animal} did you saw?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What {animal} did you spot?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What type of {animal} is it?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.478901083922.774744802323",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "How many people are at the camp?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.478901083922.677574959232",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Are there any children at the camp?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.478901083922.331242269140",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Are there any animals at the camp?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.409468368967.699702184701",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Is the camp on public property? Or is it on private property?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.409468368967.625938744990",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Can you provide a description of the camp?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.1058867146719",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, is the address at {address} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.88351892471",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Did you say the {stray} is located around {strayAnimalAddress}"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1639118695942.1016003359675",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "May I please have the address of the issue you're reporting?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.497628180714.416267865584",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What's the address?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.159243950675.1214583905306",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What's the model of the vehicle?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the model of the {vehicle} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the model of the {make} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.159243950675.45262955813",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What's the make of the vehicle?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What is the vehicle make or manufacturer name?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What is the make of the {vehicle} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.159243950675.1551161405556",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What's the color of the {vehicle} ?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the color of the vehicle?"
-                  },
-                  {
-                      "type": "PlainText",
-                      "value": "What's the color of the {make} {model} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.852077765526.1405916262811",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "No problem, can you please provide the nearest address?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Slot.852077765526.1405916262811",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, did you say the address was at {address} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Slot.535311827128.1335337409156",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, is the address at {location} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.695582460385.101077360916",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Can you please provide a description of the type of trash?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Slot.695582460385.101077360916",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Here is what you said - {trashType} . Is this description okay?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1100716015297.948173215885",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Is there trash around the camp that needs to be picked up?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Slot.591693848777.1646553018457",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Here is what you said - {campDescription} . Is that right?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.926509532094.1564036416986",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "what is the address of the dead Animal ?"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Slot.926509532094.1564036416986",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "do you confim the address of the dead animal as {deadAnimalAddress}"
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.926509532094",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "is the the dead animal a {bird} or a {Mammale} ?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.926509532094.455346598984",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "What is the animal?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1349433291344.1451233083949",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "You can give an address or nearest cross street."
-                  }
-              ]
-          },
-          {
-              "id": "Confirm.Intent.1294467916183",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "Just to confirm, the vehicle is a {color} {make} {model} , is that right?"
-                  }
-              ]
-          },
-          {
-              "id": "Elicit.Slot.1009600416173.307545323055",
-              "variations": [
-                  {
-                      "type": "PlainText",
-                      "value": "You shouldn't be hearing this"
-                  }
-              ]
+            "type": "PlainText",
+            "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
           }
-      ]
-  }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.537774412930.108680342923",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the make of the {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the vehicle make or manufacturer name?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the make of the vehicle?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1305732446753.1509393653544",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "In a few words, can you describe the issue you're reporting?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.635431382682",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, is your issue {ticketCategory} ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.816362722612",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Did you say the pothole was located on {potholeAddress} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.816362722612.1301769605493",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What street is it located on?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the address?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.347766119927",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, you're reporting an abandoned {color} {make} {model} , is that right?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.347766119927.878483551565",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the model of the {make} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the model of the {vehicle} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.486647140061.760696688304",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the color of the {make} {model} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the color of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the color of the {vehicle} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1377301254532.794869357877",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the address of the trash?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.1377301254532.794869357877",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, the address is at {address} , correct?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1415835869966",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {make} {model} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {model} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {make} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you reporting an {abandoned} {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, are you calling about an abandoned vehicle?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.221614793867.602172036702",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Where is the {stray} {strayAnimalSlot} located?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Where is the {strayAnimalSlot} located?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the address?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1176709426849.1317643299465",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What kind of {animal} did you saw?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What {animal} did you spot?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What type of {animal} is it?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.478901083922.774744802323",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "How many people are at the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.478901083922.677574959232",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Are there any children at the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.478901083922.331242269140",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Are there any animals at the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.409468368967.699702184701",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Is the camp on public property? Or is it on private property?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.409468368967.625938744990",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Can you provide a description of the camp?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1058867146719",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, is the address at {address} ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.88351892471",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Did you say the {stray} is located around {strayAnimalAddress}"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1639118695942.1016003359675",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "May I please have the address of the issue you're reporting?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.497628180714.416267865584",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the address?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.159243950675.1214583905306",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the model of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the model of the {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the model of the {make} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.159243950675.45262955813",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the make of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the vehicle make or manufacturer name?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What is the make of the {vehicle} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.159243950675.1551161405556",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What's the color of the {vehicle} ?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the color of the vehicle?"
+          },
+          {
+            "type": "PlainText",
+            "value": "What's the color of the {make} {model} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.852077765526.1405916262811",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "No problem, can you please provide the nearest address?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.852077765526.1405916262811",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, did you say the address was at {address} ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.535311827128.1335337409156",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, is the address at {location} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.695582460385.101077360916",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Can you please provide a description of the type of trash?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.695582460385.101077360916",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Here is what you said - {trashType} . Is this description okay?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1100716015297.948173215885",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Is there trash around the camp that needs to be picked up?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.591693848777.1646553018457",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Here is what you said - {campDescription} . Is that right?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.926509532094.1564036416986",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "what is the address of the dead Animal ?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Slot.926509532094.1564036416986",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "do you confim the address of the dead animal as {deadAnimalAddress}"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.926509532094",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "is the the dead animal a {bird} or a {Mammale} ?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.926509532094.455346598984",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the animal?"
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1294467916183",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, the vehicle is a {color} {make} {model} , is that right?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1009600416173.307545323055",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "You shouldn't be hearing this"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.576909764561.1383880134578",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "How long has the vehicle been abandoned?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.576909764561.780414875025",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the license plate number?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1359792393904.1219368899061",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Please say an address or cross street."
+          }
+        ]
+      }
+    ]
+  },
+  "version": "214"
 }
