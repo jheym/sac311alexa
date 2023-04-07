@@ -1,5 +1,7 @@
+// Currently not in use.
 // Mappings for interceptor to set sessionAttribute variables based on the intent
-// If current intent is one of the intent mappings, set sessionAttributes to the following values
+// Set flags here if you want each intent to get a location 
+
 const intentFlags = {
     AbandonedVehicleIntent : {
         intentName : 'AbandonedVehicleIntent',
@@ -13,6 +15,13 @@ const intentFlags = {
         flags : {
             getGeolocation : true,
             getHomeAddress : false
+        }
+    },
+    GetGarbageDayIntent : {
+        intentName : 'GetGarbageDayIntent',
+        flags : {
+            getGeolocation : true,
+            getHomeAddress : true
         }
     }
 }
