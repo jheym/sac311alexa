@@ -26,7 +26,7 @@ const intentFlagsFile = require("./helper/intentFlags.js");
 const Salesforce_Case_object = require("./helper/SalesforceCaseObject.js")
 const getServiceName = require("./helper/getServiceName.js")
 const intentFlags = intentFlagsFile.intentFlags;
-
+const trashPickupDay = require("./trashPickupDay.js");
 
 
 /*****************************************************************************/
@@ -701,6 +701,8 @@ var requestHandlers = [
 	homelessCamp.YesHomelessCampIntentHandler,
 	homelessCamp.NoHomelessCampIntentHandler,
 	trashpickup.TrashPickUpIntentHandler,
+	trashPickupDay.StartedTrashPickupDayIntentHandler,
+	trashPickupDay.InProgressTrashPickupDayIntentHandler
 ]
 
 var requestInterceptors = [

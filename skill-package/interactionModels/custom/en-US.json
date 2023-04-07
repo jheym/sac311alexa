@@ -135,6 +135,40 @@
         {
           "name": "AMAZON.RepeatIntent",
           "samples": []
+        },
+        {
+          "name": "TrashPickupDayIntent",
+          "slots": [],
+          "samples": [
+            "when is garbage collection",
+            "what day is garbage collection",
+            "what day is waste collection",
+            "what day is waste collected",
+            "when is waste collected",
+            "what day is my garbage collected",
+            "what day is garbage collected",
+            "when is garbage collected",
+            "when is trash collected",
+            "when is garbage pickup",
+            "when is trash pickup",
+            "when is my garbage pickup day",
+            "trash pickup day",
+            "What day is my trash picked up",
+            "When is trash picked up",
+            "When does trash get picked up",
+            "What is my trash pickup day",
+            "When is my trash pickup day",
+            "When is my trash pickup",
+            "What day is trash pickup"
+          ]
+        },
+        {
+          "name": "GetPreviousCaseIntent",
+          "slots": [],
+          "samples": [
+            "check ticket status",
+            "check case status"
+          ]
         }
       ],
       "types": [
@@ -2644,5 +2678,5 @@
       }
     ]
   },
-  "version": "214"
+  "version": "217"
 }
