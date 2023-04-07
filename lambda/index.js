@@ -84,6 +84,9 @@ const LaunchRequestHandler = {
 		// const token = await helper.getOAuthToken(handlerInput);
 		// const caseObject = new Salesforce_Case_object(null, 'idk', token)
 		// caseObject.create_generic_case('idk', null, null);
+		const token = await helper.getOAuthToken(handlerInput);
+		const caseObject = new Salesforce_Case_object(null, 'idk', token)
+		console.log(caseObject.world_address_verification());
 	
 
 		console.log(await helper.isPhoneNumberAvailable(handlerInput));

@@ -188,8 +188,8 @@ const yn_IsAbandonedVehicleIntentHandler = {
 			// So GetLocationIntent knows where to delegate back to after confirming the address
 			sessionAttributes.intentToRestore = 'AbandonedVehicleIntent';
 			attributesManager.setSessionAttributes(sessionAttributes);
-
-			if (helper.isGeolocationAvailable(handlerInput)) {
+			
+			if (helper.isGeolocationAvailable(handlerInput) === "supported") {
 				helper.setQuestion(handlerInput, 'UseGeolocation?')
 				let speechOutput = `Would you like to use your current location as the location of the abandoned vehicle?`;
 				return responseBuilder

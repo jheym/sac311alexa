@@ -122,22 +122,26 @@ async function getHomeAddress(handlerInput) {
 	}
 }
 
-/**
- * Checks whether the user has given permission for the skill to access their geolocation.
- * @param {object} handlerInput 
- * @returns {boolean} - true if geolocation is available, false otherwise
+/** 
+ * checks if Geo Location is accurate and authorized to be used from device
+ * @param {Object} handlerInput
+ * @returns string describing the error or returns "supported"
  */
 function isGeolocationAvailable(handlerInput) {
 	const isGeoSupported = handlerInput.requestEnvelope.context.System.device.supportedInterfaces.Geolocation;
 	if (isGeoSupported) {
 		const geoObject = handlerInput.requestEnvelope.context.Geolocation;
 		const ACCURACY_THRESHOLD = 100; // accuracy of 100 meters required
-		if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD )
-			return true;
+		if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD) {
+			return "supported";
+		}
+		else if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters > ACCURACY_THRESHOLD) {
+			return "not-accurate";
+		}
 		else
-			return false;
+			return "not-authorized";
 	} else {
-		return false;
+		return "not-available";
 	}
 }
 
@@ -281,10 +285,10 @@ function switchIntent(handlerInput, intentName) {
 }
 
 /**
- * This function takes a latitude and longitude and returns object containing information about the location
- * @param {float} latitude 
- * @param {float} longitude 
- * @returns location data object
+ * Gets the highest scoring address candidate from the ArcGIS world geocoder.
+ * The returned candidate object will be used to query the sac311gis API for more details.
+ * @param {string} address 
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
  */
 async function reverseGeocode(latitude, longitude) {
 	const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
@@ -324,6 +328,46 @@ async function getWorldAddress(address) {
 		} else {
 			return error.response // return the 4xx response regardless
 		}
+	}
+}
+
+/**
+ * Takes a candidate object from world gis to compare against sac311 gis
+ * @param {object} potentialCandidate
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
+*/
+async function getInternalAddressCandidate(potentialCandidate) {
+	if (!potentialCandidate) {
+		throw new Error('No Candidate was found.');
+	}
+
+	try {
+		const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+			params: {
+				Street: potentialCandidate.attributes.ShortLabel,
+				City: potentialCandidate.attributes.City,
+				ZIP: potentialCandidate.attributes.Postal,
+				SingleLine: potentialCandidate.attributes.ShortLabel,
+				outFields: '*',
+				outSR: 4326,
+				f: 'pjson'
+			}
+		});
+		const candidates = response.data.candidates;
+		let chosenCandidate = null;
+		for (let candidate of candidates) {
+			if (candidate.score === 100) {
+				chosenCandidate = candidate;
+				break;
+			}
+			if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+				chosenCandidate = candidate;
+			}
+		}
+		return chosenCandidate ? chosenCandidate : false;
+	} catch (error) {
+		console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+		throw new Error(`Failed to find suitable address. ${error.message}`);
 	}
 }
 
