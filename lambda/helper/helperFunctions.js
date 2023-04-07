@@ -388,7 +388,7 @@ async function reverseGeocode(latitude, longitude) {
 	}
 }
 
-async function openCase() {
+async function openCase(handlerInput) {
 	const sfUrl = `https://saccity--qa.sandbox.my.salesforce.com/services/data/v57.0/sobjects/Case`;
 	const token = await getOAuthToken();
 
@@ -417,7 +417,31 @@ async function openCase() {
 	return response.data;
 }
 
+  /*
+   *getCaseDetailsFromSalesForce will take a case number as a parameter and return the case details from salesforce
+   *as a javascript object containing the fields and values for Service_Type__c, Date, and status 
+  */
+  async function getCaseDetailsFromSalesForce(caseNumber) {
+	//Search for the case in salesforce
+	const query = `SELECT Id, CaseNumber, CreatedDate, Status, Sub_Service_Type_Text__c
+					FROM Case
+					WHERE CaseNumber = '${caseNumber}'`;
+	const token = await getOAuthToken();
+	const caseResult = await querySFDB(query, token);
 
+	if(caseResult.data) {
+		const createdDate = caseResult.data.records[0].CreatedDate;
+		const status = caseResult.data.records[0].Status;
+		const subServiceType = caseResult.data.records[0].Sub_Service_Type_Text__c;
+		return { subServiceType, createdDate, status };
+		}
+	else {
+		//Get the case details from the query result and output them
+		//should save into session attributes?
+		return null;
+	}
+
+  }
 
 /*
 getQA
@@ -461,6 +485,7 @@ module.exports = {
 	getWorldAddressResponse,
 	getInternalAddressCandidate,
 	getInternalAddressResponse,
+	getCaseDetailsFromSalesForce,
 	reverseGeocode,
 	openCase,
 	getQA,

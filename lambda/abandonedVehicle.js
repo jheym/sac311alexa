@@ -111,7 +111,7 @@ const CompletedAbandonedVehicleIntentHandler = {
 		// TEST CODE FOR CASE CREATION
 		// TODO: Is phone number required for basic case?
 		var location = sessionAttributes.confirmedLocation;
-		let phone_number = '9165551111' // TODO: Get phone number from Alexa api
+		let phone_number = '9161111111' // TODO: Get phone number from Alexa api
 		let service_name = 'Vehicle On Street' // Need to use the correct service name
 		let token = await helper.getOAuthToken();
 		let my_case_obj = new sfCase(handlerInput, 'Vehicle On Street', token); // Creating a new case object with a new token
@@ -134,11 +134,13 @@ const CompletedAbandonedVehicleIntentHandler = {
 		json_input['vehicle_license_number'] = '5RTD901';
 		json_input['time-period'] = '3';
 		const update_res = await my_case_obj.case_update(case_id, location, 'Vehicle On Street', json_input);
+		sessionAttributes.caseNumber = update_res.case_number;
+		attributesManager.setSessionAttributes(sessionAttributes);
 
 		let updated_case_query = `SELECT CreatedDate, Id, CaseNumber, Service_Type__c, Sub_Service_Type__c, Subject, Status, Origin, Anonymous_Contact__c, ContactId, Description, Email_Web_Notes__c,
-																Address_Geolocation__Latitude__s, Address_Geolocation__Longitude__s, Address_X__c, Address_Y__c, Address__c, GIS_City__c, Street_Center_Line__c, Case_Gis_Info_JSON__c
-																FROM Case
-																WHERE CaseNumber = '${case_number}'`;
+								Address_Geolocation__Latitude__s, Address_Geolocation__Longitude__s, Address_X__c, Address_Y__c, Address__c, GIS_City__c, Street_Center_Line__c, Case_Gis_Info_JSON__c
+								FROM Case
+								WHERE CaseNumber = '${case_number}'`;
 
 		const updated_case_res = await helper.querySFDB(updated_case_query, token);
 

@@ -333,6 +333,42 @@ const ErrorHandler = {
 	},
 }
 
+const GetPreviousCaseIntentHandler = {
+	canHandle(handlerInput) {
+		return (
+			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+			Alexa.getIntentName(handlerInput.requestEnvelope) === "GetPreviousCaseIntent"
+		);
+	},
+	async handle(handlerInput) {
+		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
+		const sessionAttributes = attributesManager.getSessionAttributes();
+		const { caseNumber } = sessionAttributes;
+		let caseDetails;
+		let caseDate;
+		let caseStatus;
+		let serviceName;
+
+
+		if (caseNumber) {
+			caseDetails = await helper.getCaseDetailsFromSalesForce(caseNumber); // Getting the case details from salesforce
+			caseDate = caseDetails.createdDate;
+			caseStatus = caseDetails.status;
+			serviceName = caseDetails.subServiceType;
+		}
+
+		if (caseDetails) {	
+			return responseBuilder
+				.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDate}. It's status is currently ${caseStatus}.`)
+				.getResponse();
+		} else {
+			return responseBuilder
+			.speak(`I could not find a case.`)
+			.getResponse();
+		}
+	},
+}
+
 
 /*****************************************************************************/
 /*                               INTERCEPTORS                                */
@@ -463,8 +499,8 @@ const PersonalizationRequestInterceptor = {
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
 		) {
 			const { attributesManager, requestEnvelope } = handlerInput;
-			const { apiAccessToken } = requestEnvelope.context.System
-				? requestEnvelope.context.System
+			const { apiAccessToken } = requestEnvelope.context.System 
+				? requestEnvelope.context.System 
 				: null;
 			const sessionAttributes = attributesManager.getSessionAttributes() || {};
 			let persistentAttributes =
@@ -551,6 +587,62 @@ const DelegateDirectiveResponseInterceptor = {
 	}
 };
 
+/*
+ * This is a previousCase interceptor that will run before the LaunchRequest Handle. 
+ * It is responsible for checking if there is a previous case and setting the session attributes
+*/
+
+const PreviousCaseInterceptor = {
+	async process(handlerInput) {
+		if (
+			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+		) {
+
+			const attributesManager = handlerInput.attributesManager;
+			const persistentAttributes = await attributesManager.getPersistentAttributes();
+			const sessionAttributes = attributesManager.getSessionAttributes();
+			if (persistentAttributes.caseNumber) {
+				sessionAttributes.caseNumber = persistentAttributes.caseNumber;
+				attributesManager.setSessionAttributes(sessionAttributes);
+			} else {
+				sessionAttributes.caseNumber = '230407-013720';
+				attributesManager.setSessionAttributes(sessionAttributes);
+				//console.log('No previous case');
+			}
+			
+		}
+	},	
+};
+
+/*
+ * This is a PutDynamoCaseInterceptor using putDynamoCase function
+ * that will run before the SessionEndedRequest Handle.
+ * It is responsible for checking if there is a case in session attributes and if so, it will
+ * put the case into DynamoDB. Else, it will continue.
+*/
+
+const PutDynamoCaseInterceptor = {
+	async process(handlerInput) {
+		if (
+			Alexa.getRequestType(handlerInput.requestEnvelope) === "SessionEndedRequest"
+		) {
+
+			const attributesManager = handlerInput.attributesManager;
+			const sessionAttributes = attributesManager.getSessionAttributes();
+			const persistentAttributes = await attributesManager.getPersistentAttributes();
+						
+			if (sessionAttributes.caseNumber) {
+				persistentAttributes.caseNumber = sessionAttributes.caseNumber;
+				attributesManager.setPersistentAttributes(persistentAttributes);
+				await attributesManager.savePersistentAttributes();
+			}
+
+		}
+	},
+};
+
+
+
 
 /*****************************************************************************/
 /*                        DEV ENVIRONMENT SETUP                              */
@@ -614,6 +706,7 @@ var requestHandlers = [
 	CancelAndStopIntentHandler,
 	FallbackIntentHandler,
 	ReportAnIssueIntentHandler,
+	GetPreviousCaseIntentHandler,
 	abandonedVehicle.StartedAbandonedVehicleIntentHandler,
 	getLocation.GetLocationIntentHandler,
 	getLocation.SIPGetLocationFromUserIntentHandler,
@@ -640,6 +733,8 @@ var requestInterceptors = [
 	ContextSwitchingRequestInterceptor,
 	getLocation.GetLocationRequestInterceptor,
 	SetIntentFlagsRequestInterceptor,
+	PreviousCaseInterceptor,
+	PutDynamoCaseInterceptor,
 ]
 
 const skillBuilder = Alexa.SkillBuilders.custom();
