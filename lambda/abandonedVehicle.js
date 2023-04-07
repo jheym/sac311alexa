@@ -16,6 +16,8 @@ const StartedAbandonedVehicleIntentHandler = {
 	handle(handlerInput) {
 		helper.setQuestion(handlerInput, 'IsAbandonedVehicleCorrect?')
 		const speakOutput = handlerInput.t("ABANDONED_VEHICLE_CONFIRMATION")
+		const repromptOutput = handlerInput.t("ABANDONED_VEHICLE_REPROMPT");
+		
 		return handlerInput.responseBuilder
 			.withShouldEndSession(false)
 			.speak(speakOutput)
@@ -244,16 +246,21 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
 		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const failCounter = handlerInput.attributesManager.getSessionAttributes().failCounter || 0;
+
 		return (
 			requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === 'IsVehicleDescriptionCorrect?'
+			questionAsked === 'IsVehicleDescriptionCorrect?' &&
+			failCounter < 3
 		);
 	},
 	handle(handlerInput) {
 		helper.setQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
+		const failCounter = sessionAttributes.failCounter || 0;
+
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			helper.clearFailCounter(handlerInput);
 			let speechOutput = `Great! What is the license plate number of the vehicle?`;
@@ -265,6 +272,7 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") {
 			// TODO: Submit generic case if fail handler >= 3
+			if (failCounter < 2) {
 			helper.incFailCounter(handlerInput);
 			let speechOutput = `I'm sorry about that, let's try again. What is the make of the vehicle?`;
 			let repromptOutput = `What is the make of the vehicle?`;
@@ -275,26 +283,37 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 				.withShouldEndSession(false)
 				.addElicitSlotDirective('make', updatedIntent, { maxAttempts: 3 })
 				.getResponse();
+			} else {
+				let speechOutput = `I'm sorry, I can't seem to help you with this. I'm transferring you to a live agent who can assist you. Please hold while I transfer you.`;
+				return responseBuilder
+					.speak(speechOutput)
+					.withShouldEndSession(true)
+					.getResponse();
+			}
 		}
 	}
 };
-
+	
 
 const yn_ConfirmLicensePlateIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
 		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const failCounter = handlerInput.attributesManager.getSessionAttributes().failCounter || 0;
+
 		return (
 			requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === 'IsLicensePlateCorrect?'
+			questionAsked === 'IsLicensePlateCorrect?' &&
+			failCounter < 3
 		);
 	},
 	handle(handlerInput) {
 		helper.setQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
+		const failCounter = sessionAttributes.failCounter || 0;
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			helper.clearFailCounter(handlerInput);
@@ -310,6 +329,7 @@ const yn_ConfirmLicensePlateIntentHandler = {
 		}
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") {
+			if (failCounter < 2) {
 			helper.incFailCounter(handlerInput);
 			let speechOutput = `I'm sorry about that, let's try again. What is the license plate number of the vehicle?`;
 			let repromptOutput = `What is the license plate number of the vehicle?`;
@@ -318,6 +338,13 @@ const yn_ConfirmLicensePlateIntentHandler = {
 				.reprompt(repromptOutput)
 				.addElicitSlotDirective('licensePlate', sessionAttributes.AbandonedVehicleIntent)
 				.getResponse();
+		}else {
+			let speechOutput = `I'm having trouble gathering the information. Can you describe the issue in detail for your case to be reviewed by a service agent?`;
+			return responseBuilder
+				.speak(speechOutput)
+				.withShouldEndSession(true)
+				.getResponse();
+			}
 		}
 	}
 };

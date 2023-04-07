@@ -1,13 +1,13 @@
 {
     "en": {
         "translation": {
-            "WELCOME_MSG": "Thank you for contacting Sacramento Three One One. You've used this skill {{counter}} times. How can I help you today?",
+            "WELCOME_MSG": "Thank you for contacting Sacramento Three One One. You've used this skill {{counter}} times. What can I help you with today? You can ask me about your garbage pick up day, submit a service request, or check the status of a previously submitted case.",
             "WELCOME_REPROMPT": "How can I help? You can report an issue, or you can get information about city-related activities.",
             "PERSONALIZED_WELCOME_MSG": "Welcome back {{name}}. How can I help you today?",
             "REPORT_ISSUE": "Alright. What's the issue you're reporting?",
             "YES_RETRY": "Alright, what can I do for you?",
             "NO_RETRY": "Understood. Thank you for contacting Sacramento three one one. Goodbye!",
-            "HELP_MSG": "This is the Help Message. It gives further instructions on how to use the skill.",
+            "HELP_MSG": "Welcome to the Sacramento 311 skill! To use the skill, simply say something like, when is my garbage pickup?, submit a service request, or check the status of my case. What would you like to do?",
             "FALLBACK_MSG": "Sorry, I don't know about that. Please try again.",
             "FALLBACK_MSG_REPROMPT": "Please try again.",
             "FALLBACK_STILL_MSG": "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
