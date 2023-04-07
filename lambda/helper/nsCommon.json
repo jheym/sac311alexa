@@ -18,29 +18,35 @@
             "INTENT_REFLECTOR": "You just triggered {{intentName}}",
             "GENERIC_REPROMPT": "Reprompt",
             "GOODBYE_MSG": "Goodbye!",
+            "CRITICAL_ERROR_MSG": "I'm sorry, something went wrong on our end. Please try again later.",
             "LIVEAGENT_CONFIRM": "Calling customer service",
             "LIVEAGENT_PROBLEM": "Sorry, I am having a problem right now.",
+            "ANYTHING_ELSE_MSG": "I'm sorry about that. Is there anything else I can help you with?",
             "TRASH_THANKS": "Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
-  
+
             "ABANDONED_VEHICLE_CONFIRMATION": "Just to confirm, are you reporting an abandoned vehicle?",
-            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. Your case number is <say-as interpret-as='digits'>{{case_number}}</say-as>. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?</speak>",
+            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. Your case number is <say-as interpret-as='digits'>{{caseNumber}}</say-as>. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?</speak>",
             "ABANDONED_VEHICLE_72Q": "Has the vehicle been abandoned for more than seventy-two hours?",
             "ABANDONED_VEHICLE_72A": "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. Is there anything else I can help you with?",
-  
+
             "HOMELESS_CONFIRMATION": "Just to confirm, are you reporting about a homeless camp?",
             "HOMELESS_THANKS": "Thank you for reporting the {{homelessCamp}} with {{numPeople}} people on {{propertyType}} property at {{location}}. We will dispatch someone to the incident as soon as we can. Is there anything else I can help with?",
             "HOMELESS_THANKS_CONTINUATION": "Thank you for reporting the {{homelessCamp}} with {{numPeople}} people on {{propertyType}} property at {{location}}. We will dispatch someone to the incident as soon as we can. We just need a little more information about the trash.",
-  
+
             "LOCATION_GET_ADDRESS": "What is the address of the incident you are reporting?",
-            "LOCATION_GET_LOCATION": "What's the location?",
             "LOCATION_USE_CURRENT": "Do you want to use your current location for the report?",
             "LOCATION_USE_HOME": "Would you like us to use your home address as the location for your report?",
             "LOCATION_GEO_ISSUE": "There was an issue retrieving your geolocation. Can you please tell me your location?",
             "LOCATION_CONFIRM": "Is the location near {{location}}?",
-            "LOCATION_RETRY": "Let's try that again. What's the location?",
-            "LOCATION_RETRY_REPROMPT": "Please provide an address or nearest cross streets.",
             "LOCATION_RETRY_REDIRECT": "Apologies, we're having trouble finding your location. Would you like to speak to a live agent?",
-            "LOCATION_REPEAT_ADDRESS": "<speak>Is the location near <say-as interpret-as='address'>{{address}}</say-as>?</speak>"
+            "LOCATION_REPEAT_ADDRESS": "<speak>Is the location near <say-as interpret-as='address'>{{address}}</say-as>?</speak>",
+
+            "LOCATION_RETRY": "Alright. Can you give me an address or two cross streets nearby?",
+            "LOCATION_GET_LOCATION": "What's the location? You can give an address or nearest cross street.",
+            "CONFIRM_ADDRESS_MSG": "I found an address at {{address}}. Is this the correct address?",
+            "INACCURATE_GEO_MSG": "Geo location is too inaccurate to use. Would you like to try another address?",
+            "UNAUTHORIZED_GEO_MSG": "Sacramento311 would like to use your current location. To turn on location sharing, please go to your Alexa app, and follow the instructions.",
+            "UNAVAILABLE_GEO_MSG": "This device is stationary so geoLocation is unavaible. Would you like to use your home address instead?"
         }
     },
     "es": {

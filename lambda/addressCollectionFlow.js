@@ -2,19 +2,8 @@ const Alexa = require('ask-sdk-core')
 const helper = require("./helper/helperFunctions.js")
 const format = require('./helper/formatAddress.js')
 const sfCase = require('./helper/SalesforceCaseObject.js')
-const axios = require('axios')
 
-/**
- * This file handles the entire GetLocation conversation flow. Most of the logic
- * is in GetLocationIntentHandler, while the GetLocationIntentInterceptor is
- * responsible for querying geolocation and address. The GetLocationHelperIntent
- * is responsible collecting a location from the user's input.
- * 
- * For the location conversation flow design, refer to the link below:
- * https://lucid.app/lucidchart/d73b0879-d985-45df-8ce2-64a717c08ee9/edit?invitationId=inv_9bbd682a-2890-42f8-ab2f-9d018da6e42e
- */
-
-const GetLocationIntentHandler = {
+const GetLocationIntentHandler = { //TODO: Is this handler necessary?
 	canHandle(handlerInput) {
 		return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
 			Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent')
@@ -48,7 +37,7 @@ const GetLocationIntentHandler = {
 }
 
 
-const SIPGetLocationFromUserIntentHandler = {
+const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 	canHandle(handlerInput) {
 		return (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
@@ -59,43 +48,31 @@ const SIPGetLocationFromUserIntentHandler = {
 	async handle(handlerInput) {
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput
 		const sessionAttributes = attributesManager.getSessionAttributes();
-
 		let userGivenAddress = Alexa.getSlotValue(requestEnvelope, 'userGivenAddress');
+		// sessionAttributes.unconfirmedLocation = userGivenAddress;
+		attributesManager.setSessionAttributes(sessionAttributes);
 
 		if (userGivenAddress) {
 			let token = await helper.getOAuthToken();
 			let caseObj = new sfCase(null, null, token);
 			var res = await caseObj.address_case_validator(userGivenAddress);
-			console.log(caseObj)
-
 		} else {
 			console.log('Error: userGivenAddress is undefined.')
-			let speechOutput = `I'm sorry, something went wrong on our end. Please try again later.`
 			return responseBuilder
-				.speak(speechOutput)
+				.speak(handlerInput.t('CRITICAL_ERROR_MSG'))
 				.addDelegateDirective('SessionEndedRequest')
 				.getResponse();
 		}
-		// TODO: Create generic case if fail counter > 2
-		if (res.Validated) {
-			helper.clearFailCounter(handlerInput);
-			sessionAttributes.getLocation.validatedAddress = res.Address;
-			attributesManager.setSessionAttributes(sessionAttributes);
-			let speechOutput = `I found an address at ${res.Address}. Is this the correct address?` //TODO: Add city and zip code to speech output
-			helper.setQuestion(handlerInput, 'IsAddressCorrect?')
-			return responseBuilder
-				.speak(speechOutput)
-				.reprompt(speechOutput)
-				.getResponse();
-		} else {
-			helper.incFailCounter(handlerInput);
-			helper.setQuestion(handlerInput, 'tryAnotherAddress?')
-			attributesManager.setSessionAttributes(sessionAttributes);
-			return responseBuilder
-				.speak(`I was unable to find an address near ${res.Address}. Do you want to try giving another address?`)
-				.reprompt(handlerInput.t("LOCATION_REPEAT_ADDRESS", { address: res.Address }))
-				.getResponse();
-		}
+
+		sessionAttributes.getLocation.unconfirmedValidatorRes = res;
+		attributesManager.setSessionAttributes(sessionAttributes);
+		let speechOutput = `Did you say the address was ${res.Address}?`
+		helper.setQuestion(handlerInput, 'IsAddressCorrect?')
+		return responseBuilder
+			.speak(speechOutput)
+			.withShouldEndSession(false)
+			.reprompt(speechOutput)
+			.getResponse();
 	}
 };
 
@@ -113,13 +90,16 @@ const yn_IsAddressCorrectIntentHandler = {
 		helper.setQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		const validatedAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.validatedAddress;
+		const unconfirmedAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.unconfirmedAddress;
+		const unconfirmedValidatorRes = sessionAttributes.getLocation.unconfirmedValidatorRes;
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
-			if (!validatedAddress) {
-				throw new Error('Error: validatedAddress is undefined.')
+			helper.clearFailCounter(handlerInput);
+			if (!unconfirmedValidatorRes) {
+				throw new Error('Error: unconfirmedAddress is undefined.')
 			}
-			sessionAttributes.confirmedLocation = validatedAddress;
+			sessionAttributes.confirmedValidatorRes = unconfirmedValidatorRes;
+			delete sessionAttributes.unconfirmedValidatorRes;
 			attributesManager.setSessionAttributes(sessionAttributes);
 			let updatedIntent = helper.switchIntent(handlerInput, sessionAttributes.intentToRestore)
 			return responseBuilder
@@ -128,6 +108,17 @@ const yn_IsAddressCorrectIntentHandler = {
 		}
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") { // NoIntent
+			
+			if (helper.getFailCounter(handlerInput) >= 2) {
+				helper.clearFailCounter(handlerInput);
+				let speechOutput = `I'm sorry, I'm having trouble understanding your address. Please try again later or call 311 for assistance.`
+				return responseBuilder
+					.speak(speechOutput)
+					.addDelegateDirective('SessionEndedRequest')
+					.getResponse();
+			}
+			
+			helper.incFailCounter(handlerInput);
 			const GetLocationFromUserIntent = {
 				name: 'GetLocationFromUserIntent',
 				confirmationStatus: 'NONE',
@@ -140,9 +131,8 @@ const yn_IsAddressCorrectIntentHandler = {
 				}
 			}
 			let speechOutput = `Alright. Can you give me an address or two cross streets nearby?`
-			helper.incFailCounter(handlerInput);
 			return responseBuilder
-				.speak(speechOutput)
+				.speak(handlerInput.t('LOCATION_RETRY'))
 				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
 				.getResponse();
 		}
@@ -178,7 +168,7 @@ const yn_UseGeoLocationIntentHandler = {
 			}
 		}
 
-		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") { // FIXME: Breaks here
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			if (!sessionAttributes.getLocation) {
 				throw new Error('yn_UseGeoLocationIntentHandler Error: GetLocationInterceptor was never triggered.')
 			}
@@ -191,13 +181,35 @@ const yn_UseGeoLocationIntentHandler = {
 				const longitude = geolocation.coordinate.longitudeInDegrees;
 				worldAddressObj = await helper.reverseGeocode(latitude, longitude);
 			}
+			else {
+				const isValidGeoLocationSupported = helper.isGeolocationAvailable(handlerInput);
+				if (isValidGeoLocationSupported === "not-accurate") {
+					helper.setQuestion(handlerInput, 'tryAnotherAddress?');
+					return responseBuilder
+						.speak(handlerInput.t('INACCURATE_GEO_MSG'))
+						.getResponse();
+				}
+				else if (isValidGeoLocationSupported === "not-authorized") {
+					helper.setQuestion(handlerInput, 'tryAnotherAddress?')
+					return responseBuilder
+						.speak(handlerInput.t('UNAUTHORIZED_GEO_MSG'))
+						.withAskForPermissionsConsentCard(['alexa::devices:all:geolocation:read'])
+						.getResponse();
+				}
+				else if (isValidGeoLocationSupported === "not-available") {
+					helper.setQuestion(handlerInput, 'UseHomeAddress?')
+					return responseBuilder
+						.speak(handlerInput.t('UNAVAILABLE_GEO_MSG'))
+						.getResponse();
+				}
+			}
 			
 			// TODO: Validate address with address_case_validator()?
 
 			if (worldAddressObj.address) { // TODO: Test with bad geocoordinates
 				let address = worldAddressObj.address.Address;
 				let city = worldAddressObj.address.City;
-				sessionAttributes.getLocation.validatedAddress = address; // TODO: Should we be storing the entire worldAddressObj instead?
+				sessionAttributes.getLocation.unconfirmedValidatorRes = address; // TODO: Should we be storing the entire worldAddressObj instead?
 				attributesManager.setSessionAttributes(sessionAttributes);
 				let speechOutput = `<speak>Is the location near <say-as interpret-as='address'>${address} in ${city}</say-as>?</speak>`;
 				helper.setQuestion(handlerInput, 'IsAddressCorrect?')
@@ -215,9 +227,11 @@ const yn_UseGeoLocationIntentHandler = {
 		}
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") {
+			if (!sessionAttributes.getLocation)
+				throw new Error('yn_UseGeoLocationIntentHandler Error: GetLocationInterceptor was never triggered.')
 			let speechOutput = `Alright. Can you give me an address or two cross streets nearby?`
 			return responseBuilder
-				.speak(speechOutput)
+				.speak(handlerInput.t('LOCATION_RETRY'))
 				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
 				.getResponse();
 		}
@@ -239,9 +253,53 @@ const yn_UseHomeAddressIntentHandler = {
 		)
 	},
 	async handle(handlerInput) {
-		//TODO: Code this
+		const { responseBuilder, attributesManager, requestEnvelope } = handlerInput
+		const sessionAttributes = attributesManager.getSessionAttributes()
+		helper.setQuestion(handlerInput, null)
+		const GetLocationFromUserIntent = {
+			name: 'GetLocationFromUserIntent',
+			confirmationStatus: 'NONE',
+			slots: {
+				userGivenAddress: {
+					name: 'userGivenAddress',
+					value: null,
+					confirmationStatus: 'NONE'
+				}
+			}
+		}
+		// TODO: Permission card for address
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") { // FIXME: Breaks here
+			if (!sessionAttributes.getLocation)
+				throw new Error('yn_UseHomeAddressIntentHandler Error: GetLocationInterceptor was never triggered.')
+			const homeAddress = await helper.isHomeAddressAvailable(handlerInput) ? await helper.getHomeAddress(handlerInput) : null;
+			if (homeAddress) {
+				let speechOutput = `<speak>Is the location near <say-as interpret-as='address'>${homeAddress.addressLine1} in ${homeAddress.city}</say-as>?</speak>`;
+				helper.setQuestion(handlerInput, 'IsAddressCorrect?')
+				return responseBuilder
+					.speak(speechOutput)
+					.withShouldEndSession(false)
+					.getResponse()
+			} else {
+				let speechOutput = `I'm sorry, I had trouble finding your home address. Can you give me an address or two cross streets nearby?`
+				return responseBuilder
+					.speak(speechOutput)
+					.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
+					.getResponse();
+			}
+		}
+
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") {
+			if (!sessionAttributes.getLocation)
+				throw new Error('yn_UseGeoLocationIntentHandler Error: GetLocationInterceptor was never triggered.');
+			let speechOutput = `Alright. Can you give me an address or two cross streets nearby?`
+			return responseBuilder
+				.speak(speechOutput)
+				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
+				.getResponse();
+		}			
 	}
-}
+};
+
 
 const yn_TryAnotherAddress = {
 	canHandle(handlerInput) {
@@ -258,8 +316,6 @@ const yn_TryAnotherAddress = {
 		helper.setQuestion(handlerInput, null);
 
 		if (intentName === 'AMAZON.YesIntent') {
-			const speechOutput = `Alright. What's the location? You can give an address or nearest cross street.`
-			const repromptOutput = `What's the location? You can give an address or nearest cross street.`
 			const GetLocationFromUserIntent = {
 				name: 'GetLocationFromUserIntent',
 				confirmationStatus: 'NONE',
@@ -272,8 +328,8 @@ const yn_TryAnotherAddress = {
 				}
 			}
 			return responseBuilder
-				.speak(speechOutput)
-				.reprompt(repromptOutput)
+				.speak(handlerInput.t('LOCATION_RETRY'))
+				.reprompt(handlerInput.t('LOCATION_GET_LOCATION'))
 				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
 				.getResponse();
 		}
@@ -281,7 +337,7 @@ const yn_TryAnotherAddress = {
 		if (intentName === 'AMAZON.NoIntent') {
 			helper.setQuestion(handlerInput, 'anythingElse?')
 			return responseBuilder
-				.speak(`I'm sorry about that. Is there anything else I can help you with?`)
+				.speak(handlerInput.t('ANYTHING_ELSE_MSG'))
 				.withShouldEndSession(false)
 				.getResponse();
 		}
@@ -312,11 +368,9 @@ const GetLocationRequestInterceptor = {
 			const homeAddressFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getHomeAddress;
 
 			if (geolocationFlag) {
-				if (helper.isGeolocationAvailable(handlerInput)) {
+				if (helper.isGeolocationAvailable(handlerInput) === "supported") {
 					const geoObject = requestEnvelope.context.Geolocation;
-					const ACCURACY_THRESHOLD = 100; // accuracy of 100 meters required
-					if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD)
-						sessionAttributes.getLocation.geolocation = geoObject;
+					sessionAttributes.getLocation.geolocation = geoObject;
 				}
 			}
 
@@ -341,6 +395,7 @@ module.exports = {
 	yn_IsAddressCorrectIntentHandler,
 	yn_TryAnotherAddress,
 	yn_UseGeoLocationIntentHandler,
+	yn_UseHomeAddressIntentHandler,
 	GetLocationRequestInterceptor
 }
 

@@ -11,7 +11,7 @@ class Salesforce_Case_object {
  * @param {String} token - the OAuth access token for the Salesforce API
  * @param {String} service_name - the 311 service name. Each intent should submit the case object with the correct service name.
  */
-	constructor(handlerInput=null, service_name=null, token){
+	constructor(handlerInput=null, service_name=null, token) {
 		if (handlerInput !== null)
 			this.handlerInput = handlerInput;
 		if (service_name !== null)
@@ -25,17 +25,17 @@ class Salesforce_Case_object {
 		if (handlerInput && service_name)
 			this._make_json_input(handlerInput);
 
-		if (this.token === undefined) {
+		if (this.token === undefined)
 			throw new Error("No token provided for the Salesforce Case Object.");
-		}
 	};
 
 
 
 	/**
-	 * Sets a json_object attribute for the case object. Mimics the format of
+	* Sets a json_object attribute for the case object. Mimics the format of
  	* json_input submitted by IVR but uses Alexa slot key value pairs instead.
  	* @param {Object} handlerInput 
+	* @returns {void}
  	*/
 	 _make_json_input(handlerInput) {
 		if (!handlerInput.requestEnvelope.request.intent.slots) {
@@ -46,8 +46,8 @@ class Salesforce_Case_object {
 			const slots = requestEnvelope.request.intent.slots;
 
 			// Getting json_input values from session attributes
-			this.json_input.phone_number = sessionAttributes.phone_number;
-			this.json_input.address = sessionAttributes.confirmedLocation; 
+			// this.json_input.phone_number = sessionAttributes.phone_number; // TODO: Should phone number be in json_input?
+			this.json_input.address = sessionAttributes.confirmedValidatorRes.Address; 
 			
 			for (const slot of Object.entries(slots)) {
 				let slot_name = slot[1].name;
@@ -57,18 +57,15 @@ class Salesforce_Case_object {
 				}
 			}
 
-
-
 		}	
 	}
 
 	
-
 	async create_basic_case(service_name, phone_number, Address, user_json=null, update_case=true) { //TODO: Why is address param never used?
 		if (user_json === null)
 			user_json = this.json_input; // json_input is created in constructor
 		await this.get_service_details(service_name);
-		await this.get_contact(phone_number);
+		await this.get_contact(phone_number); // if phone number is null, sets the contact to anonymous
 		this.update_case = update_case; // Set to true to indicate the case needs updating still.
 		this.input_service_name = service_name;
 		this.case_ans = this.service_question_mapper(user_json);
@@ -76,10 +73,10 @@ class Salesforce_Case_object {
 		const case_body = {
 			"Sub_Service_Type__c": this.service_type_id,
 			"Subject": `${this.service_name}-${this.user_name}`,
-			"Status": "NEW",
+			"Status": "NEW", 
 			"Service_Type__c": this.service_id,
 			"Origin": "AmazonAlexa",
-			"contactId": this.contact_id,
+			"contactId": this.contact_id, // TODO: Can this be null?
 			"Description": `Initial Case description : \n ${this.case_ans['Description']}`,
 			"Email_Web_Notes__c": this.case_ans['Description'],
 		};
@@ -105,61 +102,61 @@ class Salesforce_Case_object {
 			this.case_id = case_resp.data.id;
 			await this.get_case_number(); // Get the case number from the case id
 			return { 'case_number' : this.case_number, 'case_id' : this.case_id };
-			// return { [this.case_number]: this.case_id };
 		} catch (error) {
 			console.error("Error creating basic case");
 			console.log(error);
 			throw error;
 		}
 	};
-
-
-
-	async case_update(case_id, Address, service_name, user_json, update_case=true, threshold=90) {
+	/**
+	 * Finalizes a case draft. This function should be called after
+	 * create_basic_case() and optionally can include additional user_json
+	 * details.
+	 * @param {string} case_id 
+	 * @param {string} Address 
+	 * @param {string} service_name 
+	 * @param {object} user_json 
+	 * @param {bool} update_case 
+	 * @param {int} threshold 
+	 * @returns {object} case number, http status code of the PATCH request
+	 */
+	async case_update(case_id, Address, service_name, user_json=null, update_case=true, threshold=90) {
 		this.input_address=Address;
 		this.update_case = update_case;
 		let phone_number = null;
 		let case_body = {};
 		
 		// How else do you give the phone number?
-		if (user_json && user_json.phone_number) {
+		if (user_json && user_json.phone_number) { 
 			phone_number = user_json.phone_number.match(/\d+/g).join("");
+			await this.get_contact(phone_number) // Need contact for setting Anonymous_Contact__c field
 		}
 		
-		await this.get_contact(phone_number) // TODO: Test if this works with phone number not found
-		this.case_ans = await this.service_question_mapper(user_json);
-		
+		// TODO: Figure out how to get the phone number from json_input
+
+		this.case_ans = this.service_question_mapper(this.json_input); // Modified to use json_input (which is created by _make_json_input())
 		if (service_name) {
 			this.input_service_name = service_name;
 			await this.get_service_details(service_name);
 		}
 		
-		if (case_id) {
-			this.case_id = case_id;
-		}
-		
+		if (case_id) { this.case_id = case_id; }
 		const { internal_geocoder } = await this.world_address_verification(Address, threshold)
 		this.addr_resp = internal_geocoder;
 		await this.get_gis_attribute();
-		
-		if (this.addr_resp.length === 0) {
-			return "Case Creation Failed";
+		if (this.addr_resp.length === 0) { 
+			console.error("Error: No address found for case_update");	
+			return false; 
 		}
-
-		if (user_json) {
-			this.case_ans = await this.service_question_mapper(user_json, false) 
-		}
-
+		if (user_json) { this.case_ans = this.service_question_mapper(user_json, false); } // 
 		case_body.Status = 'NEW';
 		case_body.Sub_Service_Type__c = this.service_type_id;
 		case_body.Subject = `${this.service_name}-${this.user_name}`;
 		case_body.Service_Type__c = this.service_id;
 		case_body.Anonymous_Contact__c = this.contact_id ? "false" : "true";
-		if (this.contact_id) {
-			case_body.contactId = this.contact_id;
-		}
+		if (this.contact_id) { case_body.contactId = this.contact_id; }
 		case_body.Email_Web_Notes__c = this.case_ans.Description;
-		case_body.Description = `Additional case details \n ${this.case_ans.Description}`; // TODO: Why is this overwriting initial case details?
+		case_body.Description = `Additional case details \n ${this.case_ans.Description}`;
 		case_body.Address_Geolocation__Latitude__s = this.addr_resp.candidates[0].location.y;
 		case_body.Address_Geolocation__Longitude__s = this.addr_resp.candidates[0].location.x;
 		case_body.Address_X__c = this.addr_resp.candidates[0].attributes.X;
@@ -168,7 +165,6 @@ class Salesforce_Case_object {
 		case_body.GIS_City__c = this.addr_resp.candidates[0].attributes.City;
 		case_body.Street_Center_Line__c = this.addr_resp.candidates[0].attributes.Loc_name;
 		case_body.Case_Gis_Info_JSON__c = this.gis_json;
-
 		this.b = new Date(Date.now()).toISOString(); // TODO: Does this date get submitted to the database? Where?
 		await this.create_case_questions();
 
@@ -195,6 +191,12 @@ class Salesforce_Case_object {
 		await this.get_case_number();
 		return {'case_number' : this.case_number, 'status_code' : this.case_resp.status}
 	};
+
+
+	// TODO: Write create_generic_case and update_generic_case
+	async create_generic_case(service_name, phone_number, user_json) {
+		this.get_service_details(service_name="IVR");
+	}
 
 
 
@@ -241,9 +243,10 @@ class Salesforce_Case_object {
 
 
 	/**
-	 * Function to get the service id and parent service id
-	 * @param {String} service_name
-	 * @returns {Object} service_id, service_type_id 
+	 * Sets this.service_id and this.service_type_id
+	 * @param {string} service_name - name of the service to search for
+	 * @returns {void}
+	 * pairs and "description" string at the end of the array
 	 */
 	async get_service_details(service_name){
 		const fields = ['Portal_Display_Name__c', 'Name', 'Id', 'Parent_Service_Type__c', 'Interface_Name__c'];
@@ -272,6 +275,15 @@ class Salesforce_Case_object {
 		}
 	};
 
+	/**
+	 * Creates the case_ans object that contains the question-answer pairs for
+	 * the case along with the "description" field
+	 * @param {object} input_json - optional
+	 * @param {bool} service_question_in_description - Whether or not to include
+	 * the service questions in the description element
+	 * @returns {array} case_ans - array of objects containing question-answer
+	 * pairs and "description" string at the end of the array
+	 */
 	service_question_mapper(input_json=this.input_json, service_question_in_description=true){
 		let desc_exclude_list=["phone_number","service_type","case_id","destination_type","destination_value"];
 		let desc_include_list=["animal_type","animal_location","relamp_problem_description"];
@@ -325,6 +337,7 @@ class Salesforce_Case_object {
 			addr_validation_out.Full_Address = addr;
 			addr_validation_out.Validated = "CoS";
 			addr_validation_out.Score = geocoded_out.internal_geocoder.candidates[0].score;
+			addr_validation_out.geocoderResponse = geocoded_out; // Modified to include the full address object
 			const from_date = new Date(Date.now() - check_period * 24 * 60 * 60 * 1000);
 			const created_date = from_date.toISOString();
 			
@@ -363,6 +376,7 @@ class Salesforce_Case_object {
 				addr_validation_out.District = district;
 				addr_validation_out.Score = geocoded_out.world_geocoder.candidates[0].score;
 				addr_validation_out.Validated = "world";
+				addr_validation_out.geocoderResponse = geocoded_out; // Modified to include the full address object
 			} else {
 				addr_validation_out.Address = address;
 				addr_validation_out.Full_Address = null;
@@ -384,19 +398,19 @@ class Salesforce_Case_object {
 		// console.log(Address.length)
 		if (Address.length > 0) {
 			let addr = Address.replace(" USA",'');
-			let response = await helper.getWorldAddressResponse(addr)
+			let response = await helper.getWorldAddress(addr)
 			let resp_dict = await this.internal_verifier(response.data, threshold);
 			let internal_response=[];
 			let overview=[];
 			if (typeof(threshold) != "number") {
 				threshold = parseInt(threshold);
 			}
-			if (response.status == 200 && typeof(resp_dict) == "object" && 'candidates' in resp_dict && resp_dict['candidates'].length > 0 && resp_dict['candidates'][0]['score'] >= threshold) {
+			if (response.status == 200 && typeof(resp_dict) == 'object' && 'candidates' in resp_dict && resp_dict['candidates'].length > 0 && resp_dict['candidates'][0]['score'] >= threshold) {
 				let address = resp_dict['candidates'][0]['attributes']['ShortLabel'];
 				let city = resp_dict['candidates'][0]['attributes']['City'];
 				let county = resp_dict['candidates'][0]['attributes']['Subregion'];
 				
-				let city_response = await helper.getInternalAddressResponse(resp_dict.candidates[0]);
+				let city_response = await helper.getInternalAddress(resp_dict.candidates[0]);
 				if (city_response.status == 200 && city_response.data['candidates'].length > 0) {
 					internal_response = await this.internal_verifier(city_response.data, threshold);
 				}
@@ -492,8 +506,6 @@ class Salesforce_Case_object {
 		}
 
 		var temp = [];
-		var fields;
-		const layers = out_json.data.layers;
 		
 		for (const layer of out_json.data.layers) {
 			if (layer.hasOwnProperty('fields') && this.mapped.hasOwnProperty(layer.id)) {
@@ -511,7 +523,7 @@ class Salesforce_Case_object {
 							out.Value__c = layer.features[0].attributes[field.name]; // TODO: Is this working right?
 							// console.log(out.Value__c);
 						}
-						if (field.name == 'GARBAGE_DAY') { // TODO: Find test address for this case. Or find out why GARBAGE_DAY isn't in out_json
+						if (field.name === 'GARBAGE_DAY') { // TODO: Why did this execute when name wasn't garbage day
 							let out2 = JSON.parse(JSON.stringify(out)); // Deep copy
 							out.Label__c = this.mapped[layer.id][field.name][0];
 							out2.Label__c = this.mapped[layer.id][field.name][1];
@@ -548,7 +560,7 @@ class Salesforce_Case_object {
 		if (typeof(resp_json) === 'object') {
 			var x = resp_json.candidates[0].location.x;
 			var y = resp_json.candidates[0].location.y;
-			console.log(x, y);
+			// console.log(x, y);
 			var dtpr_flag = await this.check_dtpr(x, y);
 			if (dtpr_flag)
 				overlay_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG,+RECYCLE_WEEK,+OP_AREA"},{"layerId":2,"outFields":"DISTRICT"},{"layerId":3,"outFields":"ZIP5"},{"layerId":4,"outFields":"NAME"},{"layerId":5,"outFields":"CITY_NAME"},{"layerId":6,"outFields":"BEAT"},{"layerId":7,"outFields":"DISTRICT"},{"layerId":8,"outFields":"DISTNUM"},{"layerId":9,"outFields":"DISTRICT"},{"layerId":10,"outFields":"PAGE,TB_ROW,TB_COL"},{"layerId":11,"outFields":"OFFICER"},{"layerId":12,"outFields":"OFFICER"},{"layerId":13,"outFields":"RAINA"},{"layerId":14,"outFields":"RAINB"},{"layerId":15,"outFields":"NAME"},{"layerId":16,"outFields":"TILENUM"},{"layerId":17,"outFields":"DISTRICT"},{"layerId":18,"outFields":"NAME"},{"layerId":19,"outFields":"BEAT_NUM"},{"layerId":25,"outFields":"MAINTSUP"},{"layerId":34,"outFields":"ZI_OFFICER"},{"layerId":35,"outFields":"VA_OFFICER"},{"layerId":36,"outFields":"H_OFFICER"},{"layerId":38,"outFields":"SW_OFFICER"},{"layerId":39,"outFields":"NSA"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
@@ -1004,13 +1016,12 @@ class Salesforce_Case_object {
 };
 
 
-
 // Dictionary mapping the input fields (slot names) with Salesforce fields
 const mappings = {
 	'make': 'Vehicle Make',
 	'model': 'Vehicle Model',
-	'vehicle_license_number': 'License Plate Number',
-	'time-period': '# of Days Abandoned',
+	'licensePlate': 'License Plate Number',
+	'timePeriod': '# of Days Abandoned',
 	'color': 'Vehicle Color',
 	'animal_location':"Please select where the animal is located",
 	'animal_type':"Type of Animal",
