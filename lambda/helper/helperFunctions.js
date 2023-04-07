@@ -1,4 +1,5 @@
 const axios = require("axios")
+const iso8601 = require("iso8601-duration");
 
 /** //TODO: Get this working on a lambda environment
  * This function gets an OAuth token for use with the Salesforce API.
@@ -6,7 +7,7 @@ const axios = require("axios")
  * Be sure to have a valid .env file containing the following variables:
  * SF_AUTH_URL, SF_USERNAME, SF_PASSWORD, SF_CLIENT_ID, SF_CLIENT_SECRET
  * 
- * @returns OAuth bearer token
+ * @returns {string} OAuth bearer token
  */
 async function getOAuthToken() {
 	const res = await axios.post(process.env.SF_AUTH_URL, {
@@ -28,9 +29,9 @@ async function getOAuthToken() {
 /**
  * This function should be able to make any query to the SF API. Just pass in
  * the SOQL query you want to use. No URL encoding required.
- * @param {string} query 
- * @param {string} token
- * @returns http response from SF API
+ * @param {string} query - unencoded SOQL query
+ * @param {string} token - Oauth token
+ * @returns {object} response - 200 OK http response object
  */
 async function querySFDB(query, token) {
 	const url = encodeURI(`${process.env.SALESFORCE_URL}/query/?q=${query}`)
@@ -42,7 +43,11 @@ async function querySFDB(query, token) {
 				'Accept-Encoding': 'application/json'
 			}
 		});
-		return res;
+		if (res.status === 200)
+			return res;
+		else {
+			throw new Error(`querySFDB Error: ${res.status} ${res.statusText}`);
+		}
 	} catch (error) {
 		if (!error.response) {
 			throw new Error(`querySFDB Error: ${error.message}`);
@@ -55,35 +60,40 @@ async function querySFDB(query, token) {
 /**
  * Returns true if the user has a home address set in their Alexa app and has
  * given permission for the skill to access it.
- * @param {Object} handlerInput 
- * @returns 
+ * @param {object} handlerInput 
+ * @returns {boolean}
  */
 async function isHomeAddressAvailable(handlerInput) {
 	const { deviceId } = handlerInput.requestEnvelope.context.System.device;
 	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
 	const url = `${apiEndpoint}/v1/devices/${deviceId}/settings/address`;
-				try {
-					let res = await axios.get(url, {
-						headers: {
-							'Host': `api.amazonalexa.com`,
-							'Authorization': `Bearer ${apiAccessToken}`,
-							'Accept': 'application/json',
-						}
-					});
-				
-					if (res.status === 200 && res.data.addressLine1.length > 0)
-						return true;
-					else
-						return false;
+	try {
+		let res = await axios.get(url, {
+			headers: {
+				'Host': `api.amazonalexa.com`,
+				'Authorization': `Bearer ${apiAccessToken}`,
+				'Accept': 'application/json',
+			}
+		});
 	
-				} catch (error) {
-					return false;
-				}
+		if (res.status === 200 && res.data.addressLine1.length > 0)
+			return true;
+		else
+			return false;
+
+	} catch (error) {
+		return false;
+	}
 }
 
+/**
+ * Retrieves the user's home address from the device API.
+ * @param {object} handlerInput 
+ * @returns {object} res.data - response data from the device API
+ */
 async function getHomeAddress(handlerInput) {
-	const { deviceId } = requestEnvelope.context.System.device;
-	const { apiEndpoint, apiAccessToken } = requestEnvelope.context.System;
+	const { deviceId } = handlerInput.requestEnvelope.context.System.device;
+	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
 	const url = `${apiEndpoint}/v1/devices/${deviceId}/settings/address`;
 	try {
 		let res = await axios.get(url, {
@@ -112,25 +122,34 @@ async function getHomeAddress(handlerInput) {
 	}
 }
 
-/**
- * Checks whether the user has given permission for the skill to access their geolocation.
- * @param {Object} handlerInput 
- * @returns 
+/** 
+ * checks if Geo Location is accurate and authorized to be used from device
+ * @param {Object} handlerInput
+ * @returns string describing the error or returns "supported"
  */
 function isGeolocationAvailable(handlerInput) {
 	const isGeoSupported = handlerInput.requestEnvelope.context.System.device.supportedInterfaces.Geolocation;
 	if (isGeoSupported) {
 		const geoObject = handlerInput.requestEnvelope.context.Geolocation;
 		const ACCURACY_THRESHOLD = 100; // accuracy of 100 meters required
-		if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD )
-			return true;
+		if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters < ACCURACY_THRESHOLD) {
+			return "supported";
+		}
+		else if (geoObject && geoObject.coordinate && geoObject.coordinate.accuracyInMeters > ACCURACY_THRESHOLD) {
+			return "not-accurate";
+		}
 		else
-			return false;
+			return "not-authorized";
 	} else {
-		return false;
+		return "not-available";
 	}
 }
 
+/**
+ * Retrieves the user's geolocation from the handlerInput object.
+ * @param {object} handlerInput 
+ * @returns {object} geoObject - the user's geolocation object
+ */
 function getGeolocation(handlerInput) {
 	const geoObject = handlerInput.requestEnvelope.context.Geolocation;
 	if (geoObject && geoObject.coordinate)
@@ -139,14 +158,36 @@ function getGeolocation(handlerInput) {
 		return null;
 }
 
+function toDays(iso8601duration) {
+	return (iso8601.toSeconds(iso8601.parse(iso8601duration)) / 3600.0) / 24;
+}
 
-// Stores the asked question in a session attribute for yes and no intent handlers
+/**
+ * Sets sessionAttributes.questionAsked to the given question.
+ * @param {object} handlerInput 
+ * @param {string} questionAsked 
+ * @returns {void}
+ */
 function setQuestion(handlerInput, questionAsked) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 	sessionAttributes.questionAsked = questionAsked;
 	handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
 
+function getFailCounter(handlerInput) {
+	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+	if (sessionAttributes.failCounter) {
+		return sessionAttributes.failCounter;
+	} else {
+		return 0;
+	}
+}
+
+/**
+ * Increases the failCounter by 1. If the failCounter does not exist, it is created.
+ * @param {object} handlerInput
+ * @returns {void} 
+ */
 function incFailCounter(handlerInput) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 	if (sessionAttributes.failCounter) {
@@ -157,6 +198,11 @@ function incFailCounter(handlerInput) {
 	handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
 
+/**
+ * deletes the failCounter from sessionAttributes.
+ * @param {object} handlerInput 
+ * @returns {void}
+ */
 function clearFailCounter(handlerInput) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 	delete sessionAttributes.failCounter;
@@ -165,8 +211,8 @@ function clearFailCounter(handlerInput) {
 
 /**
  * Clear the slot values of the given intent.
- * @param {Object} intent 
- * @returns {Object} Intent with cleared slot values
+ * @param {object} intent - intent object with slot values
+ * @returns {object} updatedIntent - updated intent with cleared slot values
  */
 function clearSlots(intent) {
 	for (let key in intent.slots)
@@ -175,30 +221,23 @@ function clearSlots(intent) {
 }
 
 /** 
- * Function to clear the context. Used when the user wants to do another task in the same session.
- * Example call in Abandoned vehicle, after output statement is created, before it is returned.
- * call with: 
- * index.clearContext(handlerInput, requestEnvelope.request.intent)
+ * Delete the given intent from sessionAttributes. Call after an intent has been
+ * completed and the user wants to do something else in the same session.
+ * @param {object} handlerInput
+ * @param {string} intentName - name of the intent to delete
+ * @returns {void}
  */
-function clearContext(handlerInput, currentIntent) {
+function clearContextIntent(handlerInput, intentName) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-	delete sessionAttributes[currentIntent.name];
+	delete sessionAttributes[intentName];
 }
 
-function getDummySlots(handlerInput, intentName) {
-	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-	const { attributesManager } = handlerInput;
-	const slots = sessionAttributes[intentName].slots;
-	let dummySlots = {};
-	for (let k in slots) {
-		dummySlots[k] = {
-			name: k,
-			value: 'dummy'
-		};
-	}
-	return dummySlots;
-}
-
+/**
+ * Creates an intent object from a given intent name and slot values.
+ * @param {string} intentName 
+ * @param {object} slots 
+ * @returns 
+ */
 function createIntentFromSlots(intentName, slots) {
 	return {
 			name: intentName,
@@ -207,72 +246,68 @@ function createIntentFromSlots(intentName, slots) {
 	};
 }
 
+// TODO: Update this function to accept an optional parameter for specifying slots to be managed by auto delegation
+/**
+ * A hacky way to re-enter a previously invoked intent without Alexa taking over
+ * dialog management. It works by replacing the slot values with dummy values,
+ * tricking Alexa into immediately sending back the intent with a dialog state
+ * of COMPLETED. ContextSwitchingRequestInterceptor is also required as it is
+ * responsible for saving intent objects from previously-entered intents
+ *
+ * Sets the sessionAttributes.hasDummyValues flag so the complementary
+ * interceptor (index.RestoreDummyValuesRequestInterceptor) knows to restore the
+ * original slot values and change the dialog state back to IN_PROGRESS.
+ * 
+ * @param {object} handlerInput 
+ * @param {string} intentName - The name of the intent to switch to
+ * @returns {object} updatedIntent
+ * @example
+ * handle(handlerInput) {
+ *     return handlerInput.responseBuilder
+ *     .addDelegateDirective(switchIntent(handlerInput, 'MyIntent')) 
+ *     .getResponse();
+ * }
+ */
 function switchIntent(handlerInput, intentName) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 	
 	if (!(intentName in sessionAttributes))
 		throw new Error(`switchIntent Error: Intent ${intentName} not found in session attributes. Intent must have already been invoked previously.`);
 	
-	const { attributesManager, responseBuilder } = handlerInput;
-	let dummySlots = JSON.parse(JSON.stringify(sessionAttributes[intentName].slots));
-	const updatedIntent = JSON.parse(JSON.stringify(sessionAttributes[intentName]));
-	
+	const { attributesManager } = handlerInput;
+	const updatedIntent = JSON.parse(JSON.stringify(sessionAttributes[intentName])); // Deep copy
 	for (let k in updatedIntent.slots)
-		updatedIntent.slots[k].value = 'dummy';
 	
-	sessionAttributes.hasDummyValues = true;
+		updatedIntent.slots[k].value = 'dummy';
+	sessionAttributes.hasDummyValues = true; // Set flag for RestoreDummyValuesRequestInterceptor
 	attributesManager.setSessionAttributes(sessionAttributes);
 	return updatedIntent
 }
 
 /**
  * Gets the highest scoring address candidate from the ArcGIS world geocoder.
- * The returned address will be used to query the sac311gis API for more details.
- * TODO: Find out which return address we should be using from the response.
+ * The returned candidate object will be used to query the sac311gis API for more details.
  * @param {string} address 
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
  */
-async function getWorldAddressCandidate(address) {
-	if (!address) {
-		throw new Error('Address parameter is required.');
-	}
-
+async function reverseGeocode(latitude, longitude) {
+	const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
 	try {
-		const response = await axios.get(process.env.WORLD_GEOCODER_URL, {
-			params: {
-				address: address,
-				outFields: '*',
-				f: 'pjson',
-				maxLocations: 10
+		const res = await axios.get(url, {
+			headers : {
+				'Content-Type': 'application/json',
+				'Accept-Encoding': 'application/json',
 			}
 		});
-		const candidates = response.data.candidates;
-		let chosenCandidate = null;
-		for (let candidate of candidates) {
-			if (candidate.score === 100) {
-				chosenCandidate = candidate;
-				break;
-			}
-			if (candidate.score >= 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
-				chosenCandidate = candidate;
-			}
-		}
-		//chosenCandidate = getInternalAddressCandidate(chosenCandidate);
-		return chosenCandidate ? chosenCandidate : false;
+		if (!res.status === 200) return null;
+		return res.data;
 	} catch (error) {
-		console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
-		throw new Error(`Failed to find suitable address. ${error.message}`);
+		console.error(error);
+		return false;
 	}
 }
 
-/**
- * Gets the highest scoring address candidate from the ArcGIS world geocoder.
- * The returned address will be used to query the sac311gis API for more details.
- * TODO: Find out which return address we should be using from the response.
- * @param {string} address 
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
- */
-async function getWorldAddressResponse(address) {
+async function getWorldAddress(address) {
 	if (!address) {
 		throw new Error('Address parameter is required.');
 	}
@@ -298,10 +333,8 @@ async function getWorldAddressResponse(address) {
 
 /**
  * Takes a candidate object from world gis to compare against sac311 gis
- * Returns a candidate object or false if no suitable candidate
- * Automatically accepts a candidate if score equal to 100
  * @param {object} potentialCandidate
- * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
 */
 async function getInternalAddressCandidate(potentialCandidate) {
 	if (!potentialCandidate) {
@@ -338,7 +371,7 @@ async function getInternalAddressCandidate(potentialCandidate) {
 	}
 }
 
-async function getInternalAddressResponse(candidate) {
+async function getInternalAddress(candidate) {
 	if (!candidate) {
 		throw new Error('No Candidate was found.');
 	}
@@ -365,30 +398,88 @@ async function getInternalAddressResponse(candidate) {
 	}
 }
 
-/**
- * This function takes a latitude and longitude and returns object containing information about the location
- * @param {float} latitude 
- * @param {float} longitude 
- * @returns location data object
- */
-async function reverseGeocode(latitude, longitude) {
-	const url = `https://utility.arcgis.com/usrsvcs/servers/3f594920d25340bcb7108f137a28cda1/rest/services/World/GeocodeServer/reverseGeocode?location=${longitude},${latitude}&distance=500&f=json`;
+async function isPhoneNumberAvailable(handlerInput) {
+	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
+	const url = `${apiEndpoint}/v2/accounts/~current/settings/Profile.mobileNumber`;
+
 	try {
-		const res = await axios.get(url, {
-			headers : {
-				'Content-Type': 'application/json',
-				'Accept-Encoding': 'application/json',
+		let res = await axios.get(url, {
+			headers: {
+				'Host': `api.amazonalexa.com`,
+				'Authorization': `Bearer ${apiAccessToken}`,
+				'Accept': 'application/json'
 			}
 		});
-		if (!res.status === 200) return null;
-		return res.data;
+	
+		if (res.status === 200)
+			return true;
+		else
+			return false;
 	} catch (error) {
-		console.error(error);
 		return false;
 	}
+  }
+
+// Helper function to retrieve the user's phone number and save it in session attribute called phone else return null but do not throw an error
+async function getPhoneNumber(handlerInput) {
+	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
+	const url = `${apiEndpoint}/v2/accounts/~current/settings/Profile.mobileNumber`;
+
+	try {
+		let res = await axios.get(url, {
+			headers: {
+				'Host': `api.amazonalexa.com`,
+				'Authorization': `Bearer ${apiAccessToken}`,
+				'Accept': 'application/json'
+			}
+		});
+	
+		if (res.status === 200)
+			return res.data.phoneNumber;
+		else
+			return null;
+	} catch (error) {
+		if (error.response.status === 403) {
+			console.log('The user has not given permission to access their full address.')
+			return null;
+		}
+		else if (error.response.status) {
+			console.log('Error retrieving phone from device API: ', error.status, error.message);
+			return null;
+		}
+		else 
+			return null;
+	}
+  }
+
+
+module.exports = {
+	getOAuthToken,
+	querySFDB,
+	setQuestion,
+	clearContextIntent,
+	clearSlots,
+	reverseGeocode,
+	getFailCounter,
+	incFailCounter,
+	clearFailCounter,
+	isHomeAddressAvailable,
+	isGeolocationAvailable,
+	createIntentFromSlots,
+	switchIntent,
+	getGeolocation,
+	getHomeAddress,
+	getWorldAddress,
+	getInternalAddress,
+	toDays,
+	getPhoneNumber,
+	isPhoneNumberAvailable,
+	getCaseDetailsFromSalesForce
 }
 
-async function openCase(handlerInput) {
+// Unused functions //
+
+async function openCase() {
 	const sfUrl = `https://saccity--qa.sandbox.my.salesforce.com/services/data/v57.0/sobjects/Case`;
 	const token = await getOAuthToken();
 
@@ -474,28 +565,90 @@ function getQA(handlerInput, currentIntent) {
 		return result;
 	}
 }
+  
 
-module.exports = {
-	getOAuthToken,
-	querySFDB,
-	setQuestion,
-	clearContext,
-	clearSlots,
-	getWorldAddressCandidate,
-	getWorldAddressResponse,
-	getInternalAddressCandidate,
-	getInternalAddressResponse,
-	getCaseDetailsFromSalesForce,
-	reverseGeocode,
-	openCase,
-	getQA,
-	incFailCounter,
-	clearFailCounter,
-	isHomeAddressAvailable,
-	isGeolocationAvailable,
-	getDummySlots,
-	createIntentFromSlots,
-	switchIntent,
-	getGeolocation,
-	getHomeAddress
+
+/**
+ * Gets the highest scoring address candidate from the ArcGIS world geocoder.
+ * The returned address will be used to query the sac311gis API for more details.
+ * TODO: Find out which return address we should be using from the response.
+ * @param {string} address 
+ * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+ */
+async function getWorldAddressCandidate(address) {
+	if (!address) {
+		throw new Error('Address parameter is required.');
+	}
+
+	try {
+		const response = await axios.get(process.env.WORLD_GEOCODER_URL, {
+			params: {
+				address: address,
+				outFields: '*',
+				f: 'pjson',
+				maxLocations: 10
+			}
+		});
+		const candidates = response.data.candidates;
+		let chosenCandidate = null;
+		for (let candidate of candidates) {
+			if (candidate.score === 100) {
+				chosenCandidate = candidate;
+				break;
+			}
+			if (candidate.score >= 80 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+				chosenCandidate = candidate;
+			}
+		}
+		//chosenCandidate = getInternalAddressCandidate(chosenCandidate);
+		return chosenCandidate ? chosenCandidate : false;
+	} catch (error) {
+		console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+		throw new Error(`Failed to find suitable address. ${error.message}`);
+	}
 }
+
+
+/**
+ * Takes a candidate object from world gis to compare against sac311 gis
+ * Returns a candidate object or false if no suitable candidate
+ * Automatically accepts a candidate if score equal to 100
+ * @param {object} potentialCandidate
+ * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
+*/
+async function getInternalAddressCandidate(potentialCandidate) {
+	if (!potentialCandidate) {
+		throw new Error('No Candidate was found.');
+	}
+
+	try {
+		const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+			params: {
+				Street: potentialCandidate.attributes.ShortLabel,
+				City: potentialCandidate.attributes.City,
+				ZIP: potentialCandidate.attributes.Postal,
+				SingleLine: potentialCandidate.attributes.ShortLabel,
+				outFields: '*',
+				outSR: 4326,
+				f: 'pjson'
+			}
+		});
+		const candidates = response.data.candidates;
+		let chosenCandidate = null;
+		for (let candidate of candidates) {
+			if (candidate.score === 100) {
+				chosenCandidate = candidate;
+				break;
+			}
+			if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+				chosenCandidate = candidate;
+			}
+		}
+		return chosenCandidate ? chosenCandidate : false;
+	} catch (error) {
+		console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+		throw new Error(`Failed to find suitable address,
+	getPhoneNumber. ${error.message}`);
+	}
+}
+

@@ -11,6 +11,8 @@ const AWS = require("aws-sdk")
 const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter")
 const i18n = require("i18next")
 const axios = require("axios")
+require('dotenv').config() // TODO: Will this work on lambda env?
+
 
 // Local modules
 const helper = require("./helper/helperFunctions.js")
@@ -20,7 +22,9 @@ const abandonedVehicle = require("./abandonedVehicle.js")
 const homelessCamp = require("./homelessEncampment.js")
 const getLocation = require("./addressCollectionFlow")
 const trashpickup = require("./trashPickup.js")
-const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
+const intentFlagsFile = require("./helper/intentFlags.js"); 
+const Salesforce_Case_object = require("./helper/SalesforceCaseObject.js")
+const intentFlags = intentFlagsFile.intentFlags;
 
 
 
@@ -31,7 +35,7 @@ const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = 
 
 /**
  * This handler is triggered when the user says "Alexa, open Sacramento 311"
- */
+ */5
 const LaunchRequestHandler = {
 	canHandle(handlerInput) {
 		return (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest");
@@ -41,34 +45,31 @@ const LaunchRequestHandler = {
 		const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
 
 		// DYNAMODB TEST CODE //
-		let persistentAttributes =
-			(await attributesManager.getPersistentAttributes()) || {};
+		let persistentAttributes = (await attributesManager.getPersistentAttributes()) || {};
 		console.log("persistentAttributes: " + JSON.stringify(persistentAttributes));
 
-		var counter = persistentAttributes.hasOwnProperty("counter")
-			? persistentAttributes.counter
-			: 1;
+		var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
 		console.log("counter: " + counter);
 
-		persistentAttributes = { counter: counter + 1 };
+		persistentAttributes.counter = counter + 1;
 		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
 		await attributesManager.savePersistentAttributes(); // and then save
-		// END DYNAMODB TEST CODE //
-
-		// // Query SFDB TEST CODE //
-		// // This is an example of making a query to the Salesforce database. 
-		//  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
-		//  LastName='mouse') LIMIT 5`;
-		// const contactDetails = await helper.querySFDB(query);
-		// console.log('Name: ' + contactDetails.records[0].Name);
-		// console.log('Phone: ' + contactDetails.records[0].Phone)
-		// // END QUERY SFDB TEST CODE //
-
-		// Testing gis endpoints
-		// const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
-		// const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
-		// console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
-		// console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
+    //Output phonenumber to console
+   
+    // // Query SFDB TEST CODE //
+    // // This is an example of making a query to the Salesforce database. 
+   //  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
+   //  LastName='mouse') LIMIT 5`;
+    // const contactDetails = await helper.querySFDB(query);
+    // console.log('Name: ' + contactDetails.records[0].Name);
+    // console.log('Phone: ' + contactDetails.records[0].Phone)
+    // // END QUERY SFDB TEST CODE //
+    
+    // Testing gis endpoints
+      // const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
+      // const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
+      // console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
+      // console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
 
 		// //Submit the ticket
 		// const ticketTest = await helper.openCase();
@@ -78,29 +79,14 @@ const LaunchRequestHandler = {
 		// const query1 = 'SELECT casenumber,id FROM Case WHERE (id = \'' + ticketTest.id + '\') LIMIT 1';
 		// const caseNumber = await helper.querySFDB(query1);
 		// console.log('caseNumber: ' + caseNumber.records[0].CaseNumber);
+	
+		// //SALESFORCE CASE OBJECT TEST CODE //
+		// const token = await helper.getOAuthToken(handlerInput);
+		// const caseObject = new Salesforce_Case_object(null, 'idk', token)
+		// caseObject.create_generic_case('idk', null, null);
+	
 
-
-		// SALESFORCE CASE OBJECT TEST CODE //
-
-		// Test Addresses
-		// '1800 F ST' : dtpr = true and garbage_day is not null
-		// const service_name = 'Concern';
-		// const phone_number = '9165551111';
-		// let Address = '2525 Larkspur Ln'
-		// let token = await helper.getOAuthToken();
-		// const myCase = new sfCase(handlerInput, 'Concern', token); // Creating a new case object with a new token
-		// const out_json = await myCase.address_case_validator(Address)
-		// console.log(out_json)
-		// const caseNumber = await myCase.create_basic_case(service_name, phone_number, Address);
-
-		// token = await helper.getOAuthToken();
-		// const myUpdateCase = new sfCase(handlerInput, 'Concern', token); // Creating a new case object with a new token
-		// const update_resp = await myUpdateCase.case_update(myCase.case_id, Address, 'Concern', myCase.json_input)
-		// console.log(caseNumber);
-		// myCase.service_question_mapper(json_input);
-		// const contactID = await myCase.get_contact('9165551111'); // Getting contact details from phone number
-		// const serviceIDs = await myCase.get_service_details('Vehicle On Street') // Getting service details from service name
-		// console.log('myCase: ' + JSON.stringify(myCase)); // Print out all case details stored in the case object so far
+		console.log(await helper.isPhoneNumberAvailable(handlerInput));
 
 		// END SALESFORCE CASE OBJECT TEST CODE //
 		speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
@@ -119,8 +105,7 @@ const ReportAnIssueIntentHandler = {
 	canHandle(handlerInput) {
 		return (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-			Alexa.getIntentName(handlerInput.requestEnvelope) ===
-			"ReportAnIssueIntent"
+			Alexa.getIntentName(handlerInput.requestEnvelope) === "ReportAnIssueIntent"
 		);
 	},
 	handle(handlerInput) {
@@ -587,46 +572,36 @@ const DelegateDirectiveResponseInterceptor = {
 	}
 };
 
-/*
+
+/**
  * This is a previousCase interceptor that will run before the LaunchRequest Handle. 
  * It is responsible for checking if there is a previous case and setting the session attributes
 */
-
 const PreviousCaseInterceptor = {
 	async process(handlerInput) {
 		if (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
 		) {
-
 			const attributesManager = handlerInput.attributesManager;
 			const persistentAttributes = await attributesManager.getPersistentAttributes();
 			const sessionAttributes = attributesManager.getSessionAttributes();
-			if (persistentAttributes.caseNumber) {
-				sessionAttributes.caseNumber = persistentAttributes.caseNumber;
+			if (sessionAttributes.caseNumber = persistentAttributes.caseNumber)
 				attributesManager.setSessionAttributes(sessionAttributes);
-			} else {
-				sessionAttributes.caseNumber = '230407-013720';
-				attributesManager.setSessionAttributes(sessionAttributes);
-				//console.log('No previous case');
-			}
-			
 		}
-	},	
+	},
 };
 
-/*
+/**
  * This is a PutDynamoCaseInterceptor using putDynamoCase function
  * that will run before the SessionEndedRequest Handle.
  * It is responsible for checking if there is a case in session attributes and if so, it will
  * put the case into DynamoDB. Else, it will continue.
 */
-
 const PutDynamoCaseInterceptor = {
 	async process(handlerInput) {
 		if (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "SessionEndedRequest"
 		) {
-
 			const attributesManager = handlerInput.attributesManager;
 			const sessionAttributes = attributesManager.getSessionAttributes();
 			const persistentAttributes = await attributesManager.getPersistentAttributes();
@@ -636,7 +611,6 @@ const PutDynamoCaseInterceptor = {
 				attributesManager.setPersistentAttributes(persistentAttributes);
 				await attributesManager.savePersistentAttributes();
 			}
-
 		}
 	},
 };
@@ -652,14 +626,11 @@ const PutDynamoCaseInterceptor = {
 var awsHostedEnv = false;
 var ddbClient;
 
-// Checking environment variables to set dynamoDB client
-if (process.env['AWS_EXECUTION_ENV'] === 'AWS_Lambda_nodejs12.x') {
-	console.log("Running in Alexa-Hosted Lambda Environment")
-	awsHostedEnv = true
-} else {
+
+if (process.env.ENVIRONMENT === "dev") {
 	console.log("Not running on Alexa-Hosted Lambda Environment")
 
-	require('dotenv').config()
+	// require('dotenv').config() //TODO: Restore this for prod env?
 	const { exec } = require('child_process');
 
 	console.log("Starting local dynamoDB server...")
@@ -714,6 +685,7 @@ var requestHandlers = [
 	yn_AnythingElseIntentHandler,
 	yn_RetryIntentHandler,
 	getLocation.yn_UseGeoLocationIntentHandler,
+	getLocation.yn_UseHomeAddressIntentHandler,
 	getLocation.yn_TryAnotherAddress,
 	abandonedVehicle.InProgressAbandonedVehicleIntentHandler,
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
@@ -734,7 +706,7 @@ var requestInterceptors = [
 	getLocation.GetLocationRequestInterceptor,
 	SetIntentFlagsRequestInterceptor,
 	PreviousCaseInterceptor,
-	PutDynamoCaseInterceptor,
+	// PutDynamoCaseInterceptor,
 ]
 
 const skillBuilder = Alexa.SkillBuilders.custom();
@@ -746,7 +718,7 @@ skillBuilder
 	.addErrorHandlers(ErrorHandler)
 	.withCustomUserAgent("BigDino")
 
-if (process.env.DEVELOPMENT === "true") {
+if (process.env.ENVIRONMENT === "dev") {
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: "sac311table",
@@ -754,11 +726,11 @@ if (process.env.DEVELOPMENT === "true") {
 			dynamoDBClient: ddbClient,
 		})
 	)
-} else { // Lambda hosted environment // TODO: Make this an if statement to check for AWS_EXECUTION_ENV, else return error
+} else if (process.env.ENVIRONMENT === "lambda") { 
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-			createTable: false,
+			createTable: true,
 			dynamoDBClient: new AWS.DynamoDB({
 				apiVersion: "latest",
 				region: process.env.DYNAMODB_PERSISTENCE_REGION,
