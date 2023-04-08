@@ -66,7 +66,7 @@ const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 
 		sessionAttributes.getLocation.unconfirmedValidatorRes = res;
 		attributesManager.setSessionAttributes(sessionAttributes);
-		let speechOutput = `Did you say the address was ${res.Address}?`
+		let speechOutput = `<speak>Did you say the address was <say-as interpret-as='address'>${res.Address}</say-as>?</speak>`
 		helper.setQuestion(handlerInput, 'IsAddressCorrect?')
 		return responseBuilder
 			.speak(speechOutput)
@@ -130,7 +130,6 @@ const yn_IsAddressCorrectIntentHandler = {
 					}
 				}
 			}
-			let speechOutput = `Alright. Can you give me an address or two cross streets nearby?`
 			return responseBuilder
 				.speak(handlerInput.t('LOCATION_RETRY'))
 				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)

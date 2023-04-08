@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk-core")
-const helper = require("./helper/helperFunctions.js")
+const helper = require("../helper/helperFunctions.js")
 
 const HomelessCampIntentHandler = {
   canHandle(handlerInput) {

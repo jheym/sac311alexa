@@ -15,18 +15,14 @@ require('dotenv').config() // TODO: Will this work on lambda env?
 
 
 // Local modules
-const helper = require("./helper/helperFunctions.js")
 const sfCase = require("./helper/SalesforceCaseObject.js")
+const helper = require("./helper/helperFunctions.js")
 const languageStrings = require("./helper/nsCommon.json")
 const abandonedVehicle = require("./abandonedVehicle.js")
-const homelessCamp = require("./homelessEncampment.js")
 const getLocation = require("./addressCollectionFlow")
-const trashpickup = require("./trashPickup.js")
-const intentFlagsFile = require("./helper/intentFlags.js"); 
-const Salesforce_Case_object = require("./helper/SalesforceCaseObject.js")
-const getServiceName = require("./helper/getServiceName.js")
-const intentFlags = intentFlagsFile.intentFlags;
+const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./trashPickupDay.js");
+const checkCaseStatus = require("./checkCaseStatus.js");
 
 
 /*****************************************************************************/
@@ -54,22 +50,22 @@ const LaunchRequestHandler = {
 		persistentAttributes.counter = counter + 1;
 		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
 		await attributesManager.savePersistentAttributes(); // and then save
-    //Output phonenumber to console
-   
-    // // Query SFDB TEST CODE //
-    // // This is an example of making a query to the Salesforce database. 
-   //  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
-   //  LastName='mouse') LIMIT 5`;
-    // const contactDetails = await helper.querySFDB(query);
-    // console.log('Name: ' + contactDetails.records[0].Name);
-    // console.log('Phone: ' + contactDetails.records[0].Phone)
-    // // END QUERY SFDB TEST CODE //
-    
-    // Testing gis endpoints
-      // const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
-      // const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
-      // console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
-      // console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
+		//Output phonenumber to console
+
+		// // Query SFDB TEST CODE //
+		// // This is an example of making a query to the Salesforce database. 
+		//  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
+		//  LastName='mouse') LIMIT 5`;
+		// const contactDetails = await helper.querySFDB(query);
+		// console.log('Name: ' + contactDetails.records[0].Name);
+		// console.log('Phone: ' + contactDetails.records[0].Phone)
+		// // END QUERY SFDB TEST CODE //
+
+		// Testing gis endpoints
+		// const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
+		// const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
+		// console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
+		// console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
 
 		// //Submit the ticket
 		// const ticketTest = await helper.openCase();
@@ -79,21 +75,21 @@ const LaunchRequestHandler = {
 		// const query1 = 'SELECT casenumber,id FROM Case WHERE (id = \'' + ticketTest.id + '\') LIMIT 1';
 		// const caseNumber = await helper.querySFDB(query1);
 		// console.log('caseNumber: ' + caseNumber.records[0].CaseNumber);
-	
+
 		// //SALESFORCE CASE OBJECT TEST CODE //
 		// const token = await helper.getOAuthToken(handlerInput);
 		// const caseObject = new Salesforce_Case_object(null, 'idk', token)
 		// caseObject.create_generic_case('idk', null, null);
-	
+
 
 		console.log(await helper.isPhoneNumberAvailable(handlerInput));
 
 		// END SALESFORCE CASE OBJECT TEST CODE //
 		speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 		return handlerInput.responseBuilder
-		.speak(speechOutput)
-		.reprompt(handlerInput.t('WELCOME_REPROMPT'))
-		.getResponse()
+			.speak(speechOutput)
+			.reprompt(handlerInput.t('WELCOME_REPROMPT'))
+			.getResponse()
 	}
 }
 
@@ -112,7 +108,7 @@ const ReportAnIssueIntentHandler = {
 
 	},
 	handle(handlerInput) {
-	
+
 		helper.setQuestion(handlerInput, null);
 		return (
 			handlerInput.responseBuilder
@@ -133,7 +129,7 @@ const yn_RetryIntentHandler = {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope)
 		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
-		return (requestType === "IntentRequest" && 
+		return (requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
 			questionAsked === "TryAgain?");
 	},
@@ -142,14 +138,14 @@ const yn_RetryIntentHandler = {
 		const { requestEnvelope, responseBuilder } = handlerInput;
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			return responseBuilder
-			.speak(handlerInput.t('YES_RETRY'))
-			.withShouldEndSession(false)
-			.getResponse()
+				.speak(handlerInput.t('YES_RETRY'))
+				.withShouldEndSession(false)
+				.getResponse()
 		} else {
 			return responseBuilder
-			.speak(handlerInput.t('NO_RETRY'))
-			.withShouldEndSession(true) // This will end the session
-			.getResponse()
+				.speak(handlerInput.t('NO_RETRY'))
+				.withShouldEndSession(true) // This will end the session
+				.getResponse()
 		}
 	}
 }
@@ -159,7 +155,7 @@ const yn_AnythingElseIntentHandler = {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope)
 		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
-		return (requestType === "IntentRequest" && 
+		return (requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
 			questionAsked === "AnythingElse?");
 	},
@@ -168,14 +164,14 @@ const yn_AnythingElseIntentHandler = {
 		const { requestEnvelope, responseBuilder } = handlerInput;
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			return responseBuilder
-			.speak(handlerInput.t('YES_RETRY'))
-			.withShouldEndSession(false)
-			.getResponse()
+				.speak(handlerInput.t('YES_RETRY'))
+				.withShouldEndSession(false)
+				.getResponse()
 		} else {
 			return responseBuilder
-			.speak(handlerInput.t('NO_RETRY'))
-			.withShouldEndSession(true)
-			.getResponse()
+				.speak(handlerInput.t('NO_RETRY'))
+				.withShouldEndSession(true)
+				.getResponse()
 		}
 	}
 
@@ -322,42 +318,6 @@ const ErrorHandler = {
 	},
 }
 
-const GetPreviousCaseIntentHandler = {
-	canHandle(handlerInput) {
-		return (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-			Alexa.getIntentName(handlerInput.requestEnvelope) === "GetPreviousCaseIntent"
-		);
-	},
-	async handle(handlerInput) {
-		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
-		const sessionAttributes = attributesManager.getSessionAttributes();
-		const { caseNumber } = sessionAttributes;
-		let caseDetails;
-		let caseDate;
-		let caseStatus;
-		let serviceName;
-
-
-		if (caseNumber) {
-			caseDetails = await helper.getCaseDetailsFromSalesForce(caseNumber); // Getting the case details from salesforce
-			caseDate = caseDetails.createdDate;
-			caseStatus = caseDetails.status;
-			serviceName = caseDetails.subServiceType;
-		}
-
-		if (caseDetails) {	
-			return responseBuilder
-				.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDate}. It's status is currently ${caseStatus}.`)
-				.getResponse();
-		} else {
-			return responseBuilder
-			.speak(`I could not find a case.`)
-			.getResponse();
-		}
-	},
-}
-
 
 /*****************************************************************************/
 /*                               INTERCEPTORS                                */
@@ -420,8 +380,8 @@ const ContextSwitchingRequestInterceptor = {
  */
 const SetIntentFlagsRequestInterceptor = {
 	process(handlerInput) {
-		if (handlerInput.requestEnvelope.request.type === "IntentRequest" && 
-		handlerInput.requestEnvelope.request.intent.name in intentFlags) {
+		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+			handlerInput.requestEnvelope.request.intent.name in intentFlags) {
 			const { requestEnvelope, attributesManager } = handlerInput;
 			const currentIntent = requestEnvelope.request.intent;
 			const sessionAttributes = attributesManager.getSessionAttributes();
@@ -442,7 +402,7 @@ const SetIntentFlagsRequestInterceptor = {
 const RestoreDummyValuesRequestInterceptor = {
 	process(handlerInput) {
 		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-		handlerInput.attributesManager.getSessionAttributes().hasDummyValues) {
+			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) {
 			const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 			handlerInput.requestEnvelope.request.dialogState = "IN_PROGRESS";
 			const dummyIntent = handlerInput.requestEnvelope.request.intent;
@@ -475,113 +435,12 @@ const LocalisationRequestInterceptor = {
 	}
 };
 
-/**
- * This request interceptor tries to get the user's full name from the Alexa API
- * at the beginning of a session and saves it to persistent attributes
- * (dynamoDB).
- *
- * FIXME: Figure out why this was breaking for Ronald
- */
-const PersonalizationRequestInterceptor = {
-	async process(handlerInput) {
-		if (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-		) {
-			const { attributesManager, requestEnvelope } = handlerInput;
-			const { apiAccessToken } = requestEnvelope.context.System 
-				? requestEnvelope.context.System 
-				: null;
-			const sessionAttributes = attributesManager.getSessionAttributes() || {};
-			let persistentAttributes =
-				(await attributesManager.getPersistentAttributes()) || {};
-			console.log(
-				"persistentAttributes: " + JSON.stringify(persistentAttributes)
-			);
-			const userFullName = persistentAttributes.hasOwnProperty("userFullName")
-				? persistentAttributes.userFullName
-				: null;
-			console.log("userFullName: " + userFullName);
-
-			// If no full name was in persistent attributes, get it from the API
-			if (!userFullName) {
-				// Axios config to set headers
-				let config = {
-					headers: {
-						Authorization: `Bearer ${apiAccessToken}`,
-					},
-				};
-
-				try {
-					res = await axios.get(
-						"https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name",
-						config
-					);
-				} catch (error) {
-					console.log("There was a problem getting the user's name");
-					console.log(error);
-				}
-
-				if (res.status === 200) {
-					persistentAttributes = { userFullName: res.data };
-					attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
-					await attributesManager.savePersistentAttributes(); // and then save
-				} else {
-					console.log("There was a problem getting the user's name");
-					console.log(res);
-				}
-			} else {
-				// Else, if there was a full name in persistent attributes, set it in session attributes
-				sessionAttributes.userFullName = userFullName;
-				attributesManager.setSessionAttributes(sessionAttributes);
-			}
-		}
-	},
-};
 
 /**
- * This is a response interceptor. Not currently in use but could be used as an
- * example of how to manipulate the outgoing response.
- *
- * The purpose of this interceptor is to detect if the outgoing response
- * contains a delegateDirective(), and if so, autofill any saved slots for the
- * intent being delegated to
- */
-const DelegateDirectiveResponseInterceptor = {
-	process(handlerInput, response) {
-		// console.log(response)
-
-		// If the response has dialog delegate directives, add any existing slots from session attributes
-		if (
-			response.directives &&
-			response.directives[0].updatedIntent &&
-			response.directives[0].type === "Dialog.Delegate"
-		) {
-			const sessionAttributes =
-				handlerInput.attributesManager.getSessionAttributes();
-			// const currentIntent = handlerInput.requestEnvelope.request.intent
-			const delegatedIntent = response.directives[0].updatedIntent;
-			if (sessionAttributes[delegatedIntent.name]) {
-				let savedSlots = sessionAttributes[delegatedIntent.name].slots;
-				for (let key in savedSlots) {
-					if (
-						!response.directives[0].updatedIntent.slots[key].value &&
-						savedSlots[key].value
-					) {
-						response.directives[0].updatedIntent.slots[key] = savedSlots[key];
-					}
-				}
-			}
-			console.log(response);
-		}
-	}
-};
-
-
-/**
- * This is a previousCase interceptor that will run before the LaunchRequest Handle. 
- * It is responsible for checking if there is a previous case and setting the session attributes
+ * When a new session starts, this interceptor loads the persistent attributes
+ * from DynamoDB into the session attributes.
 */
-const PreviousCaseInterceptor = {
+const LoadPersistentAttributesInterceptor = {
 	async process(handlerInput) {
 		if (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
@@ -595,30 +454,6 @@ const PreviousCaseInterceptor = {
 	},
 };
 
-/**
- * This is a PutDynamoCaseInterceptor using putDynamoCase function
- * that will run before the SessionEndedRequest Handle.
- * It is responsible for checking if there is a case in session attributes and if so, it will
- * put the case into DynamoDB. Else, it will continue.
-*/
-const PutDynamoCaseInterceptor = {
-	async process(handlerInput) {
-		if (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "SessionEndedRequest"
-		) {
-			const attributesManager = handlerInput.attributesManager;
-			const sessionAttributes = attributesManager.getSessionAttributes();
-			const persistentAttributes = await attributesManager.getPersistentAttributes();
-						
-			if (sessionAttributes.caseNumber) {
-				persistentAttributes.caseNumber = sessionAttributes.caseNumber;
-				attributesManager.setPersistentAttributes(persistentAttributes);
-				await attributesManager.savePersistentAttributes();
-			}
-		}
-	},
-};
-
 
 
 
@@ -627,9 +462,7 @@ const PutDynamoCaseInterceptor = {
 /*****************************************************************************/
 
 // Flag for checking if we are running in the Alexa-Hosted Lambda Environment
-var awsHostedEnv = false;
 var ddbClient;
-
 
 if (process.env.ENVIRONMENT === "dev") {
 	console.log("Not running on Alexa-Hosted Lambda Environment")
@@ -681,13 +514,13 @@ var requestHandlers = [
 	CancelAndStopIntentHandler,
 	FallbackIntentHandler,
 	ReportAnIssueIntentHandler,
-	GetPreviousCaseIntentHandler,
+	yn_AnythingElseIntentHandler,
+	yn_RetryIntentHandler,
+	checkCaseStatus.GetPreviousCaseIntentHandler,
 	abandonedVehicle.StartedAbandonedVehicleIntentHandler,
 	getLocation.GetLocationIntentHandler,
 	getLocation.SIPGetLocationFromUserIntentHandler,
 	getLocation.yn_IsAddressCorrectIntentHandler,
-	yn_AnythingElseIntentHandler,
-	yn_RetryIntentHandler,
 	getLocation.yn_UseGeoLocationIntentHandler,
 	getLocation.yn_UseHomeAddressIntentHandler,
 	getLocation.yn_TryAnotherAddress,
@@ -697,22 +530,17 @@ var requestHandlers = [
 	abandonedVehicle.yn_ConfirmVehicleDescriptionIntentHandler,
 	abandonedVehicle.yn_ConfirmLicensePlateIntentHandler,
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
-	homelessCamp.HomelessCampIntentHandler,
-	homelessCamp.YesHomelessCampIntentHandler,
-	homelessCamp.NoHomelessCampIntentHandler,
-	trashpickup.TrashPickUpIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler
 ]
 
 var requestInterceptors = [
 	LocalisationRequestInterceptor,
-	RestoreDummyValuesRequestInterceptor,
+	LoadPersistentAttributesInterceptor,
+	RestoreDummyValuesRequestInterceptor, // This might have to be before ContextSwitchingRequestInterceptor
 	ContextSwitchingRequestInterceptor,
 	getLocation.GetLocationRequestInterceptor,
 	SetIntentFlagsRequestInterceptor,
-	PreviousCaseInterceptor,
-	// PutDynamoCaseInterceptor,
 ]
 
 const skillBuilder = Alexa.SkillBuilders.custom();
@@ -732,7 +560,7 @@ if (process.env.ENVIRONMENT === "dev") {
 			dynamoDBClient: ddbClient,
 		})
 	)
-} else if (process.env.ENVIRONMENT === "lambda") { 
+} else if (process.env.ENVIRONMENT === "lambda") {
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
@@ -748,111 +576,112 @@ if (process.env.ENVIRONMENT === "dev") {
 exports.handler = skillBuilder.lambda();
 
 
-// if (!awsHostedEnv) {
-//   exports.handler = Alexa.SkillBuilders.custom()
-//     .addRequestHandlers(
-//       LaunchRequestHandler,
-//       ReportAnIssueIntentHandler,
-//       getLocation.GetLocationIntentHandler,
-//       getLocation.YesUseCurrentLocationIntentHandler,
-//       getLocation.NoUseCurrentLocationIntentHandler,
-//       // getLocation.YesUseHomeAddressIntentHandler,
-//       // getLocation.NoUseHomeAddressIntentHandler,
-//       getLocation.GetLocationHelperIntentHandler,
-//       abandonedVehicle.AbandonedVehicleIntentHandler,
-//       abandonedVehicle.YesAbandonedVehicleIntentHandler,
-//       abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
-//       abandonedVehicle.NoAbandonedVehicleIntentHandler,
-//       abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
-//       homelessCamp.HomelessCampIntentHandler,
-//       homelessCamp.YesHomelessCampIntentHandler,
-//       homelessCamp.NoHomelessCampIntentHandler,
-//       trashpickup.TrashPickUpIntentHandler,
-//       YesRetryIntentHandler,
-//       NoRetryIntentHandler,
-//       FallbackIntentHandler,
-//       HelpIntentHandler,
-//       CancelAndStopIntentHandler,
-//       SessionEndedRequestHandler
-//       // IntentReflectorHandler,
-//     )
-//     .addRequestInterceptors(
-//       // NewSessionRequestInterceptor,
-//       // PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
-//       LocalisationRequestInterceptor,
-//       ContextSwitchingRequestInterceptor,
-//       getLocation.GetLocationRequestInterceptor
-//     )
-//     .addResponseInterceptors
-//     // DelegateDirectiveResponseInterceptor
-//     // getLocation.DelegateToGetLocationResponseInterceptor
-//     ()
-//     .withApiClient(new Alexa.DefaultApiClient())
-//     .addErrorHandlers(ErrorHandler)
-//     .withCustomUserAgent("BigDino")
-//     .withPersistenceAdapter(
-//       new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
-//         tableName: "sac311table",
-//         createTable: true,
-//         dynamoDBClient: ddbClient,
-//       })
-//     )
-//     .lambda();
-// } 
 
 
-// /* DO NOT EDIT, THESE ARE FOR ALEXA-HOSTED ENVIRONMENT */
-// else {
-//   exports.handler = Alexa.SkillBuilders.custom()
-//     .addRequestHandlers(
-//       LaunchRequestHandler,
-//       ReportAnIssueIntentHandler,
-//       getLocation.GetLocationIntentHandler,
-//       getLocation.YesUseCurrentLocationIntentHandler,
-//       getLocation.NoUseCurrentLocationIntentHandler,
-//       // getLocation.YesUseHomeAddressIntentHandler,
-//       // getLocation.NoUseHomeAddressIntentHandler,
-//       getLocation.GetLocationHelperIntentHandler,
-//       abandonedVehicle.AbandonedVehicleIntentHandler,
-//       abandonedVehicle.YesAbandonedVehicleIntentHandler,
-//       abandonedVehicle.YesAbandonedVehicleTimeIntentHandler,
-//       abandonedVehicle.NoAbandonedVehicleIntentHandler,
-//       abandonedVehicle.NoAbandonedVehicleTimeIntentHandler,
-//       homelessCamp.HomelessCampIntentHandler,
-//       homelessCamp.YesHomelessCampIntentHandler,
-//       homelessCamp.NoHomelessCampIntentHandler,
-//       trashpickup.TrashPickUpIntentHandler,
-//       YesRetryIntentHandler,
-//       NoRetryIntentHandler,
-//       FallbackIntentHandler,
-//       HelpIntentHandler,
-//       CancelAndStopIntentHandler,
-//       SessionEndedRequestHandler
-//       // IntentReflectorHandler,
-//     )
-//     .addRequestInterceptors(
-//       // NewSessionRequestInterceptor,
-//       // PersonalizationRequestInterceptor, //FIXME: Fix whatever was happening on ronald's machine
-//       LocalisationRequestInterceptor,
-//       ContextSwitchingRequestInterceptor,
-//       getLocation.GetLocationRequestInterceptor
-//     )
-//     .addResponseInterceptors
-//     // DelegateDirectiveResponseInterceptor
-//     // getLocation.DelegateToGetLocationResponseInterceptor
-//     ()
-//     .withApiClient(new Alexa.DefaultApiClient())
-//     .addErrorHandlers(ErrorHandler)
-//     .withCustomUserAgent("BigDino")
-//     .withPersistenceAdapter(
-//       new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
-//         tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-//         createTable: false,
-//         dynamoDBClient: new AWS.DynamoDB({
-//           apiVersion: "latest",
-//           region: process.env.DYNAMODB_PERSISTENCE_REGION,
-//         }),
-//       })
-//     )
-//     .lambda();
-// }
+
+
+
+
+// UNUSED CODE
+
+/**
+ * This request interceptor tries to get the user's full name from the Alexa API
+ * at the beginning of a session and saves it to persistent attributes
+ * (dynamoDB).
+ *
+ * FIXME: Figure out why this was breaking for Ronald
+ */
+const PersonalizationRequestInterceptor = {
+	async process(handlerInput) {
+		if (
+			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+		) {
+			const { attributesManager, requestEnvelope } = handlerInput;
+			const { apiAccessToken } = requestEnvelope.context.System
+				? requestEnvelope.context.System
+				: null;
+			const sessionAttributes = attributesManager.getSessionAttributes() || {};
+			let persistentAttributes =
+				(await attributesManager.getPersistentAttributes()) || {};
+			console.log(
+				"persistentAttributes: " + JSON.stringify(persistentAttributes)
+			);
+			const userFullName = persistentAttributes.hasOwnProperty("userFullName")
+				? persistentAttributes.userFullName
+				: null;
+			console.log("userFullName: " + userFullName);
+
+			// If no full name was in persistent attributes, get it from the API
+			if (!userFullName) {
+				// Axios config to set headers
+				let config = {
+					headers: {
+						Authorization: `Bearer ${apiAccessToken}`,
+					},
+				};
+
+				try {
+					res = await axios.get(
+						"https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name",
+						config
+					);
+				} catch (error) {
+					console.log("There was a problem getting the user's name");
+					console.log(error);
+				}
+
+				if (res.status === 200) {
+					persistentAttributes = { userFullName: res.data };
+					attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
+					await attributesManager.savePersistentAttributes(); // and then save
+				} else {
+					console.log("There was a problem getting the user's name");
+					console.log(res);
+				}
+			} else {
+				// Else, if there was a full name in persistent attributes, set it in session attributes
+				sessionAttributes.userFullName = userFullName;
+				attributesManager.setSessionAttributes(sessionAttributes);
+			}
+		}
+	},
+};
+
+
+/**
+ * This is a response interceptor. Not currently in use but could be used as an
+ * example of how to manipulate the outgoing response.
+ *
+ * The purpose of this interceptor is to detect if the outgoing response
+ * contains a delegateDirective(), and if so, autofill any saved slots for the
+ * intent being delegated to
+ */
+const DelegateDirectiveResponseInterceptor = {
+	process(handlerInput, response) {
+		// console.log(response)
+
+		// If the response has dialog delegate directives, add any existing slots from session attributes
+		if (
+			response.directives &&
+			response.directives[0].updatedIntent &&
+			response.directives[0].type === "Dialog.Delegate"
+		) {
+			const sessionAttributes =
+				handlerInput.attributesManager.getSessionAttributes();
+			// const currentIntent = handlerInput.requestEnvelope.request.intent
+			const delegatedIntent = response.directives[0].updatedIntent;
+			if (sessionAttributes[delegatedIntent.name]) {
+				let savedSlots = sessionAttributes[delegatedIntent.name].slots;
+				for (let key in savedSlots) {
+					if (
+						!response.directives[0].updatedIntent.slots[key].value &&
+						savedSlots[key].value
+					) {
+						response.directives[0].updatedIntent.slots[key] = savedSlots[key];
+					}
+				}
+			}
+			console.log(response);
+		}
+	}
+};

@@ -22,7 +22,7 @@ function getServiceDetail(handlerInput) {
       'ParentServiceId': 'a0Om0000003eSnmEAE'
     },
     'HomelessCampIntentHandler': {
-      'sfdbSubServiceType': 'Trash',
+      'sfdbSubServiceType': 'Trash', // FIXME: This is not correct. The sub service name should be "Concern." Double check to make sure the subservice Id is correct.
       'sfdbSubServiceId': 'a0Om0000005oGQLEA2',
       'ParentServiceName': 'Homeless Camp',
       'ParentServiceId': 'a0Om0000003eSnmEAE'

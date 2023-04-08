@@ -46,7 +46,7 @@ class Salesforce_Case_object {
 			const slots = requestEnvelope.request.intent.slots;
 
 			// Getting json_input values from session attributes
-			// this.json_input.phone_number = sessionAttributes.phone_number; // TODO: Should phone number be in json_input?
+			this.json_input.phone_number = sessionAttributes.phone_number; // TODO: Should phone number be in json_input?
 			this.json_input.address = sessionAttributes.confirmedValidatorRes.Address; 
 			
 			for (const slot of Object.entries(slots)) {
@@ -127,10 +127,10 @@ class Salesforce_Case_object {
 		let case_body = {};
 		
 		// How else do you give the phone number?
-		if (user_json && user_json.phone_number) { 
+		if (user_json && user_json.phone_number)
 			phone_number = user_json.phone_number.match(/\d+/g).join("");
-			await this.get_contact(phone_number) // Need contact for setting Anonymous_Contact__c field
-		}
+		
+		await this.get_contact(phone_number) // Need contact for setting Anonymous_Contact__c field
 		
 		// TODO: Figure out how to get the phone number from json_input
 
@@ -151,7 +151,7 @@ class Salesforce_Case_object {
 		if (user_json) { this.case_ans = this.service_question_mapper(user_json, false); } // 
 		case_body.Status = 'NEW';
 		case_body.Sub_Service_Type__c = this.service_type_id;
-		case_body.Subject = `${this.service_name}-${this.user_name}`;
+		case_body.Subject = `${this.service_name}-${this.user_name}`; //TODO: user_name is undefined
 		case_body.Service_Type__c = this.service_id;
 		case_body.Anonymous_Contact__c = this.contact_id ? "false" : "true";
 		if (this.contact_id) { case_body.contactId = this.contact_id; }
@@ -208,7 +208,7 @@ class Salesforce_Case_object {
 	 */
 	async get_contact(phone_number){
 		
-		if (phone_number.toString().length > 9) {
+		if (phone_number && phone_number.toString().length > 9) {
 			phone_number = phone_number.toString().replace(/\D/g, '');
 			const phone_number_v1 = phone_number.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
 			const phone_number_v2 = phone_number.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');

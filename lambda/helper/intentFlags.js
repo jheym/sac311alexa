@@ -20,7 +20,7 @@ const intentFlags = {
     GetGarbageDayIntent : {
         intentName : 'GetGarbageDayIntent',
         flags : {
-            getGeolocation : true,
+            getGeolocation : false,
             getHomeAddress : true
         }
     }

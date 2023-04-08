@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk-core")
-const index = require("./index.js")
+const index = require("../index.js")
 
 const TrashPickUpIntentHandler = {
   canHandle(handlerInput) {

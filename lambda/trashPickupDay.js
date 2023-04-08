@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core")
 const helper = require("./helper/helperFunctions.js")
-const iso8601 = require('iso8601-duration')
+const sfCase = require('./helper/SalesforceCaseObject.js')
 const axios = require("axios")
 
 //Started
@@ -12,31 +12,39 @@ const StartedTrashPickupDayIntentHandler = {
             Alexa.getDialogState(handlerInput.requestEnvelope) === "STARTED"
         )
     },
-    handle(handlerInput) {
-		/*
-        helper.setQuestion(handlerInput, 'IsTrashPickupDayCorrect')
-        const speakOutput = handlerInput.t("Do you want to know your trash pickup day?")
-        return handlerInput.responseBuilder
-        .withShouldEndSession(false)
-        .speak(speakOutput)
-        .getResponse();
-		*/
-		// So GetLocationIntent knows where to delegate back to after confirming the address
+    async handle(handlerInput) {
+
+        // helper.setQuestion(handlerInput, 'IsTrashPickupDayCorrect?')
+        // const speakOutput = handlerInput.t("Do you want to know your trash pickup day?")
+        // return handlerInput.responseBuilder
+        // .withShouldEndSession(false)
+        // .speak(speakOutput)
+        // .getResponse();
+
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 		const currentIntent = requestEnvelope.request.intent;
 		sessionAttributes.intentToRestore = 'TrashPickupDayIntent';
 		attributesManager.setSessionAttributes(sessionAttributes);
 		
-		if (helper.isGeolocationAvailable(handlerInput)) {
-			helper.setQuestion(handlerInput, 'UseGeolocation?')
-			let speechOutput = `Would you like to use your current location?`;
+		
+		if (await helper.isHomeAddressAvailable(handlerInput)) {
+			const { addressLine1 } = await helper.getHomeAddress(handlerInput);
+			if (addressLine1.length > 0) {
+				const token = await helper.getOAuthToken(handlerInput);
+				const myCaseObj = new sfCase(null, null, token);
+				var validatorObj = await myCaseObj.address_case_validator(addressLine1);
+			}
+		}
+
+		if (validatorObj && validatorObj.Within_City === true) {
+			let speechOutput = `We found a city address associated with your Amazon account. Would you like to use it to check your garbage day?`;
 			return responseBuilder
-			.speak(speechOutput)
-			.withShouldEndSession(false)
-			.getResponse();
+				.speak(speechOutput)
+				.withShouldEndSession(false)
+				.getResponse();
 		} else {
-			let speechOutput = `Where is the trash being picked up from?`
+			let speechOutput = `Sure, I can check any address within the city of Sacramento. What address should I check?`
 			let GetLocationFromUserIntent = {
 				name: 'GetLocationFromUserIntent',
 				confirmationStatus: 'NONE',
@@ -101,29 +109,31 @@ const InProgressTrashPickupDayIntentHandler = {
 				const garbage_day = res.data.features[0].attributes.GARBAGE_DAY;
 				console.log(garbage_day);
 				if(garbage_day === 'MON-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Monday")
+					speakOutput = handlerInput.t("Your trash pickup day is Monday.")
 				}
 				else if(garbage_day === 'TUE-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Tuesday")
+					speakOutput = handlerInput.t("Your trash pickup day is Tuesday.")
 				}
 				else if(garbage_day === 'WED-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Wednesday")
+					speakOutput = handlerInput.t("Your trash pickup day is Wednesday.")
 				}
 				else if(garbage_day === 'THU-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Thursday")
+					speakOutput = handlerInput.t("Your trash pickup day is Thursday.")
 				}
 				else if(garbage_day === 'FRI-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Friday")
+					speakOutput = handlerInput.t("Your trash pickup day is Friday.")
 				}
 				else {
-					speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address")
+					speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address.")
 				}
 			} catch(error) {
 				console.log(error);
-				speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address")
+				speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address.")
 			}
 			
 		}
+		speakOutput += handlerInput.t(" Is there anything else I can help you with?")
+		helper.setQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
 		.speak(speakOutput)
 		.getResponse();
