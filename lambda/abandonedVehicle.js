@@ -52,9 +52,11 @@ const InProgressAbandonedVehicleIntentHandler = {
 				.addDelegateDirective()
 				.getResponse();
 		}
-
 		if (slots.licensePlate.value) {
-			let speechOutput = `Just to confirm, did you say the license plate number is ${slots.licensePlate.value}?`
+			slots.licensePlate.value = slots.licensePlate.value.replace(/\s+/g, '').toUpperCase();
+			//TODO: replace "for" with "4", "one" with "1", and "ate" with "8"
+			//TODO: slow down the speech when speaking the license plate number
+			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as>?</speak>`
 			helper.setQuestion(handlerInput, 'IsLicensePlateCorrect?');
 			return responseBuilder
 				.speak(speechOutput)
@@ -109,12 +111,15 @@ const CompletedAbandonedVehicleIntentHandler = {
 		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const currentIntent = requestEnvelope.request.intent;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		let service_name = 'Vehicle On Street' // Need to use the correct service name
-		sessionAttributes.phone_number = await helper.isPhoneNumberAvailable(handlerInput) ? await helper.getPhoneNumber(handlerInput) : null;
+		const slots = currentIntent.slots;
+		const internalServiceName = 'Vehicle On Street' // Need to use the correct service name associated with the service type
+		const phoneNumber = await helper.isPhoneNumberAvailable(handlerInput) ? await helper.getPhoneNumber(handlerInput) : null; //TODO: Use phone number collection flow instead
+		const token = await helper.getOAuthToken();
+		sessionAttributes.phoneNumber = phoneNumber;
 		attributesManager.setSessionAttributes(sessionAttributes);
-		currentIntent.slots.timePeriod.value = helper.toDays(currentIntent.slots.timePeriod.value);
-		let token = await helper.getOAuthToken();
-		var caseNumber, caseId;
+		slots.timePeriod.value = helper.toDays(currentIntent.slots.timePeriod.value);
+		var caseNumber, caseId; 
+
 
 		if (!sessionAttributes.confirmedValidatorRes) {
 			// TODO: Submit generic case with unvalidated location
@@ -125,19 +130,16 @@ const CompletedAbandonedVehicleIntentHandler = {
 				.withShouldEndSession(false)
 				.getResponse();
 		} else {
-			var location = sessionAttributes.confirmedValidatorRes.Address
-			const myBasicCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // Creating a new case object with a new token
-			const basicCaseRes = await myBasicCaseObj.create_basic_case(service_name, sessionAttributes.phone_number, location);
-			caseNumber = basicCaseRes.case_number;
-			caseId = basicCaseRes.case_id;
+			var address = sessionAttributes.confirmedValidatorRes.Address;
+			const myCaseObj = new sfCase(token);
+			const open_res = await helper.openIntegratedCase(handlerInput, myCaseObj, internalServiceName, address, phoneNumber);
+			[caseNumber, caseId] = [open_res.case_number, open_res.case_id];
+			const myUpdateCaseObj = new sfCase(token);
+			const update_res = await helper.updateIntegratedCase(handlerInput, open_res.case_id, myUpdateCaseObj, internalServiceName, address, phoneNumber);
+			await helper.saveCaseToDynamo(handlerInput, caseNumber);
 			
-			const persistentAttributes = await attributesManager.getPersistentAttributes();
-			persistentAttributes.caseNumber = caseNumber;
-			attributesManager.setPersistentAttributes(persistentAttributes);
-			await attributesManager.savePersistentAttributes();
-			
-			const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
-			const caseUpdateRes = await myUpdateCaseObj.case_update(caseId, location, 'Vehicle On Street', null);
+			// const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
+			// const caseUpdateRes = await myUpdateCaseObj.case_update(caseId, location, 'Vehicle On Street', null);
 		}
 		
 		// TEST CODE FOR CASE CREATION
@@ -165,7 +167,7 @@ const CompletedAbandonedVehicleIntentHandler = {
 		var make = Alexa.getSlotValue(handlerInput.requestEnvelope, 'make');
 		var model = Alexa.getSlotValue(handlerInput.requestEnvelope, 'model');
 		var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color');
-		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${location}`, caseNumber: `${caseNumber}` })
+		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${address}`, caseNumber: `${caseNumber}` })
 		helper.clearContextIntent(handlerInput, sessionAttributes.AbandonedVehicleIntent.name)
 		helper.setQuestion(handlerInput, 'AnythingElse?')
 		return responseBuilder

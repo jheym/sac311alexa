@@ -54,7 +54,7 @@ const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 
 		if (userGivenAddress) {
 			let token = await helper.getOAuthToken();
-			let caseObj = new sfCase(null, null, token);
+			let caseObj = new sfCase(token);
 			var res = await caseObj.address_case_validator(userGivenAddress);
 		} else {
 			console.log('Error: userGivenAddress is undefined.')

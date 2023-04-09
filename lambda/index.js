@@ -45,46 +45,45 @@ const LaunchRequestHandler = {
 		console.log("persistentAttributes: " + JSON.stringify(persistentAttributes));
 
 		var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
-		console.log("counter: " + counter);
 
 		persistentAttributes.counter = counter + 1;
 		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
 		await attributesManager.savePersistentAttributes(); // and then save
-		//Output phonenumber to console
 
-		// // Query SFDB TEST CODE //
-		// // This is an example of making a query to the Salesforce database. 
-		//  const query = `SELECT Name, Phone FROM Contact WHERE (FirstName='mickey' AND \
-		//  LastName='mouse') LIMIT 5`;
-		// const contactDetails = await helper.querySFDB(query);
-		// console.log('Name: ' + contactDetails.records[0].Name);
-		// console.log('Phone: ' + contactDetails.records[0].Phone)
-		// // END QUERY SFDB TEST CODE //
+		// ***************************CREATING A GENERIC CASE************************** //
+		
+		// Normally you will create the userResponses object from the slot values in handlerInput
+		// You will get the phone number using the phone number collection.
+		// You will get the address using the address collection.
+		// Address can be unverified, in which case you should first check if ValidatedAddressRes exists in sessionAttributes, otherwise use UnvalidatedAddressRes
+		
+		// // Create a salesforce case object to be passed to createGenericCase()
+		// const token = await helper.getOAuthToken();
+		// const myCaseObj = new sfCase(null, null, token);
+		
+		// // Imagine these slots came from handlerInput
+		// const slots = {
+		// 	genericDescription: {
+		// 		name: 'genericDescription',
+		// 		value: 'The storm drain is clogged and our street is flooding.'
+		// 	}
+		// }
+		
+		// // Create a userReponses object from the slot values you want to submit to Salesforce
+		// const userResponses = {
+		// 	'GenericDescription': slots.genericDescription.value
+		// }
+		// // Create a generic case
+		// const create_case_response = await helper.createGenericCase(myCaseObj, 'Curb/Gutter', userResponses, null, '1800 F Street', '2095686272');
+		// console.log('create_case_response: ' + JSON.stringify(create_case_response, null, 2));
 
-		// Testing gis endpoints
-		// const worldCandidate = await helper.getWorldAddressCandidate('1234 5th st, sacramento, ca 95814');
-		// const internalCandidate = await helper.getInternalAddressCandidate(worldCandidate);
-		// console.log('worldCandidate: ' + JSON.stringify(worldCandidate));
-		// console.log('internalCandidate: ' + JSON.stringify(internalCandidate));
+		// // Finalize the case by updating the case using the case_id from createGenericCase()
+		// const update_case_response = await helper.updateGenericCase(myCaseObj, 'Curb/Gutter', userResponses, create_case_response.case_id, '1800 F Street', '2095686272');
+		// console.log('update_case_response: ' + JSON.stringify(update_case_response, null, 2));
 
-		// //Submit the ticket
-		// const ticketTest = await helper.openCase();
-		// console.log('ticketTest: ' + JSON.stringify(ticketTest));
-
-		// //Search for CaseNumber using CaseId
-		// const query1 = 'SELECT casenumber,id FROM Case WHERE (id = \'' + ticketTest.id + '\') LIMIT 1';
-		// const caseNumber = await helper.querySFDB(query1);
-		// console.log('caseNumber: ' + caseNumber.records[0].CaseNumber);
-
-		// //SALESFORCE CASE OBJECT TEST CODE //
-		// const token = await helper.getOAuthToken(handlerInput);
-		// const caseObject = new Salesforce_Case_object(null, 'idk', token)
-		// caseObject.create_generic_case('idk', null, null);
+		// ****************************END CREATING A GENERIC CASE EXAMPLE*************************** //
 
 
-		console.log(await helper.isPhoneNumberAvailable(handlerInput));
-
-		// END SALESFORCE CASE OBJECT TEST CODE //
 		speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 		return handlerInput.responseBuilder
 			.speak(speechOutput)

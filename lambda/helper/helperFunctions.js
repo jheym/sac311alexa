@@ -26,6 +26,23 @@ async function getOAuthToken() {
 	return res.data.access_token;
 }
 
+
+async function saveCaseToDynamo(handlerInput, caseNumber) {
+	const attributesManager = handlerInput.attributesManager;
+	const persistentAttributes = await attributesManager.getPersistentAttributes();
+	persistentAttributes['caseNumber'] = caseNumber;
+	attributesManager.setPersistentAttributes(persistentAttributes);
+	await attributesManager.savePersistentAttributes();
+}
+
+async function saveToDynamo(handlerInput, key, value) {
+	const attributesManager = handlerInput.attributesManager;
+	const persistentAttributes = await attributesManager.getPersistentAttributes();
+	persistentAttributes[key] = value;
+	attributesManager.setPersistentAttributes(persistentAttributes);
+	await attributesManager.savePersistentAttributes();
+}
+
 /**
  * This function should be able to make any query to the SF API. Just pass in
  * the SOQL query you want to use. No URL encoding required.
@@ -55,6 +72,70 @@ async function querySFDB(query, token) {
 			return error.response // return the 4xx response regardless
 		}
 	}
+}
+
+async function openIntegratedCase(handlerInput, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
+		SalesforceCaseObject.set_service_questions(handlerInput);
+		const case_response = await SalesforceCaseObject.create_basic_case(serviceName, phoneNumber, address, null, true);
+		return case_response;
+}
+
+async function updateIntegratedCase(handlerInput, caseId, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
+	SalesforceCaseObject.set_service_questions(handlerInput);
+	const case_response = await SalesforceCaseObject.case_update(caseId, serviceName, address, phoneNumber);
+	return case_response;
+
+
+}
+
+/**
+ * This is the function for creating a generic case in Salesforce. If caseId is
+ * provided, it will update the existing case. Otherwise, it will create a new
+ * case with the data provided.
+ * @param {object} SalesforceCaseObject - case object created from
+ * SalesForceCaseObject class
+ * @param {string} serviceName - name of the service required
+ * @param {obj} genericDescription - description of the issue from the user
+ * @param {string} address - optional address //TODO: Is this optional?
+ * @param {string} phoneNumber - Optional phone number for service agent to
+ * reach back out. Must be 9 digits no spaces or symbols.  //TODO: Is this true?
+ * @returns {object} case_response - response from the Salesforce API containing
+ * {case_number, case_id}
+ */
+async function createGenericCase(SalesforceCaseObject, serviceName, userResponses, address=null, phoneNumber=null) {
+	const json_input = {}
+	if (address) {json_input.address = address}
+	if (phoneNumber) {json_input.contacted_number = phoneNumber}
+	for (const [key, value] of Object.entries(userResponses))
+		json_input[key] = value;
+
+	const case_response = await SalesforceCaseObject.create_generic_case(serviceName, json_input);
+	return case_response;
+
+}
+
+/**
+ *
+ * @param {object} SalesforceCaseObject - case object created from
+ * SalesForceCaseObject class
+ * @param {string} serviceName - name of the service required
+ * @param {object} userResponses - contains details you want to include in the
+ * case description. Generally, you should create this object from the
+ * handlerInput slot values.
+ * @param {string} caseId - the caseId of the case you want to update
+ * @param {string} address - optional address //TODO: Is this optional?
+ * @param {string} phoneNumber - Optional phone number for service agent to
+ * reach back out. Must be 9 digits no spaces or symbols.  //TODO: Is this true?
+ * @returns {object} { case_id, http_response_status }
+ */
+async function updateGenericCase(SalesforceCaseObject, serviceName, userResponses, caseId, address=null, phoneNumber=null, checkContact=false) {
+	const json_input = {}
+	if (address) {json_input.address = address}
+	if (phoneNumber) {json_input.contacted_number = phoneNumber}
+	for (const [key, value] of Object.entries(userResponses))
+		json_input[key] = value;
+	const case_response = await SalesforceCaseObject.update_generic_case(caseId, serviceName, json_input, checkContact);
+	return case_response;
 }
 
 /**
@@ -474,7 +555,13 @@ module.exports = {
 	toDays,
 	getPhoneNumber,
 	isPhoneNumberAvailable,
-	getCaseDetailsFromSalesForce
+	getCaseDetailsFromSalesForce,
+	createGenericCase,
+	updateGenericCase,
+	openIntegratedCase,
+	updateIntegratedCase,
+	saveCaseToDynamo,
+	saveToDynamo
 }
 
 // Unused functions //

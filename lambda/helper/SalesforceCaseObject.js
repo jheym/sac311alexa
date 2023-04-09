@@ -8,36 +8,26 @@ class Salesforce_Case_object {
  * the salesforce API. When creating a new case object, generate a new token and
  * supply it to the constructor.
  * @param {Object} handlerInput - the handlerInput object from the Alexa request
- * @param {String} token - the OAuth access token for the Salesforce API
  * @param {String} service_name - the 311 service name. Each intent should submit the case object with the correct service name.
+ * @param {String} token - the OAuth access token for the Salesforce API
  */
-	constructor(handlerInput=null, service_name=null, token) {
-		if (handlerInput !== null)
-			this.handlerInput = handlerInput;
-		if (service_name !== null)
-			this.service_name = service_name;
+	constructor(token) {
 		this.token = token;
 		this.sf_url = process.env.SALESFORCE_URL;
 		this.json_input = {};
 		this.mapped = gis_to_sf_mapping;
-
-		// Generate the json_input object from handlerInput
-		if (handlerInput && service_name)
-			this._make_json_input(handlerInput);
-
-		if (this.token === undefined)
-			throw new Error("No token provided for the Salesforce Case Object.");
 	};
 
 
 
 	/**
-	* Sets a json_object attribute for the case object. Mimics the format of
- 	* json_input submitted by IVR but uses Alexa slot key value pairs instead.
+	* Sets the json_input attributes for create_basic_case and case_update.
+ 	* Mimics the format of json_input submitted by IVR but uses Alexa slot key
+ 	* value pairs instead.
  	* @param {Object} handlerInput 
 	* @returns {void}
  	*/
-	 _make_json_input(handlerInput) {
+	 set_service_questions(handlerInput) {
 		if (!handlerInput.requestEnvelope.request.intent.slots) {
 			throw new Error("No slots found in the handlerInput.");
 		} else {
@@ -46,7 +36,7 @@ class Salesforce_Case_object {
 			const slots = requestEnvelope.request.intent.slots;
 
 			// Getting json_input values from session attributes
-			this.json_input.phone_number = sessionAttributes.phone_number; // TODO: Should phone number be in json_input?
+			this.json_input.phone_number = sessionAttributes.phoneNumber; // TODO: Should phone number be in json_input?
 			this.json_input.address = sessionAttributes.confirmedValidatorRes.Address; 
 			
 			for (const slot of Object.entries(slots)) {
@@ -63,7 +53,7 @@ class Salesforce_Case_object {
 	
 	async create_basic_case(service_name, phone_number, Address, user_json=null, update_case=true) { //TODO: Why is address param never used?
 		if (user_json === null)
-			user_json = this.json_input; // json_input is created in constructor
+			user_json = this.json_input;
 		await this.get_service_details(service_name);
 		await this.get_contact(phone_number); // if phone number is null, sets the contact to anonymous
 		this.update_case = update_case; // Set to true to indicate the case needs updating still.
@@ -120,19 +110,20 @@ class Salesforce_Case_object {
 	 * @param {int} threshold 
 	 * @returns {object} case number, http status code of the PATCH request
 	 */
-	async case_update(case_id, Address, service_name, user_json=null, update_case=true, threshold=90) {
+	async case_update(case_id, service_name, Address, phone_number=null, user_json=null, update_case=true, threshold=90) {
 		this.input_address=Address;
 		this.update_case = update_case;
-		let phone_number = null;
 		let case_body = {};
 		
-		// How else do you give the phone number?
 		if (user_json && user_json.phone_number)
 			phone_number = user_json.phone_number.match(/\d+/g).join("");
+		if (this.phone_number)
+			phone_number = this.phone_number.match(/\d+/g).join("")
+		if (phone_number)
+			phone_number = phone_number.match(/\d+/g).join("")
+
 		
 		await this.get_contact(phone_number) // Need contact for setting Anonymous_Contact__c field
-		
-		// TODO: Figure out how to get the phone number from json_input
 
 		this.case_ans = this.service_question_mapper(this.json_input); // Modified to use json_input (which is created by _make_json_input())
 		if (service_name) {
@@ -194,8 +185,67 @@ class Salesforce_Case_object {
 
 
 	// TODO: Write create_generic_case and update_generic_case
-	async create_generic_case(service_name, phone_number, user_json) {
-		this.get_service_details(service_name="IVR");
+	async create_generic_case(service_name, user_json) {
+		await this.get_service_details("IVR");
+		const case_body = {};
+		case_body.Sub_Service_Type__c = this.service_type_id;
+		case_body.Subject = `${this.service_name}-unverified`;
+		case_body.Service_Type__c = this.service_id;
+		case_body.Status = 'DRAFT'; // TODO: Is this the correct status?
+		case_body.Origin = "AmazonAlexa";
+		user_json.service_request = service_name;
+		this.case_ans = this.service_question_mapper(user_json);
+		case_body.Description = `Initial Case description: \n ${this.case_ans.Description}`;
+		case_body.Email_Web_Notes__c = this.case_ans.Description;
+		let case_resp = await axios ({
+			url: `${this.sf_url}/sobjects/Case`,
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${this.token}`,
+				'Content-Type': 'application/json',
+				'Accept-Encoding': 'application/json'
+			},
+			data: case_body
+		})
+		if (![200, 201, 204].includes(case_resp.status)) {
+			console.log('Error creating case');
+			console.log(case_resp.data);
+		}
+		this.case_id = case_resp.data.id;
+		await this.get_case_number();
+		return {'case_number' : this.case_number, 'case_id' : this.case_id};
+	}
+
+
+	async update_generic_case(case_id, service_name, user_json, confirm_name=false) {
+		user_json.service_request = service_name;
+		this.case_ans = this.service_question_mapper(user_json);
+		await this.get_service_details("IVR");
+		this.case_id = case_id;
+		const case_body = {};
+		if (confirm_name && user_json.contacted_number) {
+			await this.get_contact(user_json.contacted_number);
+			case_body.Subject = `${this.service_name}-${this.user_name}`
+			case_body.contactId = this.contact_id;
+		}
+		case_body.Status = "NEW";
+		case_body.Description = `Case Details: \n ${this.case_ans.Description}`;
+		case_body.Email_Web_Notes__c = this.case_ans.Description;
+		let case_resp = await axios ({
+			url: `${this.sf_url}/sobjects/Case/${this.case_id}`,
+			method: 'PATCH',
+			headers: {
+				'Authorization': `Bearer ${this.token}`,
+				'Content-Type': 'application/json',
+				'Accept-Encoding': 'application/json'
+			},
+			data: case_body
+		})
+		if (![200, 201, 204].includes(case_resp.status)) {
+			console.log('Error creating case');
+			console.log(case_resp.data);
+		}
+		return { 'case_id' : case_id, 'status_code' : case_resp.status }
 	}
 
 
@@ -327,7 +377,6 @@ class Salesforce_Case_object {
 		
 		if (geocoded_out.internal_geocoder.candidates) {
 			const addr = geocoded_out.internal_geocoder.candidates[0].address.replace(' & ', ' and ');
-			console.log(addr);
 			addr_validation_out.Address = addr.split(',')[0];
 			const X = geocoded_out.internal_geocoder.candidates[0].attributes.X;
 			const Y = geocoded_out.internal_geocoder.candidates[0].attributes.Y;
@@ -364,7 +413,6 @@ class Salesforce_Case_object {
 				} else {
 					addr_validation_out.Similar_Cases = null;
 				}
-			console.log("inside internal");
 			} else if (geocoded_out.world_geocoder.candidates && geocoded_out.world_geocoder.candidates.length > 0) {
 				const addr = geocoded_out.world_geocoder.candidates[0].address.replace(' & ', ' and ');
 				addr_validation_out.Full_Address = addr;
@@ -606,7 +654,6 @@ class Salesforce_Case_object {
 		}
 		let fields = fields_to_capture.join(',');
 		let addr_url=`https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/37/query?where=ADDRESSID=${address_id}&outFields=${fields}&f=pjson`
-		console.log(encodeURI(addr_url));
 		const res = await axios.get(encodeURI(addr_url));
 
 		const day_mapping = {'SUN': 'Sunday', 'MON': 'Monday', 'TUE': 'Tuesday', 'WED': 'Wednesday', 'THU': 'Thursday', 'FRI': 'Friday', 'SAT': 'Saturday'};
