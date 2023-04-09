@@ -28,46 +28,6 @@
           "samples": []
         },
         {
-          "name": "PotHoleIntent",
-          "slots": [
-            {
-              "name": "potholeAddress",
-              "type": "AMAZON.StreetAddress",
-              "samples": [
-                "Its on {potholeAddress}",
-                "{potholeAddress}"
-              ]
-            }
-          ],
-          "samples": [
-            "I would like to report a pothole on {potholeAddress}",
-            "I would like to report a pothole",
-            "There is a pothole {potholeAddress}",
-            "Pothole",
-            "There is a pothole"
-          ]
-        },
-        {
-          "name": "PetComplaintIntent",
-          "slots": [
-            {
-              "name": "animal",
-              "type": "animalType",
-              "samples": [
-                "It\u0027s a {animal}",
-                "The {animal} I saw is",
-                "{animal} is "
-              ]
-            }
-          ],
-          "samples": [
-            "pet complaint",
-            "Report pet complaint",
-            "I would like to report a pet complaint",
-            "There is an {animal} in the street"
-          ]
-        },
-        {
           "name": "AbandonedVehicleIntent",
           "slots": [
             {
@@ -80,52 +40,54 @@
             },
             {
               "name": "make",
-              "type": "vehicleMakeType",
-              "samples": [
-                "It\u0027s a {make}",
-                "{make}",
-                "a {make}",
-                "{make} is the make"
-              ]
+              "type": "vehicleMakeType"
             },
             {
               "name": "model",
-              "type": "vehicleModelType",
-              "samples": [
-                "{model}",
-                "It\u0027s a {make} {model}",
-                "It\u0027s a {model}",
-                "It\u0027s a {color} {make} {model}"
-              ]
+              "type": "vehicleModelType"
             },
             {
               "name": "color",
-              "type": "colorType",
+              "type": "colorType"
+            },
+            {
+              "name": "timePeriod",
+              "type": "AMAZON.DURATION"
+            },
+            {
+              "name": "licensePlate",
+              "type": "AMAZON.SearchQuery",
               "samples": [
-                "{color}",
-                "It\u0027s {color}",
-                "The {vehicle} is {color}"
+                "{licensePlate}"
               ]
             },
             {
-              "name": "nullRequired",
-              "type": "nullRequiredType"
+              "name": "brokenType",
+              "type": "brokenType"
             }
           ],
           "samples": [
+            "There is a vehicle that is {brokenType} and left behind",
+            "There is a {vehicle} left unattended",
+            "Want to report a {vehicle} that is {abandoned}",
+            "I want to report a {vehicle} that seems to be left {abandoned}",
+            "There is a {vehicle} left {abandoned}",
+            "There is an {abandoned} {vehicle} parked on the street",
+            "{color} {abandoned} {make}",
+            "id like to report an {color} {vehicle}",
             "Someone left their {color} {model}",
-            "I\u0027d like to report a {abandoned} {make} {model}",
-            "I\u0027d like to report a {abandoned} {make}",
-            "I\u0027d like to report a {abandoned} {vehicle}",
+            "I'd like to report a {abandoned} {make} {model}",
+            "I'd like to report a {abandoned} {make}",
+            "I'd like to report a {abandoned} {vehicle}",
             "Someone left their {color} {make} {model}",
             "Someone left their {color} {vehicle}",
             "Someone left their {make} {model}",
             "Someone left their {model}",
             "Someone left their {make}",
             "Someone left their {vehicle}",
-            "There\u0027s an {abandoned} {vehicle}",
-            "There\u0027s a {abandoned} {model}",
-            "There\u0027s a {abandoned} {color} {model}",
+            "There's an {abandoned} {vehicle}",
+            "There's a {abandoned} {model}",
+            "There's a {abandoned} {color} {model}",
             "someone {abandoned} their {vehicle} ",
             "A {vehicle} has no owner",
             "{color} {abandoned} {vehicle}",
@@ -141,33 +103,6 @@
           ]
         },
         {
-          "name": "StrayAnimalIntent",
-          "slots": [
-            {
-              "name": "stray",
-              "type": "straySynonymsType"
-            },
-            {
-              "name": "strayAnimalSlot",
-              "type": "animalType"
-            },
-            {
-              "name": "strayAnimalAddress",
-              "type": "AMAZON.PostalAddress",
-              "samples": [
-                "The {strayAnimalSlot} is at {strayAnimalAddress}",
-                "{strayAnimalAddress}",
-                "It is located at {strayAnimalAddress}"
-              ]
-            }
-          ],
-          "samples": [
-            "Report a {stray} {strayAnimalSlot}",
-            "{stray} {strayAnimalSlot}",
-            "There\u0027s a {stray} {strayAnimalSlot}"
-          ]
-        },
-        {
           "name": "ReportAnIssueIntent",
           "slots": [],
           "samples": [
@@ -177,188 +112,17 @@
           ]
         },
         {
-          "name": "HomelessCampIntent",
+          "name": "GetLocationFromUserIntent",
           "slots": [
             {
-              "name": "homelessCamp",
-              "type": "homelessSynonymsType"
-            },
-            {
-              "name": "propertyType",
-              "type": "propertySynonymsType",
-              "samples": [
-                "It is on {propertyType}",
-                "{propertyType}"
-              ]
-            },
-            {
-              "name": "numPeople",
-              "type": "AMAZON.NUMBER",
-              "samples": [
-                "About {numPeople} people",
-                "{numPeople} persons",
-                "{numPeople} people",
-                "There are {numPeople} people",
-                "{numPeople}"
-              ]
-            },
-            {
-              "name": "isChildren",
-              "type": "yesNoType",
-              "samples": [
-                "{isChildren}"
-              ]
-            },
-            {
-              "name": "isAnimals",
-              "type": "yesNoType"
-            },
-            {
-              "name": "campDescription",
+              "name": "userGivenAddress",
               "type": "AMAZON.SearchQuery",
               "samples": [
-                "{campDescription}"
-              ]
-            },
-            {
-              "name": "isTrash",
-              "type": "yesNoType",
-              "samples": [
-                "{isTrash}"
-              ]
-            }
-          ],
-          "samples": [
-            "Report a {homelessCamp} on {propertyType}",
-            "Report a {homelessCamp}",
-            "There is a {homelessCamp} on {propertyType}",
-            "There is a {homelessCamp}",
-            "{homelessCamp} on {propertyType}",
-            "{homelessCamp}",
-            "Help me report a {homelessCamp}  ticket",
-            "Reporting {homelessCamp}  on {propertyType}",
-            "Reporting {homelessCamp} on  {propertyType}",
-            "Report {homelessCamp} ",
-            "There is a {homelessCamp}  on {propertyType}"
-          ]
-        },
-        {
-          "name": "GetLocationIntent",
-          "slots": [
-            {
-              "name": "location",
-              "type": "AMAZON.PostalAddress"
-            }
-          ],
-          "samples": []
-        },
-        {
-          "name": "TrashPickupIntent",
-          "slots": [
-            {
-              "name": "trashType",
-              "type": "AMAZON.SearchQuery",
-              "samples": [
-                "{trashType}"
+                "{userGivenAddress}"
               ]
             }
           ],
           "samples": []
-        },
-        {
-          "name": "DeadAnimalIntent",
-          "slots": [
-            {
-              "name": "deadAnimalAddress",
-              "type": "AMAZON.PostalAddress",
-              "samples": [
-                "{deadAnimalAddress}",
-                "The address is {deadAnimalAddress}"
-              ]
-            },
-            {
-              "name": "deadAnimal",
-              "type": "animalType",
-              "samples": [
-                "it is a {deadAnimal}",
-                "{deadAnimal}"
-              ]
-            }
-          ],
-          "samples": [
-            "dead {deadAnimal} at {deadAnimalAddress}",
-            "a dead {deadAnimal}",
-            "I would like to report a dead {deadAnimal} on {deadAnimalAddress}"
-          ]
-        },
-        {
-          "name": "TrafficLightIntent",
-          "slots": [
-            {
-              "name": "intersectionAddress",
-              "type": "AMAZON.StreetName",
-              "multipleValues": {
-                "enabled": true
-              }
-            }
-          ],
-          "samples": [
-            "Traffic light",
-            "Traffic light broken at {intersectionAddress} {intersectionAddress}",
-            "Traffic light broken on {intersectionAddress}",
-            "Traffic light broken at intersection of {intersectionAddress} and {intersectionAddress}",
-            "Traffic light down at the intersection of {intersectionAddress} and {intersectionAddress}"
-          ]
-        },
-        {
-          "name": "DirtyParkBathroomIntent",
-          "slots": [
-            {
-              "name": "dirtyType",
-              "type": "dirtyType"
-            },
-            {
-              "name": "bathroomType",
-              "type": "bathroomType"
-            },
-            {
-              "name": "cleaningType",
-              "type": "cleaningType"
-            },
-            {
-              "name": "towelType",
-              "type": "towelType"
-            }
-          ],
-          "samples": [
-            "The {bathroomType} is missing {towelType}",
-            "The park {bathroomType} needs {towelType}",
-            "The park {bathroomType} needs {cleaningType}",
-            "The park {bathroomType} is {dirtyType}",
-            "Our local park {bathroomType} is {dirtyType}",
-            "There is a {dirtyType} park {bathroomType}"
-          ]
-        },
-        {
-          "name": "GetLocationHelperIntent",
-          "slots": [
-            {
-              "name": "helperLocation",
-              "type": "AMAZON.SearchQuery",
-              "samples": [
-                "{helperLocation}"
-              ]
-            }
-          ],
-          "samples": []
-        },
-        {
-          "name": "LiveAgentIntent",
-          "slots": [],
-          "samples": [
-            "Speak to live agent",
-            "Live agent"
-          ]
         },
         {
           "name": "AMAZON.FallbackIntent",
@@ -371,6 +135,40 @@
         {
           "name": "AMAZON.RepeatIntent",
           "samples": []
+        },
+        {
+          "name": "TrashPickupDayIntent",
+          "slots": [],
+          "samples": [
+            "when is garbage collection",
+            "what day is garbage collection",
+            "what day is waste collection",
+            "what day is waste collected",
+            "when is waste collected",
+            "what day is my garbage collected",
+            "what day is garbage collected",
+            "when is garbage collected",
+            "when is trash collected",
+            "when is garbage pickup",
+            "when is trash pickup",
+            "when is my garbage pickup day",
+            "trash pickup day",
+            "What day is my trash picked up",
+            "When is trash picked up",
+            "When does trash get picked up",
+            "What is my trash pickup day",
+            "When is my trash pickup day",
+            "When is my trash pickup",
+            "What day is trash pickup"
+          ]
+        },
+        {
+          "name": "GetPreviousCaseIntent",
+          "slots": [],
+          "samples": [
+            "check ticket status",
+            "check case status"
+          ]
         }
       ],
       "types": [
@@ -391,6 +189,171 @@
         },
         {
           "values": [
+            {
+              "name": {
+                "value": "Volvo"
+              }
+            },
+            {
+              "name": {
+                "value": "Volkswagen"
+              }
+            },
+            {
+              "name": {
+                "value": "Tesla"
+              }
+            },
+            {
+              "name": {
+                "value": "Subaru"
+              }
+            },
+            {
+              "name": {
+                "value": "Rolls-Royce"
+              }
+            },
+            {
+              "name": {
+                "value": "RAM"
+              }
+            },
+            {
+              "name": {
+                "value": "Porsche"
+              }
+            },
+            {
+              "name": {
+                "value": "Nissan"
+              }
+            },
+            {
+              "name": {
+                "value": "Mitsubishi"
+              }
+            },
+            {
+              "name": {
+                "value": "Mercedes-Benz"
+              }
+            },
+            {
+              "name": {
+                "value": "McLaren"
+              }
+            },
+            {
+              "name": {
+                "value": "Maserati"
+              }
+            },
+            {
+              "name": {
+                "value": "Lincoln"
+              }
+            },
+            {
+              "name": {
+                "value": "Lexus"
+              }
+            },
+            {
+              "name": {
+                "value": "Land Rover"
+              }
+            },
+            {
+              "name": {
+                "value": "Lamborghini"
+              }
+            },
+            {
+              "name": {
+                "value": "Kia"
+              }
+            },
+            {
+              "name": {
+                "value": "Jeep"
+              }
+            },
+            {
+              "name": {
+                "value": "Jaguar"
+              }
+            },
+            {
+              "name": {
+                "value": "Infiniti"
+              }
+            },
+            {
+              "name": {
+                "value": "GMC"
+              }
+            },
+            {
+              "name": {
+                "value": "Genesis"
+              }
+            },
+            {
+              "name": {
+                "value": "Fiat"
+              }
+            },
+            {
+              "name": {
+                "value": "Ferrari"
+              }
+            },
+            {
+              "name": {
+                "value": "Chrysler"
+              }
+            },
+            {
+              "name": {
+                "value": "Chevrolet"
+              }
+            },
+            {
+              "name": {
+                "value": "Cadillac"
+              }
+            },
+            {
+              "name": {
+                "value": "Buick"
+              }
+            },
+            {
+              "name": {
+                "value": "Bugatti"
+              }
+            },
+            {
+              "name": {
+                "value": "BMW"
+              }
+            },
+            {
+              "name": {
+                "value": "Bentley"
+              }
+            },
+            {
+              "name": {
+                "value": "Audi"
+              }
+            },
+            {
+              "name": {
+                "value": "Acura"
+              }
+            },
             {
               "name": {
                 "value": "Honda"
@@ -426,6 +389,1321 @@
         },
         {
           "values": [
+            {
+              "name": {
+                "value": "ID.4"
+              }
+            },
+            {
+              "name": {
+                "value": "Atlas Cross Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Atlas"
+              }
+            },
+            {
+              "name": {
+                "value": "Tiguan"
+              }
+            },
+            {
+              "name": {
+                "value": "Arteon"
+              }
+            },
+            {
+              "name": {
+                "value": "Passat"
+              }
+            },
+            {
+              "name": {
+                "value": "Jetta"
+              }
+            },
+            {
+              "name": {
+                "value": "Golf"
+              }
+            },
+            {
+              "name": {
+                "value": "Tundra"
+              }
+            },
+            {
+              "name": {
+                "value": "Tacoma"
+              }
+            },
+            {
+              "name": {
+                "value": "Sequoia"
+              }
+            },
+            {
+              "name": {
+                "value": "4Runner"
+              }
+            },
+            {
+              "name": {
+                "value": "Highlander"
+              }
+            },
+            {
+              "name": {
+                "value": "RAV4"
+              }
+            },
+            {
+              "name": {
+                "value": "Mirai"
+              }
+            },
+            {
+              "name": {
+                "value": "Prius"
+              }
+            },
+            {
+              "name": {
+                "value": "Avalon"
+              }
+            },
+            {
+              "name": {
+                "value": "Corolla"
+              }
+            },
+            {
+              "name": {
+                "value": "Model Y"
+              }
+            },
+            {
+              "name": {
+                "value": "Model X "
+              }
+            },
+            {
+              "name": {
+                "value": "Model 3 "
+              }
+            },
+            {
+              "name": {
+                "value": "Model S"
+              }
+            },
+            {
+              "name": {
+                "value": "Phantom"
+              }
+            },
+            {
+              "name": {
+                "value": "Cullian"
+              }
+            },
+            {
+              "name": {
+                "value": "Dawn"
+              }
+            },
+            {
+              "name": {
+                "value": "Wraith"
+              }
+            },
+            {
+              "name": {
+                "value": "Ghost"
+              }
+            },
+            {
+              "name": {
+                "value": "Cayenne"
+              }
+            },
+            {
+              "name": {
+                "value": "Macan"
+              }
+            },
+            {
+              "name": {
+                "value": "Panamera"
+              }
+            },
+            {
+              "name": {
+                "value": "Taycan"
+              }
+            },
+            {
+              "name": {
+                "value": "911"
+              }
+            },
+            {
+              "name": {
+                "value": "GT-R"
+              }
+            },
+            {
+              "name": {
+                "value": "Titan"
+              }
+            },
+            {
+              "name": {
+                "value": "Frontier"
+              }
+            },
+            {
+              "name": {
+                "value": "Armada"
+              }
+            },
+            {
+              "name": {
+                "value": "Pathfinder"
+              }
+            },
+            {
+              "name": {
+                "value": "Murano"
+              }
+            },
+            {
+              "name": {
+                "value": "Rogue"
+              }
+            },
+            {
+              "name": {
+                "value": "Rogue Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Kicks"
+              }
+            },
+            {
+              "name": {
+                "value": "Leaf"
+              }
+            },
+            {
+              "name": {
+                "value": "Maxima"
+              }
+            },
+            {
+              "name": {
+                "value": "Altima"
+              }
+            },
+            {
+              "name": {
+                "value": "Sentra"
+              }
+            },
+            {
+              "name": {
+                "value": "Versa"
+              }
+            },
+            {
+              "name": {
+                "value": "Outlander PHEV"
+              }
+            },
+            {
+              "name": {
+                "value": "Outlander"
+              }
+            },
+            {
+              "name": {
+                "value": "Eclipse Cross"
+              }
+            },
+            {
+              "name": {
+                "value": "Mirage G4"
+              }
+            },
+            {
+              "name": {
+                "value": "Mirage"
+              }
+            },
+            {
+              "name": {
+                "value": "G-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLS-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLE-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLC-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLB-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "GLA-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "SL-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "SLC-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "CLS-CLass"
+              }
+            },
+            {
+              "name": {
+                "value": "CLA-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "S-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "E-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "C-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "A-Class"
+              }
+            },
+            {
+              "name": {
+                "value": "Artura"
+              }
+            },
+            {
+              "name": {
+                "value": "Elva"
+              }
+            },
+            {
+              "name": {
+                "value": "Speedtail"
+              }
+            },
+            {
+              "name": {
+                "value": "GT"
+              }
+            },
+            {
+              "name": {
+                "value": "720S"
+              }
+            },
+            {
+              "name": {
+                "value": "600LT"
+              }
+            },
+            {
+              "name": {
+                "value": "570GT"
+              }
+            },
+            {
+              "name": {
+                "value": "570S"
+              }
+            },
+            {
+              "name": {
+                "value": "540C"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-9"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-5"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-30"
+              }
+            },
+            {
+              "name": {
+                "value": "CX-3"
+              }
+            },
+            {
+              "name": {
+                "value": "MX-5 Miata"
+              }
+            },
+            {
+              "name": {
+                "value": "Mazda6"
+              }
+            },
+            {
+              "name": {
+                "value": "Mazda3"
+              }
+            },
+            {
+              "name": {
+                "value": "GranCabrio"
+              }
+            },
+            {
+              "name": {
+                "value": "GranTurismo"
+              }
+            },
+            {
+              "name": {
+                "value": "Levante"
+              }
+            },
+            {
+              "name": {
+                "value": "Quattroporte"
+              }
+            },
+            {
+              "name": {
+                "value": "Ghibli"
+              }
+            },
+            {
+              "name": {
+                "value": "Navigator"
+              }
+            },
+            {
+              "name": {
+                "value": "Nautilus"
+              }
+            },
+            {
+              "name": {
+                "value": "Corsair"
+              }
+            },
+            {
+              "name": {
+                "value": "Aviator"
+              }
+            },
+            {
+              "name": {
+                "value": "LX"
+              }
+            },
+            {
+              "name": {
+                "value": "GX"
+              }
+            },
+            {
+              "name": {
+                "value": "RX"
+              }
+            },
+            {
+              "name": {
+                "value": "NX"
+              }
+            },
+            {
+              "name": {
+                "value": "UX"
+              }
+            },
+            {
+              "name": {
+                "value": "LC"
+              }
+            },
+            {
+              "name": {
+                "value": "RC"
+              }
+            },
+            {
+              "name": {
+                "value": "LS"
+              }
+            },
+            {
+              "name": {
+                "value": "ES"
+              }
+            },
+            {
+              "name": {
+                "value": "IS"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover Velar"
+              }
+            },
+            {
+              "name": {
+                "value": "Range Rover Evoque"
+              }
+            },
+            {
+              "name": {
+                "value": "Discovery"
+              }
+            },
+            {
+              "name": {
+                "value": "Discovery Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Defender"
+              }
+            },
+            {
+              "name": {
+                "value": "Carnival"
+              }
+            },
+            {
+              "name": {
+                "value": "Sorento"
+              }
+            },
+            {
+              "name": {
+                "value": "Sportage"
+              }
+            },
+            {
+              "name": {
+                "value": "Seltos"
+              }
+            },
+            {
+              "name": {
+                "value": "Soul"
+              }
+            },
+            {
+              "name": {
+                "value": "Stinger"
+              }
+            },
+            {
+              "name": {
+                "value": "K5"
+              }
+            },
+            {
+              "name": {
+                "value": "Forte"
+              }
+            },
+            {
+              "name": {
+                "value": "Rio"
+              }
+            },
+            {
+              "name": {
+                "value": "Renegade"
+              }
+            },
+            {
+              "name": {
+                "value": "Compass"
+              }
+            },
+            {
+              "name": {
+                "value": "Grand Cherokee"
+              }
+            },
+            {
+              "name": {
+                "value": "Cherokee"
+              }
+            },
+            {
+              "name": {
+                "value": "Gladiator"
+              }
+            },
+            {
+              "name": {
+                "value": "Wrangler"
+              }
+            },
+            {
+              "name": {
+                "value": "I-Pace"
+              }
+            },
+            {
+              "name": {
+                "value": "F-Pace"
+              }
+            },
+            {
+              "name": {
+                "value": "E-Pace"
+              }
+            },
+            {
+              "name": {
+                "value": "F-Type"
+              }
+            },
+            {
+              "name": {
+                "value": "XJ"
+              }
+            },
+            {
+              "name": {
+                "value": "XF"
+              }
+            },
+            {
+              "name": {
+                "value": "XE"
+              }
+            },
+            {
+              "name": {
+                "value": "QX80"
+              }
+            },
+            {
+              "name": {
+                "value": "QX60"
+              }
+            },
+            {
+              "name": {
+                "value": "QX50"
+              }
+            },
+            {
+              "name": {
+                "value": "Q60"
+              }
+            },
+            {
+              "name": {
+                "value": "Q50"
+              }
+            },
+            {
+              "name": {
+                "value": "Nexo"
+              }
+            },
+            {
+              "name": {
+                "value": "Palisade"
+              }
+            },
+            {
+              "name": {
+                "value": "Santa Fe"
+              }
+            },
+            {
+              "name": {
+                "value": "Tucson"
+              }
+            },
+            {
+              "name": {
+                "value": "Kona"
+              }
+            },
+            {
+              "name": {
+                "value": "Ioniq"
+              }
+            },
+            {
+              "name": {
+                "value": "Veloster"
+              }
+            },
+            {
+              "name": {
+                "value": "Sonata"
+              }
+            },
+            {
+              "name": {
+                "value": "Elantra"
+              }
+            },
+            {
+              "name": {
+                "value": "Accent"
+              }
+            },
+            {
+              "name": {
+                "value": "Ridgeline"
+              }
+            },
+            {
+              "name": {
+                "value": "Odessey"
+              }
+            },
+            {
+              "name": {
+                "value": "Pilot"
+              }
+            },
+            {
+              "name": {
+                "value": "Passport"
+              }
+            },
+            {
+              "name": {
+                "value": "CR-V"
+              }
+            },
+            {
+              "name": {
+                "value": "HR-V"
+              }
+            },
+            {
+              "name": {
+                "value": "Clarity"
+              }
+            },
+            {
+              "name": {
+                "value": "Insight"
+              }
+            },
+            {
+              "name": {
+                "value": "Savana"
+              }
+            },
+            {
+              "name": {
+                "value": "Yukon"
+              }
+            },
+            {
+              "name": {
+                "value": "Terrain"
+              }
+            },
+            {
+              "name": {
+                "value": "Acadia"
+              }
+            },
+            {
+              "name": {
+                "value": "Sierra HD"
+              }
+            },
+            {
+              "name": {
+                "value": "Sierra 1500"
+              }
+            },
+            {
+              "name": {
+                "value": "Canyon"
+              }
+            },
+            {
+              "name": {
+                "value": "Super Duty"
+              }
+            },
+            {
+              "name": {
+                "value": "F-150"
+              }
+            },
+            {
+              "name": {
+                "value": "Expedition"
+              }
+            },
+            {
+              "name": {
+                "value": "Explorer"
+              }
+            },
+            {
+              "name": {
+                "value": "Edge"
+              }
+            },
+            {
+              "name": {
+                "value": "Bronco Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Escape"
+              }
+            },
+            {
+              "name": {
+                "value": "EcoSport"
+              }
+            },
+            {
+              "name": {
+                "value": "Taurus"
+              }
+            },
+            {
+              "name": {
+                "value": "Fusion"
+              }
+            },
+            {
+              "name": {
+                "value": "Mustang"
+              }
+            },
+            {
+              "name": {
+                "value": "488 Spider"
+              }
+            },
+            {
+              "name": {
+                "value": "488 Pista"
+              }
+            },
+            {
+              "name": {
+                "value": "F8 Spider"
+              }
+            },
+            {
+              "name": {
+                "value": "F8 Tributo"
+              }
+            },
+            {
+              "name": {
+                "value": "SF90 Spider"
+              }
+            },
+            {
+              "name": {
+                "value": "SF90 Stradale"
+              }
+            },
+            {
+              "name": {
+                "value": "Roma"
+              }
+            },
+            {
+              "name": {
+                "value": "Portofino M"
+              }
+            },
+            {
+              "name": {
+                "value": "812 GTS"
+              }
+            },
+            {
+              "name": {
+                "value": "812 Superfast"
+              }
+            },
+            {
+              "name": {
+                "value": "Journey"
+              }
+            },
+            {
+              "name": {
+                "value": "Durango"
+              }
+            },
+            {
+              "name": {
+                "value": "Challenger"
+              }
+            },
+            {
+              "name": {
+                "value": "Charger"
+              }
+            },
+            {
+              "name": {
+                "value": "Voyager"
+              }
+            },
+            {
+              "name": {
+                "value": "Pacifica"
+              }
+            },
+            {
+              "name": {
+                "value": "300"
+              }
+            },
+            {
+              "name": {
+                "value": "Silverado"
+              }
+            },
+            {
+              "name": {
+                "value": "Colorado"
+              }
+            },
+            {
+              "name": {
+                "value": "Suburban"
+              }
+            },
+            {
+              "name": {
+                "value": "Traverse"
+              }
+            },
+            {
+              "name": {
+                "value": "Blazer"
+              }
+            },
+            {
+              "name": {
+                "value": "Equinox"
+              }
+            },
+            {
+              "name": {
+                "value": "Trax"
+              }
+            },
+            {
+              "name": {
+                "value": "Trailblazer"
+              }
+            },
+            {
+              "name": {
+                "value": "Corvette"
+              }
+            },
+            {
+              "name": {
+                "value": "Camaro"
+              }
+            },
+            {
+              "name": {
+                "value": "Impala"
+              }
+            },
+            {
+              "name": {
+                "value": "Sonic"
+              }
+            },
+            {
+              "name": {
+                "value": "Spark"
+              }
+            },
+            {
+              "name": {
+                "value": "Escalade"
+              }
+            },
+            {
+              "name": {
+                "value": "XT6"
+              }
+            },
+            {
+              "name": {
+                "value": "XT5"
+              }
+            },
+            {
+              "name": {
+                "value": "XT4"
+              }
+            },
+            {
+              "name": {
+                "value": "CT6"
+              }
+            },
+            {
+              "name": {
+                "value": "CT5"
+              }
+            },
+            {
+              "name": {
+                "value": "CT4"
+              }
+            },
+            {
+              "name": {
+                "value": "Regal TourX"
+              }
+            },
+            {
+              "name": {
+                "value": "Regal Sportback"
+              }
+            },
+            {
+              "name": {
+                "value": "Enclave"
+              }
+            },
+            {
+              "name": {
+                "value": "Envision"
+              }
+            },
+            {
+              "name": {
+                "value": "Encore GX"
+              }
+            },
+            {
+              "name": {
+                "value": "Encore"
+              }
+            },
+            {
+              "name": {
+                "value": "Chiron Super Sport 300+"
+              }
+            },
+            {
+              "name": {
+                "value": "Chiron Sport"
+              }
+            },
+            {
+              "name": {
+                "value": "Chiron"
+              }
+            },
+            {
+              "name": {
+                "value": "i8"
+              }
+            },
+            {
+              "name": {
+                "value": "i3 "
+              }
+            },
+            {
+              "name": {
+                "value": "X6 M"
+              }
+            },
+            {
+              "name": {
+                "value": "X5 M"
+              }
+            },
+            {
+              "name": {
+                "value": "X4 M"
+              }
+            },
+            {
+              "name": {
+                "value": "X3 M"
+              }
+            },
+            {
+              "name": {
+                "value": "M6"
+              }
+            },
+            {
+              "name": {
+                "value": "M5"
+              }
+            },
+            {
+              "name": {
+                "value": "M4"
+              }
+            },
+            {
+              "name": {
+                "value": "M3"
+              }
+            },
+            {
+              "name": {
+                "value": "M2"
+              }
+            },
+            {
+              "name": {
+                "value": "Z4"
+              }
+            },
+            {
+              "name": {
+                "value": "X7"
+              }
+            },
+            {
+              "name": {
+                "value": "X6"
+              }
+            },
+            {
+              "name": {
+                "value": "X5"
+              }
+            },
+            {
+              "name": {
+                "value": "X4"
+              }
+            },
+            {
+              "name": {
+                "value": "X3"
+              }
+            },
+            {
+              "name": {
+                "value": "X2"
+              }
+            },
+            {
+              "name": {
+                "value": "X1"
+              }
+            },
+            {
+              "name": {
+                "value": "e-tron"
+              }
+            },
+            {
+              "name": {
+                "value": "R8"
+              }
+            },
+            {
+              "name": {
+                "value": "TT"
+              }
+            },
+            {
+              "name": {
+                "value": "Q8"
+              }
+            },
+            {
+              "name": {
+                "value": "Q7"
+              }
+            },
+            {
+              "name": {
+                "value": "Q5"
+              }
+            },
+            {
+              "name": {
+                "value": "Q3"
+              }
+            },
+            {
+              "name": {
+                "value": "A8"
+              }
+            },
+            {
+              "name": {
+                "value": "A7"
+              }
+            },
+            {
+              "name": {
+                "value": "A6"
+              }
+            },
+            {
+              "name": {
+                "value": "A5"
+              }
+            },
+            {
+              "name": {
+                "value": "A4"
+              }
+            },
+            {
+              "name": {
+                "value": "A3"
+              }
+            },
+            {
+              "name": {
+                "value": "NSX"
+              }
+            },
+            {
+              "name": {
+                "value": "MDX"
+              }
+            },
+            {
+              "name": {
+                "value": "RDX"
+              }
+            },
+            {
+              "name": {
+                "value": "RLX"
+              }
+            },
+            {
+              "name": {
+                "value": "TLX"
+              }
+            },
+            {
+              "name": {
+                "value": "ILX"
+              }
+            },
+            {
+              "name": {
+                "value": "PoleStar 2"
+              }
+            },
+            {
+              "name": {
+                "value": "Polestar 1"
+              }
+            },
+            {
+              "name": {
+                "value": "XC90"
+              }
+            },
+            {
+              "name": {
+                "value": "XC60"
+              }
+            },
+            {
+              "name": {
+                "value": "XC40"
+              }
+            },
+            {
+              "name": {
+                "value": "V90"
+              }
+            },
+            {
+              "name": {
+                "value": "V60"
+              }
+            },
+            {
+              "name": {
+                "value": "S90"
+              }
+            },
+            {
+              "name": {
+                "value": "S60"
+              }
+            },
             {
               "name": {
                 "value": "Malibu"
@@ -465,6 +1743,7 @@
               "name": {
                 "value": "abandoned",
                 "synonyms": [
+                  "unattended",
                   "neglected",
                   "unused",
                   "uninhabited",
@@ -826,36 +2105,35 @@
             }
           ],
           "name": "nullRequiredType"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "broken",
+                "synonyms": [
+                  "uncared",
+                  "dismantled",
+                  "broken"
+                ]
+              }
+            }
+          ],
+          "name": "brokenType"
         }
-      ]
+      ],
+      "modelConfiguration": {
+        "fallbackIntentSensitivity": {
+          "level": "HIGH"
+        }
+      }
     },
     "dialog": {
       "intents": [
         {
-          "name": "PotHoleIntent",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.816362722612"
-          },
-          "slots": [
-            {
-              "name": "potholeAddress",
-              "type": "AMAZON.StreetAddress",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.816362722612.1301769605493"
-              }
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
           "name": "AbandonedVehicleIntent",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.1294467916183"
-          },
+          "confirmationRequired": false,
+          "prompts": {},
           "slots": [
             {
               "name": "abandoned",
@@ -874,230 +2152,64 @@
             {
               "name": "make",
               "type": "vehicleMakeType",
-              "elicitationRequired": true,
+              "elicitationRequired": false,
               "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.159243950675.45262955813"
-              }
+              "prompts": {}
             },
             {
               "name": "model",
               "type": "vehicleModelType",
-              "elicitationRequired": true,
+              "elicitationRequired": false,
               "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.159243950675.1214583905306"
-              }
+              "prompts": {}
             },
             {
               "name": "color",
               "type": "colorType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.159243950675.1551161405556"
-              }
-            },
-            {
-              "name": "nullRequired",
-              "type": "nullRequiredType",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
-          "name": "StrayAnimalIntent",
-          "confirmationRequired": true,
-          "prompts": {
-            "confirmation": "Confirm.Intent.88351892471"
-          },
-          "slots": [
-            {
-              "name": "stray",
-              "type": "straySynonymsType",
               "elicitationRequired": false,
               "confirmationRequired": false,
               "prompts": {}
             },
             {
-              "name": "strayAnimalSlot",
-              "type": "animalType",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            },
-            {
-              "name": "strayAnimalAddress",
-              "type": "AMAZON.PostalAddress",
+              "name": "timePeriod",
+              "type": "AMAZON.DURATION",
               "elicitationRequired": true,
               "confirmationRequired": false,
               "prompts": {
-                "elicitation": "Elicit.Slot.221614793867.602172036702"
-              }
-            }
-          ]
-        },
-        {
-          "name": "PetComplaintIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "animal",
-              "type": "animalType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1176709426849.1317643299465"
-              }
-            }
-          ]
-        },
-        {
-          "name": "HomelessCampIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "homelessCamp",
-              "type": "homelessSynonymsType",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            },
-            {
-              "name": "propertyType",
-              "type": "propertySynonymsType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.409468368967.699702184701"
+                "elicitation": "Elicit.Slot.576909764561.1383880134578"
               }
             },
             {
-              "name": "numPeople",
-              "type": "AMAZON.NUMBER",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.478901083922.774744802323"
-              }
-            },
-            {
-              "name": "isChildren",
-              "type": "yesNoType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.478901083922.677574959232"
-              }
-            },
-            {
-              "name": "isAnimals",
-              "type": "yesNoType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.478901083922.331242269140"
-              }
-            },
-            {
-              "name": "campDescription",
-              "type": "AMAZON.SearchQuery",
-              "elicitationRequired": true,
-              "confirmationRequired": true,
-              "prompts": {
-                "confirmation": "Confirm.Slot.591693848777.1646553018457",
-                "elicitation": "Elicit.Slot.409468368967.625938744990"
-              }
-            },
-            {
-              "name": "isTrash",
-              "type": "yesNoType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.1100716015297.948173215885"
-              }
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
-          "name": "GetLocationIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "location",
-              "type": "AMAZON.PostalAddress",
-              "elicitationRequired": false,
-              "confirmationRequired": false,
-              "prompts": {}
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
-          "name": "TrashPickupIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "trashType",
-              "type": "AMAZON.SearchQuery",
-              "elicitationRequired": true,
-              "confirmationRequired": true,
-              "prompts": {
-                "confirmation": "Confirm.Slot.695582460385.101077360916",
-                "elicitation": "Elicit.Slot.695582460385.101077360916"
-              }
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
-          "name": "DeadAnimalIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "deadAnimalAddress",
-              "type": "AMAZON.PostalAddress",
-              "elicitationRequired": true,
-              "confirmationRequired": true,
-              "prompts": {
-                "confirmation": "Confirm.Slot.926509532094.1564036416986",
-                "elicitation": "Elicit.Slot.926509532094.1564036416986"
-              }
-            },
-            {
-              "name": "deadAnimal",
-              "type": "animalType",
-              "elicitationRequired": true,
-              "confirmationRequired": false,
-              "prompts": {
-                "elicitation": "Elicit.Slot.926509532094.455346598984"
-              }
-            }
-          ],
-          "delegationStrategy": "SKILL_RESPONSE"
-        },
-        {
-          "name": "GetLocationHelperIntent",
-          "confirmationRequired": false,
-          "prompts": {},
-          "slots": [
-            {
-              "name": "helperLocation",
+              "name": "licensePlate",
               "type": "AMAZON.SearchQuery",
               "elicitationRequired": true,
               "confirmationRequired": false,
               "prompts": {
-                "elicitation": "Elicit.Slot.1349433291344.1451233083949"
+                "elicitation": "Elicit.Slot.576909764561.780414875025"
+              }
+            },
+            {
+              "name": "brokenType",
+              "type": "brokenType",
+              "elicitationRequired": false,
+              "confirmationRequired": false,
+              "prompts": {}
+            }
+          ],
+          "delegationStrategy": "SKILL_RESPONSE"
+        },
+        {
+          "name": "GetLocationFromUserIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "userGivenAddress",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1359792393904.1219368899061"
               }
             }
           ]
@@ -1111,7 +2223,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you\u0027d like to report a {ticketCategoryType} . Is that correct?"
+            "value": "Just to confirm, you'd like to report a {ticketCategoryType} . Is that correct?"
           }
         ]
       },
@@ -1128,7 +2240,7 @@
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the make of the vehicle?"
+            "value": "What's the make of the vehicle?"
           }
         ]
       },
@@ -1137,7 +2249,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "In a few words, can you describe the issue you\u0027re reporting?"
+            "value": "In a few words, can you describe the issue you're reporting?"
           }
         ]
       },
@@ -1177,7 +2289,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Just to confirm, you\u0027re reporting an abandoned {color} {make} {model} , is that right?"
+            "value": "Just to confirm, you're reporting an abandoned {color} {make} {model} , is that right?"
           }
         ]
       },
@@ -1186,11 +2298,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {make} ?"
+            "value": "What's the model of the {make} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {vehicle} ?"
+            "value": "What's the model of the {vehicle} ?"
           }
         ]
       },
@@ -1199,15 +2311,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {make} {model} ?"
+            "value": "What's the color of the {make} {model} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the vehicle?"
+            "value": "What's the color of the vehicle?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {vehicle} ?"
+            "value": "What's the color of the {vehicle} ?"
           }
         ]
       },
@@ -1267,7 +2379,7 @@
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the address?"
+            "value": "What's the address?"
           }
         ]
       },
@@ -1356,7 +2468,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "May I please have the address of the issue you\u0027re reporting?"
+            "value": "May I please have the address of the issue you're reporting?"
           }
         ]
       },
@@ -1365,7 +2477,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the address?"
+            "value": "What's the address?"
           }
         ]
       },
@@ -1374,15 +2486,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the vehicle?"
+            "value": "What's the model of the vehicle?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {vehicle} ?"
+            "value": "What's the model of the {vehicle} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the model of the {make} ?"
+            "value": "What's the model of the {make} ?"
           }
         ]
       },
@@ -1391,7 +2503,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the make of the vehicle?"
+            "value": "What's the make of the vehicle?"
           },
           {
             "type": "PlainText",
@@ -1408,15 +2520,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {vehicle} ?"
+            "value": "What's the color of the {vehicle} ?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the vehicle?"
+            "value": "What's the color of the vehicle?"
           },
           {
             "type": "PlainText",
-            "value": "What\u0027s the color of the {make} {model} ?"
+            "value": "What's the color of the {make} {model} ?"
           }
         ]
       },
@@ -1520,15 +2632,6 @@
         ]
       },
       {
-        "id": "Elicit.Slot.1349433291344.1451233083949",
-        "variations": [
-          {
-            "type": "PlainText",
-            "value": "You can give an address or nearest cross street."
-          }
-        ]
-      },
-      {
         "id": "Confirm.Intent.1294467916183",
         "variations": [
           {
@@ -1542,11 +2645,38 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "You shouldn\u0027t be hearing this"
+            "value": "You shouldn't be hearing this"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.576909764561.1383880134578",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "How long has the vehicle been abandoned?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.576909764561.780414875025",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What is the license plate number?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.1359792393904.1219368899061",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Please say an address or cross street."
           }
         ]
       }
     ]
   },
-  "version": "185"
+  "version": "217"
 }

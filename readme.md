@@ -74,41 +74,51 @@ The Sacramento 311 Alexa Skill makes use of the Alexa Skills Kit SDK for Node.js
 - [x] Basic use case for an abandoned vehicle service request
 	- [x] Identify caller's intent from a wide variety of inputs
 	- [x] Verify the caller's intent before collecting details
-	- [x] Collect service-specific details from the caller
+	- [x] Support collecting service-specific details from the caller throughout the session
 - [x] Location retrieval
 	- [x] Get geocoordinates from geolocation-enabled devices
 	- [x] Get home address from caller's Amazon contact details
 	- [x] Get location from caller speech input
-- [ ]   Get a candidate from the internal geocoder using address collected from caller
-	- [x] Get candidate from world geocoder
-	- [ ] Pick the world candidate with the highest score, or ask the user for another address if no candidates found
-	- [x] Run world geocoder candidate against internal geocoder
-	- [ ] Pick the internal candidate with the highest score, or ask for address again if no internal geocoder candidate was found
+	- [x] Verify address with world geocoder and CoS geocoder
+- [ ] Contact details retrieval
+	- [x] Collect phone number from Amazon user contact details
+	- [ ] Confirm phone number with the skill user
+	- [ ] Collect a phone number from the skill user
 - [ ] Salesforce Integration
-	- [x] Get OAuth Token
-	- [x] Support making any query in the SFDB
-	- [ ] Create a new case
-		- [ ] Collect the caller's phone number
-			- [ ] via caller's Amazon contact details
-			- [ ] via caller speech input
-		- [ ] Query SFDB contacts for a matching phone number
-			- [ ] Verify caller contact details, if false then submit anonymous case
-		- [ ] Collect all necessary location details based on the service type
-		- [ ] Store the case number in DynamoDB
+	- [x] Make authenticated calls to CoS salesforce CRM via OAuth
+	- [ ] Open a generic case (leave a generic description for review)
+		- [x] Get case number and caseID back
+		- [ ] Confirm all fields are being correctly submitted to SF
+	- [ ] Open a non-generic case (abandoned vehicle service request)
+		- [x] Get case number and caseID back
+		- [ ] Confirm all fields are being correctly submitted to SF
+		- [x] Store the case number in DynamoDB for a given skill user
 - [x] Working Production-like Environment
 	- [x] Connect AWS Lambda function to Alexa Skill
 	- [x] Attach a public IP address to Lambda function using AWS VPC (for internal geocoder whitelist)
 
-### Additional Functionality
-- [x] DynamoDB persistent storage
-- [ ] Visual and touch UI
-	- [x] Support for adding ALP directives
-	- [ ] ALP directives for all caller interactions
+### Additional Features
 - [ ] Get case status information about a previously-submitted case
+- [x] Get garbage day
 - [ ] Get city information from knowledgebase
-- [ ] AWS Chime Integration (Transfer to live agent)
-	- [x] Support transferring caller to any US Phone number
-	- [ ] Integrate with Sac311 SIP
+- [x] Support for adding new languages
+
+### Future Face
+
+- [ ] Enable [skill personalization](https://developer.amazon.com/en-US/docs/alexa/custom-skills/add-personalization-to-your-skill.html) to identify the speaker based on their voice
+	- [ ] Manage data in dynamodb per household user
+- [ ]  Send notifications to skill users with the [ProactiveEvents API](https://developer.amazon.com/en-US/docs/alexa/smapi/proactive-events-api.html)
+	- [ ] Send a notification when the case status changes
+	- [ ] Send a notification from the city
+		- [ ] Allow users to unsubscribe from these
+- [ ] Enable [account linking](https://developer.amazon.com/en-US/docs/alexa/account-linking/add-account-linking.html) to allow alexa users to sign in to their sacramento 311 account in the skill
+- [ ] Integrate Alexa with the Sacramento 311 App using [Alexa for Apps](https://developer.amazon.com/en-US/alexa/alexa-skills-kit/get-deeper/response-api/alexa-for-apps), [Alexa for Apps Documentation](https://developer.amazon.com/en-US/docs/alexa/alexa-for-apps/about-alexa-for-apps.html)
+- [ ] [Connect an SIP Media Application](https://docs.aws.amazon.com/chime-sdk/latest/dg/alexa-calling.html) to allow alexa users to be transferred to the 311 call center
+- [ ] Add support for spanish speakers using [i18n](https://developer.amazon.com/blogs/alexa/post/285a6778-0ed0-4467-a602-d9893eae34d7/how-to-localize-your-alexa-skills)
+- [ ] Create FAQ intents getting answers from the knowledgebase
+	- [ ] Call existing dialogflow FAQ bot with AMAZON.searchQuery values, or an FAQ bot wrapper, or using Alexa Conversations
+- [ ] Extend the skill by collecting several complex data points using next-gen AI with [Alexa Conversations](https://developer.amazon.com/en-US/docs/alexa/conversations/about-alexa-conversations.html)
+- [ ] Create UI for allowing saccity employees to easily manage the interaction model and conversation dialog for the 311 skill 
 
 <br></br>
 <img src="doc_resources/wavedivider.png"/>

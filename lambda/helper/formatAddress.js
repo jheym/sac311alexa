@@ -37,7 +37,7 @@ function formatInput(input){
     // This loop replaces the words in the input with the abbreviations
     for (let word in wordMap) {
       // This regex matches the word in the input
-      const regex = new RegExp(`\\b${word}\\b`, "gi");
+      const regex = new RegExp(`(?:\\b|\\B&)${word}(?:\\b|\\B)`, "gi");
       // This replaces the word with the abbreviation
       formattedInput = formattedInput.replace(regex, wordMap[word]);
 
