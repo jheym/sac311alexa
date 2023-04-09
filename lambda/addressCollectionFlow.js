@@ -86,18 +86,25 @@ const yn_IsAddressCorrectIntentHandler = {
 			handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsAddressCorrect?'
 		);
 	},
-	handle(handlerInput) {
+	async handle(handlerInput) {
 		helper.setQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		const unconfirmedAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.unconfirmedAddress;
 		const unconfirmedValidatorRes = sessionAttributes.getLocation.unconfirmedValidatorRes;
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			helper.clearFailCounter(handlerInput);
 			if (!unconfirmedValidatorRes) {
-				throw new Error('Error: unconfirmedAddress is undefined.')
+				throw new Error('Error: unconfirmedValidatorRes is undefined.')
 			}
+
+			// if (sessionAttributes.usingGeolocation) {
+			// 	const token = await helper.getOAuthToken();
+			// 	const myCaseObj = new sfCase(token);
+			// 	const unconfirmedValidatorRes = await myCaseObj.address_case_validator(address);
+			// }
+
+			
 			sessionAttributes.confirmedValidatorRes = unconfirmedValidatorRes;
 			delete sessionAttributes.unconfirmedValidatorRes;
 			attributesManager.setSessionAttributes(sessionAttributes);
@@ -173,12 +180,12 @@ const yn_UseGeoLocationIntentHandler = {
 			}
 
 			let geolocation;
-			let worldAddressObj = null;
+			let revGeocodeRes = null;
 
 			if (geolocation = sessionAttributes.getLocation.geolocation) {
 				const latitude = geolocation.coordinate.latitudeInDegrees;
 				const longitude = geolocation.coordinate.longitudeInDegrees;
-				worldAddressObj = await helper.reverseGeocode(latitude, longitude);
+				revGeocodeRes = await helper.reverseGeocode(latitude, longitude);
 			}
 			else {
 				const isValidGeoLocationSupported = helper.isGeolocationAvailable(handlerInput);
@@ -188,7 +195,7 @@ const yn_UseGeoLocationIntentHandler = {
 						.speak(handlerInput.t('INACCURATE_GEO_MSG'))
 						.getResponse();
 				}
-				else if (isValidGeoLocationSupported === "not-authorized") {
+				else if (isValidGeoLocationSupported === "not-authorized") { // TODO: Test this. If it ends the session, scrap cards for now.
 					helper.setQuestion(handlerInput, 'tryAnotherAddress?')
 					return responseBuilder
 						.speak(handlerInput.t('UNAUTHORIZED_GEO_MSG'))
@@ -202,14 +209,17 @@ const yn_UseGeoLocationIntentHandler = {
 						.getResponse();
 				}
 			}
-			
-			// TODO: Validate address with address_case_validator()?
 
-			if (worldAddressObj.address) { // TODO: Test with bad geocoordinates
-				let address = worldAddressObj.address.Address;
-				let city = worldAddressObj.address.City;
-				sessionAttributes.getLocation.unconfirmedValidatorRes = address; // TODO: Should we be storing the entire worldAddressObj instead?
+			if (revGeocodeRes.address) { // TODO: Test with bad geocoordinates
+				let address = revGeocodeRes.address.Address;
+				let city = revGeocodeRes.address.City;
+
+				const token = await helper.getOAuthToken();
+				const myCaseObj = new sfCase(token);
+				const unconfirmedValidatorRes = await myCaseObj.address_case_validator(address);
+				sessionAttributes.getLocation.unconfirmedValidatorRes = unconfirmedValidatorRes;
 				attributesManager.setSessionAttributes(sessionAttributes);
+				
 				let speechOutput = `<speak>Is the location near <say-as interpret-as='address'>${address} in ${city}</say-as>?</speak>`;
 				helper.setQuestion(handlerInput, 'IsAddressCorrect?')
 				return responseBuilder
