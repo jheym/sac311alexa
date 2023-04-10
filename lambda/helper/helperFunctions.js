@@ -44,6 +44,42 @@ async function saveToDynamo(handlerInput, key, value) {
 }
 
 /**
+ * Sends a progressive response to the user. This is useful for sending
+ * speechOutput to the user during a request that may take a while.
+ * @param {object} handlerInput 
+ * @param {string} speechOutput - speech to send to the user. String gets wrapped in <speak> tags
+ * @returns {void} if the request fails the error will be logged in console.
+ */
+async function sendProgressiveResponse(handlerInput, speechOutput) {
+	const { requestEnvelope } = handlerInput;
+	const apiAccessToken = requestEnvelope.context.System.apiAccessToken;
+	const apiEndpoint = requestEnvelope.context.System.apiEndpoint;
+	// const requestId = inRequestId ? inRequestId : requestEnvelope.request.requestId;
+	const requestId = requestEnvelope.request.requestId;
+	try {
+		const res = await axios({
+			method: 'POST',
+			url: `${apiEndpoint}/v1/directives`,
+			headers: {
+				'Authorization': `Bearer ${apiAccessToken}`,
+				'Content-Type': 'application/json'
+			},
+			data: {
+				"header": {
+					"requestId": requestId
+				},
+				"directive": {
+					"type": "VoicePlayer.Speak",
+					"speech": `<speak>${speechOutput}</speak>`
+				}
+			}
+		});
+	} catch (error) {
+		console.log(`Error sending progressive response: Code: ${error.code} \n Message: ${error.message} \n ${error.response.data.message}`);
+	}
+}
+
+/**
  * This function should be able to make any query to the SF API. Just pass in
  * the SOQL query you want to use. No URL encoding required.
  * @param {string} query - unencoded SOQL query
@@ -74,14 +110,14 @@ async function querySFDB(query, token) {
 	}
 }
 
-async function openIntegratedCase(handlerInput, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
-		SalesforceCaseObject.set_service_questions(handlerInput);
+async function openIntegratedCase(handlerInput, slots, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
+		SalesforceCaseObject.set_service_questions(handlerInput, slots);
 		const case_response = await SalesforceCaseObject.create_basic_case(serviceName, phoneNumber, address, null, true);
 		return case_response;
 }
 
-async function updateIntegratedCase(handlerInput, caseId, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
-	SalesforceCaseObject.set_service_questions(handlerInput);
+async function updateIntegratedCase(handlerInput, slots, caseId, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
+	SalesforceCaseObject.set_service_questions(handlerInput, slots);
 	const case_response = await SalesforceCaseObject.case_update(caseId, serviceName, address, phoneNumber);
 	return case_response;
 
@@ -561,7 +597,8 @@ module.exports = {
 	openIntegratedCase,
 	updateIntegratedCase,
 	saveCaseToDynamo,
-	saveToDynamo
+	saveToDynamo,
+	sendProgressiveResponse
 }
 
 // Unused functions //

@@ -32,14 +32,16 @@ const GetPreviousCaseIntentHandler = {
 			// let caseDate = new Date(caseDateISO); 
 
 		}
-
+		helper.setQuestion(handlerInput, 'AnythingElse?')
 		if (caseDetails) {	
 			return responseBuilder
-				.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDateISO}. It's status is currently ${caseStatus}.`)
+				.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDateISO}. It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
+				.withShouldEndSession(false)
 				.getResponse();
 		} else {
 			return responseBuilder
-			.speak(`I could not find a case.`)
+			.speak(`I'm sorry. I could not find a case for you. Is there anything else I can help you with?`)
+			.withShouldEndSession(false)
 			.getResponse();
 		}
 	},

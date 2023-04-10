@@ -2,6 +2,7 @@ const Alexa = require('ask-sdk-core')
 const helper = require("./helper/helperFunctions.js")
 const format = require('./helper/formatAddress.js')
 const sfCase = require('./helper/SalesforceCaseObject.js')
+const { default: axios } = require('axios')
 
 const GetLocationIntentHandler = { //TODO: Is this handler necessary?
 	canHandle(handlerInput) {
@@ -52,10 +53,13 @@ const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 		// sessionAttributes.unconfirmedLocation = userGivenAddress;
 		attributesManager.setSessionAttributes(sessionAttributes);
 
+		const prSpeechOutput = `One moment while I look it up. <audio src="https://alexa311resources.s3.us-west-1.amazonaws.com/mechanical-keyboard-typing_trimmed.mp3" /> <break time="1s"/> Okay <break time="1s"/>`
+		await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
+
 		if (userGivenAddress) {
 			let token = await helper.getOAuthToken();
 			let caseObj = new sfCase(token);
-			var res = await caseObj.address_case_validator(userGivenAddress);
+			var res = await caseObj.address_case_validator(format.formatInput(userGivenAddress));
 		} else {
 			console.log('Error: userGivenAddress is undefined.')
 			return responseBuilder
@@ -97,14 +101,13 @@ const yn_IsAddressCorrectIntentHandler = {
 			if (!unconfirmedValidatorRes) {
 				throw new Error('Error: unconfirmedValidatorRes is undefined.')
 			}
-
-			// if (sessionAttributes.usingGeolocation) {
-			// 	const token = await helper.getOAuthToken();
-			// 	const myCaseObj = new sfCase(token);
-			// 	const unconfirmedValidatorRes = await myCaseObj.address_case_validator(address);
-			// }
-
-			
+			const prSpeechOutput = `Okay. <audio src="https://alexa311resources.s3.us-west-1.amazonaws.com/mechanical-keyboard-typing_trimmed.mp3" /> <break time="1s"/>`;
+			await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
+			const token = await helper.getOAuthToken();
+			const caseObj = new sfCase(token);
+			caseObj.addr_resp = unconfirmedValidatorRes.geocoderResponse.internal_geocoder; // TODO: Only do this if there is an internal_geocoder response
+			await caseObj.get_gis_attribute();
+			sessionAttributes.caseObj = caseObj;
 			sessionAttributes.confirmedValidatorRes = unconfirmedValidatorRes;
 			delete sessionAttributes.unconfirmedValidatorRes;
 			attributesManager.setSessionAttributes(sessionAttributes);
@@ -214,6 +217,11 @@ const yn_UseGeoLocationIntentHandler = {
 				let address = revGeocodeRes.address.Address;
 				let city = revGeocodeRes.address.City;
 
+				// Send a progressive response while validating the address
+				const prSpeechOutput = `Alright, one moment while I validate your address.`
+				await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
+				
+
 				const token = await helper.getOAuthToken();
 				const myCaseObj = new sfCase(token);
 				const unconfirmedValidatorRes = await myCaseObj.address_case_validator(address);
@@ -240,7 +248,7 @@ const yn_UseGeoLocationIntentHandler = {
 				throw new Error('yn_UseGeoLocationIntentHandler Error: GetLocationInterceptor was never triggered.')
 			let speechOutput = `Alright. Can you give me an address or two cross streets nearby?`
 			return responseBuilder
-				.speak(handlerInput.t('LOCATION_RETRY'))
+				.speak(speechOutput)
 				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
 				.getResponse();
 		}

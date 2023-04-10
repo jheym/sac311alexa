@@ -32,7 +32,7 @@ const StartedTrashPickupDayIntentHandler = {
 			const { addressLine1 } = await helper.getHomeAddress(handlerInput);
 			if (addressLine1.length > 0) {
 				const token = await helper.getOAuthToken(handlerInput);
-				const myCaseObj = new sfCase(null, null, token);
+				const myCaseObj = new sfCase(token);
 				var validatorObj = await myCaseObj.address_case_validator(addressLine1);
 			}
 		}
@@ -135,6 +135,7 @@ const InProgressTrashPickupDayIntentHandler = {
 		speakOutput += handlerInput.t(" Is there anything else I can help you with?")
 		helper.setQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
+		.withshouldEndSession(false)
 		.speak(speakOutput)
 		.getResponse();
 	}

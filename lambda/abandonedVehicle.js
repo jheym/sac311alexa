@@ -2,7 +2,7 @@
 const Alexa = require("ask-sdk-core")
 const helper = require("./helper/helperFunctions.js")
 const sfCase = require("./helper/SalesforceCaseObject.js")
-const iso8601 = require('iso8601-duration')
+const iso8601 = require('iso8601-duration');
 
 // Started
 const StartedAbandonedVehicleIntentHandler = {
@@ -44,14 +44,14 @@ const InProgressAbandonedVehicleIntentHandler = {
 		const slots = currentIntent.slots;
 
 		if (slots.timePeriod.value) {
-			// FIXME: Alexa device turns off after submitting a case.
-			// Try submitting a progressive response?
-			// https://developer.amazon.com/en-US/docs/alexa/custom-skills/send-the-user-a-progressive-response.html
+			// we have to send the progressive response before we add the delegate directive. Not sure why.
+			const prSpeechOutput = `That's all the information I need. One moment please while I update your case. <audio src="https://alexa311resources.s3.us-west-1.amazonaws.com/mechanical-keyboard-typing_trimmed.mp3" /> <break time="1s"/> Okay, all done. <break time="1s"/>`;
+			await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
 			return responseBuilder
-				.withShouldEndSession(false)
-				.addDelegateDirective()
+				.addDelegateDirective(currentIntent)
 				.getResponse();
 		}
+		
 		if (slots.licensePlate.value) {
 			slots.licensePlate.value = slots.licensePlate.value.replace(/\s+/g, '').toUpperCase();
 			//TODO: replace "for" with "4", "one" with "1", and "ate" with "8"
@@ -80,7 +80,7 @@ const InProgressAbandonedVehicleIntentHandler = {
 				if (v) answeredSlots[k] = v;
 
 			if (!answeredSlots.make) {
-				speechOutput = 'What is the make of the vehicle?'
+				speechOutput = 'What is the make model and color of the vehicle?'
 				slotToElicit = 'make'
 			} else if (!answeredSlots.model) {
 				speechOutput = 'What is the model of the vehicle?'
@@ -107,18 +107,26 @@ const CompletedAbandonedVehicleIntentHandler = {
 			Alexa.getIntentName(handlerInput.requestEnvelope) === "AbandonedVehicleIntent" &&
 			Alexa.getDialogState(handlerInput.requestEnvelope) === "COMPLETED");
 	},
-	async handle(handlerInput) {
+	async handle(handlerInput) {	
 		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const currentIntent = requestEnvelope.request.intent;
 		const sessionAttributes = attributesManager.getSessionAttributes();
+		
+		// Send a progressive response while the case is being created. 
+		//FIXME: Getting 403 Unrecognized requestId error. Not sure why this is
+		//happening. See https://amazon.developer.forums.answerhub.com/questions/228211/unexpected-service-error-with-progressive-response.html
+		// const prSpeechOutput = `Perfect. That's all the information I need. Please give me a moment while I enter your case.`;
+		// await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
+	
 		const slots = currentIntent.slots;
-		const internalServiceName = 'Vehicle On Street' // Need to use the correct service name associated with the service type
-		const phoneNumber = await helper.isPhoneNumberAvailable(handlerInput) ? await helper.getPhoneNumber(handlerInput) : null; //TODO: Use phone number collection flow instead
+		const internalServiceName = 'Vehicle On Street'; // Need to use the correct service name associated with the service type
+		// const phoneNumber = await helper.isPhoneNumberAvailable(handlerInput) ? await helper.getPhoneNumber(handlerInput) : null; //TODO: Use phone number collection flow instead
 		const token = await helper.getOAuthToken();
-		sessionAttributes.phoneNumber = phoneNumber;
-		attributesManager.setSessionAttributes(sessionAttributes);
+		// sessionAttributes.phoneNumber = phoneNumber;
+		// attributesManager.setSessionAttributes(sessionAttributes);
 		slots.timePeriod.value = helper.toDays(currentIntent.slots.timePeriod.value);
-		var caseNumber, caseId; 
+		const caseNumber = sessionAttributes.caseNumber;
+		const caseId = sessionAttributes.caseId;
 
 
 		if (!sessionAttributes.confirmedValidatorRes) {
@@ -131,13 +139,16 @@ const CompletedAbandonedVehicleIntentHandler = {
 				.getResponse();
 		} else {
 			var address = sessionAttributes.confirmedValidatorRes.Address;
-			const myCaseObj = new sfCase(token);
-			const open_res = await helper.openIntegratedCase(handlerInput, myCaseObj, internalServiceName, address, phoneNumber);
-			[caseNumber, caseId] = [open_res.case_number, open_res.case_id];
-			const myUpdateCaseObj = new sfCase(token);
-			const update_res = await helper.updateIntegratedCase(handlerInput, open_res.case_id, myUpdateCaseObj, internalServiceName, address, phoneNumber);
-			await helper.saveCaseToDynamo(handlerInput, caseNumber);
-			
+			// const myCaseObj = new sfCase(token);
+			// const open_res = await helper.openIntegratedCase(handlerInput, myCaseObj, internalServiceName, address, phoneNumber);
+			// [caseNumber, caseId] = [open_res.case_number, open_res.case_id];
+			// const myUpdateCaseObj = new sfCase(token);
+			const caseObj = sessionAttributes.caseObj
+			const myCaseObj = new sfCase(token); // Reconstruct the case object
+			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
+			const update_res = await helper.updateIntegratedCase(handlerInput, slots, caseId, myCaseObj, internalServiceName, address, null);
+			console.log(update_res)
+			// await helper.saveCaseToDynamo(handlerInput, caseNumber);
 			// const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
 			// const caseUpdateRes = await myUpdateCaseObj.case_update(caseId, location, 'Vehicle On Street', null);
 		}
@@ -201,13 +212,13 @@ const yn_IsAbandonedVehicleIntentHandler = {
 			
 			if (helper.isGeolocationAvailable(handlerInput) === "supported") {
 				helper.setQuestion(handlerInput, 'UseGeolocation?')
-				let speechOutput = `Would you like to use your current location as the location of the abandoned vehicle?`;
+				let speechOutput = `Alright. Would you like to use your current location as the location of the abandoned vehicle?`;
 				return responseBuilder
 					.speak(speechOutput)
 					.withShouldEndSession(false)
 					.getResponse();
 			} else {
-				let speechOutput = `Where is the abandoned vehicle located? You can give an address or nearest cross street.`
+				let speechOutput = `Alright. Where is the abandoned vehicle located? You can give an address or nearest cross street.`
 				let GetLocationFromUserIntent = {
 					name: 'GetLocationFromUserIntent',
 					confirmationStatus: 'NONE',
@@ -221,6 +232,7 @@ const yn_IsAbandonedVehicleIntentHandler = {
 				}
 				return responseBuilder
 					.speak(speechOutput)
+					.withShouldEndSession(false)
 					.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
 					.getResponse();
 			}
@@ -257,7 +269,7 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 			failCounter < 3
 		);
 	},
-	handle(handlerInput) {
+	async handle(handlerInput) {
 		helper.setQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
@@ -265,7 +277,23 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			helper.clearFailCounter(handlerInput);
-			let speechOutput = `Great! What is the license plate number of the vehicle?`;
+
+			const prSpeechOutput = `<say-as interpret-as="interjection">Great.</say-as> I just have a few more questions to ask. <break time="1s"/>`;
+			await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
+			const internalServiceName = 'Vehicle On Street';
+			let phoneNumber = '9165551111'
+			var address = sessionAttributes.confirmedValidatorRes.Address;
+			const caseObj = sessionAttributes.caseObj
+			const myCaseObj = new sfCase(caseObj.token); // Reconstruct the case object
+			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
+			const slots = sessionAttributes.AbandonedVehicleIntent.slots;
+			const open_res = await helper.openIntegratedCase(handlerInput, slots, myCaseObj, internalServiceName, address, phoneNumber);
+			sessionAttributes.caseNumber = open_res.case_number;
+			sessionAttributes.caseId = open_res.case_id
+			sessionAttributes.caseObj = myCaseObj;
+			attributesManager.setSessionAttributes(sessionAttributes);
+
+			let speechOutput = `What is the license plate number of the vehicle?`;
 			return responseBuilder
 				.speak(speechOutput)
 				.addElicitSlotDirective('licensePlate', sessionAttributes.AbandonedVehicleIntent)
@@ -319,7 +347,7 @@ const yn_ConfirmLicensePlateIntentHandler = {
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			helper.clearFailCounter(handlerInput);
-			let speechOutput = `Great! How long has the vehicle been abandoned?`;
+			let speechOutput = `Got it. Okay, last question. How long has the vehicle been abandoned?`;
 			let repromptOutput = `How long has the vehicle been abandoned? You can say any amount of time, such as 2 days, 3 weeks, or 1 month.`;
 			updatedIntent = sessionAttributes.AbandonedVehicleIntent;
 			updatedIntent.confirmationStatus = 'CONFIRMED';

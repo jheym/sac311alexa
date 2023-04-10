@@ -84,9 +84,14 @@ const LaunchRequestHandler = {
 		// ****************************END CREATING A GENERIC CASE EXAMPLE*************************** //
 
 
-		speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
+		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
+		const time = new Date().getHours();
+		const speechOutput = `<speak>Hello! Thank you for using the City of Sacramento Alexa skill. 
+							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
+							list of capabilities, you can say help. What can I do for you this evening?</speak>`
 		return handlerInput.responseBuilder
 			.speak(speechOutput)
+			.withShouldEndSession(false) // keep the session open
 			.reprompt(handlerInput.t('WELCOME_REPROMPT'))
 			.getResponse()
 	}

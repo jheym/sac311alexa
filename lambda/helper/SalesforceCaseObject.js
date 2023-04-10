@@ -27,27 +27,21 @@ class Salesforce_Case_object {
  	* @param {Object} handlerInput 
 	* @returns {void}
  	*/
-	 set_service_questions(handlerInput) {
-		if (!handlerInput.requestEnvelope.request.intent.slots) {
-			throw new Error("No slots found in the handlerInput.");
-		} else {
-			const { requestEnvelope, attributesManager} = handlerInput;
-			const sessionAttributes = attributesManager.getSessionAttributes();
-			const slots = requestEnvelope.request.intent.slots;
+	 set_service_questions(handlerInput, slots) {
+		const { attributesManager } = handlerInput;
+		const sessionAttributes = attributesManager.getSessionAttributes();
 
-			// Getting json_input values from session attributes
-			this.json_input.phone_number = sessionAttributes.phoneNumber; // TODO: Should phone number be in json_input?
-			this.json_input.address = sessionAttributes.confirmedValidatorRes.Address; 
-			
-			for (const slot of Object.entries(slots)) {
-				let slot_name = slot[1].name;
-				let slot_value = slot[1].value;
-				if (mappings.hasOwnProperty(slot_name)) {
-					this.json_input[slot_name] = slot_value;
-				}
+		// Getting json_input values from session attributes
+		this.json_input.phone_number = sessionAttributes.phoneNumber; // TODO: Should phone number be in json_input?
+		this.json_input.address = sessionAttributes.confirmedValidatorRes.Address; 
+		
+		for (const slot of Object.entries(slots)) {
+			let slot_name = slot[1].name;
+			let slot_value = slot[1].value;
+			if (mappings.hasOwnProperty(slot_name) && slot_value !== undefined) {
+				this.json_input[slot_name] = slot_value;
 			}
-
-		}	
+		}
 	}
 
 	
@@ -117,28 +111,38 @@ class Salesforce_Case_object {
 		
 		if (user_json && user_json.phone_number)
 			phone_number = user_json.phone_number.match(/\d+/g).join("");
-		if (this.phone_number)
+		if (this.json_input.phone_number)
 			phone_number = this.phone_number.match(/\d+/g).join("")
 		if (phone_number)
 			phone_number = phone_number.match(/\d+/g).join("")
 
-		
-		await this.get_contact(phone_number) // Need contact for setting Anonymous_Contact__c field
+		if (!this.contact_id) {
+			await this.get_contact(phone_number) // Need contact for setting Anonymous_Contact__c field
+		}
 
 		this.case_ans = this.service_question_mapper(this.json_input); // Modified to use json_input (which is created by _make_json_input())
 		if (service_name) {
 			this.input_service_name = service_name;
+		}
+
+		if (!this.service_id || !this.service_type_id || !this.service_name ) {
 			await this.get_service_details(service_name);
 		}
 		
-		if (case_id) { this.case_id = case_id; }
-		const { internal_geocoder } = await this.world_address_verification(Address, threshold)
-		this.addr_resp = internal_geocoder;
-		await this.get_gis_attribute();
-		if (this.addr_resp.length === 0) { 
+		if (!this.case_id && case_id) { this.case_id = case_id; }
+		
+		if (!this.addr_resp) {
+			const { internal_geocoder } = await this.world_address_verification(Address, threshold)
+			this.addr_resp = internal_geocoder;
+		}
+
+		if (!this.gis_json) { await this.get_gis_attribute(); }
+		console.log(typeof this.addr_resp);
+		if (typeof this.addr_resp !== 'object' || Object.keys(this.addr_resp).length === 0) { 
 			console.error("Error: No address found for case_update");	
 			return false; 
 		}
+		
 		if (user_json) { this.case_ans = this.service_question_mapper(user_json, false); } // 
 		case_body.Status = 'NEW';
 		case_body.Sub_Service_Type__c = this.service_type_id;
@@ -156,7 +160,7 @@ class Salesforce_Case_object {
 		case_body.GIS_City__c = this.addr_resp.candidates[0].attributes.City;
 		case_body.Street_Center_Line__c = this.addr_resp.candidates[0].attributes.Loc_name;
 		case_body.Case_Gis_Info_JSON__c = this.gis_json;
-		this.b = new Date(Date.now()).toISOString(); // TODO: Does this date get submitted to the database? Where?
+		this.b = new Date(Date.now()).toISOString(); // TODO: Does this date get submitted to the database? Where? Also, it might be in the wrong format and it is not in local time.
 		await this.create_case_questions();
 
 		try {
@@ -403,7 +407,7 @@ class Salesforce_Case_object {
 				// const response = await fetch(`${sf_url}/query/?q=${query_string}`, {
 				// 	headers: { "Authorization": `Bearer ${this.token}` }
 				// });
-				if (response.data.records.length) {
+				if (response.data.records.length) { // FIXME: Breaks here on getting trash pickup day
 					const similarCases = {};
 					response.data.records.forEach(record => {
 					  similarCases[record.CaseNumber] = record.Subject;
@@ -520,7 +524,7 @@ class Salesforce_Case_object {
 		
 		if (addr_resp.length === 0)
 			return "Failed Case update"
-		if (this.case_id.length === 0)
+		if (!this.case_id || this.case_id.length === 0)
 			this.case_id = null;
 
 		var addr_id = addr_resp.candidates[0].attributes.User_fld
@@ -801,39 +805,67 @@ class Salesforce_Case_object {
 		
 		caseq = new_seq; // TODO: Confirm new_seq has expected output
 		this.caseq = caseq;
-		
+
+		// ** OLD CODE ** //
+		// if (this.update_case) {
+		// 	const resp = [];
+		// 	let start_time = new Date().getTime();
+		// 	for (let json_out of caseq) {
+		// 		delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
+		// 		delete json_out.Portal_Question_Label__c;
+		// 		try {
+		// 			var case_resp = await axios({ // TODO: Don't await here. Send all the requests at once and await them all at the end
+		// 				url: `${this.sf_url}/sobjects/Case_Questions__c`,
+		// 				method: 'POST',
+		// 				headers: { 
+		// 					'Authorization': `Bearer ${this.token}`,
+		// 					'Content-Type': 'application/json',
+		// 					'Accept-Encoding': 'application/json'
+		// 				},
+		// 				data: json_out
+		// 			});
+
+		// 			if (![200, 201, 204, 203].includes(case_resp.status)) {
+		// 				console.log('Error updating case questions');
+		// 				console.log(case_resp.data);
+		// 			}
+		// 		} catch(error) {
+		// 			console.error("Error creating basic case");
+		// 			console.log(error);
+		// 			throw error;
+		// 		}
+		// 		resp.push(case_resp.data);
+		// 	} // Done posting data
+		// 	this.case_question_details = resp;
+		// 	let end_time = new Date().getTime();
+		// 	console.log(`Old code time: ${end_time - start_time}`);
+		// }
+
+		// ** OPTIMIZED CODE ** //
 		if (this.update_case) {
 		  	const resp = [];
-		  	for (let json_out of caseq) {
-				delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
-				delete json_out.Portal_Question_Label__c;
-				try {
-					var case_resp = await axios({
-						url: `${this.sf_url}/sobjects/Case_Questions__c`,
-						method: 'POST',
-						headers: { 
-							'Authorization': `Bearer ${this.token}`,
-							'Content-Type': 'application/json',
-							'Accept-Encoding': 'application/json'
-						},
-						data: json_out
-					});
+			let start_time = new Date().getTime();
+			let promises = [];
+			let result = [];
+			let currCaseq = 0;
 
-					if (![200, 201, 204, 203].includes(case_resp.status)) {
-						console.log('Error updating case questions');
-						console.log(case_resp.data);
-					}
-				} catch(error) {
-					console.error("Error creating basic case");
-					console.log(error);
-					throw error;
-				}
-				resp.push(case_resp.data);
-			} // Done posting data
-			this.case_question_details = resp;
+			while (currCaseq < caseq.length) {
+				promises.push(this._postQuestion(caseq[currCaseq]));
+				currCaseq++;
+			}
+
+			const data = await Promise.all(promises);
+			data.forEach(({ data }) => {
+				if (!data.success) { console.log(`Error submitting case questions: ${data.errors}`)};
+				result = [...result, data];
+			});
+
+			this.case_question_details = result;
+			let end_time = new Date().getTime();
+			console.log(`New code time: ${end_time - start_time}`);
 		}
-
 	}
+
 
 
 	async service_questions() {
@@ -1047,6 +1079,34 @@ class Salesforce_Case_object {
 			console.log('case_question_new(): service type not found in subject map')
 			return false;
 		}
+	}
+
+	_postQuestion(json_out) {
+		delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
+		delete json_out.Portal_Question_Label__c;
+		try {
+			let case_resp = axios({ // TODO: Don't await here. Send all the requests at once and await them all at the end
+				url: `${this.sf_url}/sobjects/Case_Questions__c`,
+				method: 'POST',
+				headers: { 
+					'Authorization': `Bearer ${this.token}`,
+					'Content-Type': 'application/json',
+					'Accept-Encoding': 'application/json'
+				},
+				data: json_out
+			});
+
+			// if (![200, 201, 204, 203].includes(case_resp.status)) {
+			// 	console.log('Error updating case questions');
+			// 	console.log(case_resp.data);
+			// }
+			return case_resp;
+		} catch(error) {
+			console.error("Error creating basic case");
+			console.log(error);
+			throw error;
+		}
+		// resp.push(case_resp.data);
 	}
 
 	  
