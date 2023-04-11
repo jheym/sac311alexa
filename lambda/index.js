@@ -59,7 +59,7 @@ const LaunchRequestHandler = {
 		
 		// // Create a salesforce case object to be passed to createGenericCase()
 		// const token = await helper.getOAuthToken();
-		// const myCaseObj = new sfCase(null, null, token);
+		// const myCaseObj = new sfCase(token);
 		
 		// // Imagine these slots came from handlerInput
 		// const slots = {
@@ -85,7 +85,6 @@ const LaunchRequestHandler = {
 
 
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
-		const time = new Date().getHours();
 		const speechOutput = `<speak>Hello! Thank you for using the City of Sacramento Alexa skill. 
 							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
 							list of capabilities, you can say help. What can I do for you this evening?</speak>`

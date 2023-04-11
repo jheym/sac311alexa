@@ -288,6 +288,7 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
 			const slots = sessionAttributes.AbandonedVehicleIntent.slots;
 			const open_res = await helper.openIntegratedCase(handlerInput, slots, myCaseObj, internalServiceName, address, phoneNumber);
+			console.log(open_res);
 			sessionAttributes.caseNumber = open_res.case_number;
 			sessionAttributes.caseId = open_res.case_id
 			sessionAttributes.caseObj = myCaseObj;

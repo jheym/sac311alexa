@@ -706,7 +706,7 @@ class Salesforce_Case_object {
 		const case_question_sequence = {	
 			"vehicle on":[
 				"Vehicle Color","Vehicle Make",
-				"Vehicle Model","Licence Plate Number",
+				"Vehicle Model","License Plate Number", // TODO: Does this need to be spelled "licence"?
 				"# of Days Abandoned","ACTIVITY","ASSIGN TO",
 				"CASE STATUS","CITIZENSERVE CATEGORY",
 				"DEPARTMENT","FILE TYPE","PRIORITY",
@@ -1081,9 +1081,9 @@ class Salesforce_Case_object {
 		}
 	}
 
-	_postQuestion(json_out) {
-		delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
-		delete json_out.Portal_Question_Label__c;
+	_postQuestion(json_in) {
+		// delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
+		// delete json_out.Portal_Question_Label__c;
 		try {
 			let case_resp = axios({ // TODO: Don't await here. Send all the requests at once and await them all at the end
 				url: `${this.sf_url}/sobjects/Case_Questions__c`,
@@ -1093,7 +1093,7 @@ class Salesforce_Case_object {
 					'Content-Type': 'application/json',
 					'Accept-Encoding': 'application/json'
 				},
-				data: json_out
+				data: json_in
 			});
 
 			// if (![200, 201, 204, 203].includes(case_resp.status)) {
@@ -1127,7 +1127,7 @@ class Salesforce_Case_object {
 const mappings = {
 	'make': 'Vehicle Make',
 	'model': 'Vehicle Model',
-	'licensePlate': 'License Plate Number',
+	'licensePlate': 'Licens                            e Plate Number',
 	'timePeriod': '# of Days Abandoned',
 	'color': 'Vehicle Color',
 	'animal_location':"Please select where the animal is located",
