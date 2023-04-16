@@ -85,7 +85,37 @@ const LaunchRequestHandler = {
 
 
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
-		const speechOutput = `<speak>Hello! Thank you for using the City of Sacramento Alexa skill. 
+		function getTimeOfDay() {
+			// Get the current hour
+			const currentHour = new Date().getHours();
+		  
+			// Define the time ranges for each part of the day
+			const morningStart = 5;
+			const morningEnd = 11;
+			const afternoonStart = 12;
+			const afternoonEnd = 17;
+			const eveningStart = 18;
+			const eveningEnd = 22;
+		  
+			// Deduce the time of day based on the current hour
+			let timeOfDay;
+			if (currentHour >= morningStart && currentHour <= morningEnd) {
+			  timeOfDay = 'Good morning';
+			} else if (currentHour >= afternoonStart && currentHour <= afternoonEnd) {
+			  timeOfDay = 'Good afternoon';
+			} else if (currentHour >= eveningStart && currentHour <= eveningEnd) {
+			  timeOfDay = 'Good evening';
+			} else {
+			  timeOfDay = 'Good night';
+			}
+		  
+			// Return the time of day
+			return console.log(timeOfDay);
+		  }
+		
+		// call the funct
+		const greeting = getTimeOfDay();
+		const speechOutput = `<speak>${greeting}! Thank you for using the City of Sacramento Alexa skill. 
 							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
 							list of capabilities, you can say help. What can I do for you this evening?</speak>`
 		return handlerInput.responseBuilder
