@@ -1127,7 +1127,7 @@ class Salesforce_Case_object {
 const mappings = {
 	'make': 'Vehicle Make',
 	'model': 'Vehicle Model',
-	'licensePlate': 'Licens                            e Plate Number',
+	'licensePlate': 'License Plate Number',
 	'timePeriod': '# of Days Abandoned',
 	'color': 'Vehicle Color',
 	'animal_location':"Please select where the animal is located",
