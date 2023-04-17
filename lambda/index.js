@@ -87,9 +87,16 @@ const LaunchRequestHandler = {
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 		function getTimeOfDay() {
 			// Get the current hour
-			const currentHour = new Date().getHours();
-		  
-			// Define the time ranges for each part of the day
+			const now = new Date();
+			const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+			const currentHour = new Date(utcTime + (3600000*-7));
+
+
+			
+
+
+			// Set the morning, afternoon, evening, and night hours
+
 			const morningStart = 5;
 			const morningEnd = 11;
 			const afternoonStart = 12;
@@ -97,13 +104,14 @@ const LaunchRequestHandler = {
 			const eveningStart = 18;
 			const eveningEnd = 22;
 		  
-			// Deduce the time of day based on the current hour
+			// Determine the time of day
 			let timeOfDay;
-			if (currentHour >= morningStart && currentHour <= morningEnd) {
+			const localHour = currentHour.getHours();
+			if (localHour >= morningStart && localHour <= morningEnd) {
 			  timeOfDay = 'morning';
-			} else if (currentHour >= afternoonStart && currentHour <= afternoonEnd) {
+			} else if (localHour >= afternoonStart && localHour <= afternoonEnd) {
 			  timeOfDay = 'afternoon';
-			} else if (currentHour >= eveningStart && currentHour <= eveningEnd) {
+			} else if (localHour >= eveningStart && localHour <= eveningEnd) {
 			  timeOfDay = 'evening';
 			} else {
 			  timeOfDay = 'night';
@@ -112,10 +120,12 @@ const LaunchRequestHandler = {
 			// Return the time of day
 			return timeOfDay;
 		  }
+		  
 		
-		// call the funct
+		// call the function to get the time of day.
 		const greeting = getTimeOfDay();
-		const speechOutput = `<speak> Hello! Thank you for using the City of Sacramento Alexa skill. 
+
+		const speechOutput = `<speak> Good ${greeting} ! Thank you for using the City of Sacramento Alexa skill. 
 							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
 							list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
 		return handlerInput.responseBuilder
