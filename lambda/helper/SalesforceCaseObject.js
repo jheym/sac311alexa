@@ -1,5 +1,6 @@
 const helper = require("./helperFunctions.js")
 const axios = require("axios");
+const https = require('https');
 
 
 class Salesforce_Case_object {	
@@ -137,7 +138,7 @@ class Salesforce_Case_object {
 		}
 
 		if (!this.gis_json) { await this.get_gis_attribute(); }
-		console.log(typeof this.addr_resp);
+		// console.log(typeof this.addr_resp);
 		if (typeof this.addr_resp !== 'object' || Object.keys(this.addr_resp).length === 0) { 
 			console.error("Error: No address found for case_update");	
 			return false; 
@@ -163,6 +164,18 @@ class Salesforce_Case_object {
 		this.b = new Date(Date.now()).toISOString(); // TODO: Does this date get submitted to the database? Where? Also, it might be in the wrong format and it is not in local time.
 		await this.create_case_questions();
 
+		// try {
+		// 	this.case_resp = await sendPatchRequest(`${this.sf_url}/sobjects/Case/${this.case_id}`, this.token, case_body);
+		// } catch (error) {
+		// 	console.log(error);
+		// 	throw new Error(error);
+		// }
+
+
+
+
+		
+
 		try {
 			this.case_resp = await axios({
 				url: `${this.sf_url}/sobjects/Case/${this.case_id}`,
@@ -178,10 +191,21 @@ class Salesforce_Case_object {
 			if (![200, 201, 204].includes(this.case_resp.status)) {
 				console.log('Error updating case questions');
 				console.log(this.case_resp.data);
+				throw new Error(this.case_resp.data);
 			}
-		} catch(error) {
-			console.error("Error updating case");
-			console.log(error);
+		} catch(error) { // FIXME: Getting 400 responses but apparently it's okay?
+			if (error.response.status === 400) {
+				console.log(`Warning: 400 Response when updating case questions. Case ID: ${this.case_id}`); 
+				this.case_resp = error.response;
+			} else if (error.response) {
+				console.log(`Error updating case - Response: ${error.response.status}`);
+				console.log(error.response);
+				throw new Error(error);
+			} else {
+				console.log("Error updating case");
+				console.log(error);
+				throw new Error(error);
+			}
 		}
 		await this.get_case_number();
 		return {'case_number' : this.case_number, 'status_code' : this.case_resp.status}
@@ -375,6 +399,7 @@ class Salesforce_Case_object {
 
 
 	async address_case_validator(address, subject = null, threshold = 80, check_period = 3, check_case = true) {
+		// console.log(`In address_case_validator: address = ${address}`);
 		const subject_map = service_type_to_sf_service;
 		const addr_validation_out = {};
 		const geocoded_out = await this.world_address_verification(address, threshold);
@@ -448,9 +473,15 @@ class Salesforce_Case_object {
 	async world_address_verification(Address="915 I Street", threshold=80) {
 		let output = {};
 		// console.log(Address.length)
-		if (Address.length > 0) {
+		if (Address.length > 0) { // TODO: Test many addresses. We may have to change the slot type back to AMAZON.SearchQuery.
+			// FIXME: Doesn't work when someone says "seven zero one forty-first street" we get "70 141st street" Should we just collect street number and street name separately?
+			let regex = /(\d)[\s,]+(?=\d(?!\d*(?:st|nd|rd|th)\b))/g; // This regex matches a space or comma followed by a number that is not followed by a number and a suffix (e.g. 1st, 2nd, 3rd, 4th, etc.)
+			Address = Address.replace(regex, '$1')
 			let addr = Address.replace(" USA",'');
+			// console.log(`In world_address_verification: ${addr}`)
 			let response = await helper.getWorldAddress(addr)
+			// const stringRes = JSON.stringify(response.data, null, 2);
+			// console.log(`In world_address_verification: world Address geocoder response = ${stringRes}`)
 			let resp_dict = await this.internal_verifier(response.data, threshold);
 			let internal_response=[];
 			let overview=[];
@@ -458,16 +489,20 @@ class Salesforce_Case_object {
 				threshold = parseInt(threshold);
 			}
 			if (response.status == 200 && typeof(resp_dict) == 'object' && 'candidates' in resp_dict && resp_dict['candidates'].length > 0 && resp_dict['candidates'][0]['score'] >= threshold) {
+				// console.log(`In world_address_verification (Res == 200, resp_dict is object, candidates in resp_dict, resp_dict['candidates'].length > 0, resp_dict['candidates'][0]['score'] >= threshold)`)
 				let address = resp_dict['candidates'][0]['attributes']['ShortLabel'];
 				let city = resp_dict['candidates'][0]['attributes']['City'];
 				let county = resp_dict['candidates'][0]['attributes']['Subregion'];
-				
+				// console.log(`In world_address_verification (before helper.getInternalAddress): resp_dict.candidates[0] = ${JSON.stringify(resp_dict.candidates[0], null, 2)}`)
 				let city_response = await helper.getInternalAddress(resp_dict.candidates[0]);
+				// const city_res_string = JSON.stringify(city_response.data, null, 2);
+				// console.log(`In world_address_verification (after helper.getInternalAddress): city_response = ${city_res_string}`)
 				if (city_response.status == 200 && city_response.data['candidates'].length > 0) {
 					internal_response = await this.internal_verifier(city_response.data, threshold);
 				}
 				overview = {"address":address,"city":city,"county":county};
 			} else {
+				console.log('In world_address_verification (else reached)');
 				let url_address = encodeURIComponent(addr);
 				let city_geocoder_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates?SingleLine=${url_address}&category=&outFields=*&outSR=4326&searchExtent=&location=&distance=&magicKey=&f=pjson`;
 				let city_response = await axios.get(city_geocoder_url)
@@ -1121,6 +1156,47 @@ class Salesforce_Case_object {
 	}
 
 };
+
+async function sendPatchRequest(url, token, jsonData) {
+	return new Promise((resolve, reject) => {
+	  const data = JSON.stringify(jsonData);
+	  const headers = {
+		'Authorization': `Bearer ${token}`,
+		'Content-Type': 'application/json',
+		'Accept-Encoding': 'application/json',
+	  };
+  
+	  const parsedUrl = new URL(url);
+	  const options = {
+		hostname: parsedUrl.hostname,
+		path: parsedUrl.pathname,
+		method: 'PATCH',
+		headers: headers,
+	  };
+  
+	  const req = https.request(options, (res) => {
+		let body = '';
+		res.on('data', (chunk) => {
+		  body += chunk;
+		});
+  
+		res.on('end', () => {
+		  if (res.statusCode >= 200 && res.statusCode < 400 || res.statusCode === 400) {
+				resolve(res);
+		  } else {
+			reject(new Error(`Request failed with status code ${res.statusCode}`));
+		  }
+		});
+	  });
+  
+	  req.on('error', (error) => {
+		reject(error);
+	  });
+  
+	  req.write(data);
+	  req.end();
+	});
+  }
 
 
 // Dictionary mapping the input fields (slot names) with Salesforce fields

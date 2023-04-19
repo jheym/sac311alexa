@@ -7,7 +7,7 @@
             "REPORT_ISSUE": "Alright. What's the issue you're reporting?",
             "YES_RETRY": "Alright, what can I do for you?",
             "NO_RETRY": "Understood. Thank you for contacting Sacramento three one one. Goodbye!",
-            "HELP_MSG": "Welcome to the Sacramento 311 skill! To use the skill, simply say something like, when is my garbage pickup day?, report an abandoned vehicle, or check the status of my case. How can I help?",
+            "HELP_MSG": "<speak>To use the City of Sacramento <say-as interpret-as=\"digits\">311 </say-as> skill, you can say things like, when is my garbage pickup day, report an abandoned vehicle, or check the status of my case. How can I help?</speak>",
             "FALLBACK_MSG": "Sorry, I don't know about that. Please try again.",
             "FALLBACK_MSG_REPROMPT": "Please try again.",
             "FALLBACK_STILL_MSG": "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
@@ -25,7 +25,7 @@
             "TRASH_THANKS": "Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
 
             "ABANDONED_VEHICLE_CONFIRMATION": "Just to confirm, are you reporting an abandoned vehicle?",
-            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. <break time=\"1s\"/> We'll dispatch someone to the incident as soon as we can. To check the status of your case, you can always check back here and say, check case status. Is there anything else I can help you with?</speak>",
+            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. <break time=\"0.5s\"/> We'll dispatch someone to the incident as soon as we can. To check the status of your case, you can always check back here and say, check case status. Is there anything else I can help you with?</speak>",
             "ABANDONED_VEHICLE_72Q": "Has the vehicle been abandoned for more than seventy-two hours?",
             "ABANDONED_VEHICLE_72A": "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. Is there anything else I can help you with?",
 

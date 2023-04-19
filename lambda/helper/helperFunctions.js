@@ -598,7 +598,9 @@ module.exports = {
 	updateIntegratedCase,
 	saveCaseToDynamo,
 	saveToDynamo,
-	sendProgressiveResponse
+	sendProgressiveResponse,
+	getInternalAddress,
+	getWorldAddressCandidate
 }
 
 // Unused functions //

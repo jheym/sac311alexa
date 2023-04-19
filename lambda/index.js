@@ -83,8 +83,8 @@ const LaunchRequestHandler = {
 
 		// ****************************END CREATING A GENERIC CASE EXAMPLE*************************** //
 
-
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
+
 		const speechOutput = `<speak>Hello! Thank you for using the City of Sacramento Alexa skill. 
 							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
 							list of capabilities, you can say help. What can I do for you this evening?</speak>`
@@ -534,7 +534,8 @@ var requestHandlers = [
 	abandonedVehicle.yn_ConfirmLicensePlateIntentHandler,
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
-	trashPickupDay.InProgressTrashPickupDayIntentHandler
+	trashPickupDay.InProgressTrashPickupDayIntentHandler,
+	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler
 ]
 
 var requestInterceptors = [
