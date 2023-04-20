@@ -103,15 +103,6 @@
           ]
         },
         {
-          "name": "ReportAnIssueIntent",
-          "slots": [],
-          "samples": [
-            "Report a complant",
-            "Report an incident",
-            "Report an issue"
-          ]
-        },
-        {
           "name": "GetLocationFromUserIntent",
           "slots": [
             {
@@ -140,6 +131,9 @@
           "name": "TrashPickupDayIntent",
           "slots": [],
           "samples": [
+            "what is my trash day",
+            "what is my garbage pickup day",
+            "what is my garbage day",
             "when is garbage collection",
             "what day is garbage collection",
             "what day is waste collection",
@@ -169,6 +163,127 @@
             "check ticket status",
             "check case status"
           ]
+        },
+        {
+          "name": "KBJunkPickUpIntent",
+          "slots": [],
+          "samples": [
+            "schedule household junk pick up",
+            "schedule a household junk pick up",
+            "How can I schedule a househould junk pick up",
+            "I want to schedule a household junk pick up",
+            "I've used my free junk appointment can I pay for a pickup ",
+            "junk pickup",
+            "I need to schedule a household junk pick up",
+            "Schedule a household junk pickup",
+            "I need assistance getting my trash cans. Can the city help",
+            "Can a household junk pick up be scheduled if I live on a private street"
+          ]
+        },
+        {
+          "name": "GetPhoneNumberIntent",
+          "slots": [
+            {
+              "name": "GetPhoneNumber",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{GetPhoneNumber}"
+              ]
+            }
+          ],
+          "samples": []
+        },
+        {
+          "name": "KBTrashCanIntent",
+          "slots": [],
+          "samples": [
+            "Request to change the size of recycle can",
+            "Request to change the size of organics can",
+            "Request to change the size of garbage can",
+            "Can i change the size of my recycle can",
+            "Can i change the size of my organics can",
+            "Can i change the size of my garbage can",
+            "i want to change the size of my organics can",
+            "i want to change the size of my recycle can",
+            "i want to change the size of my garbage can",
+            "How can i change the size of my garbage recycle or organics can"
+          ]
+        },
+        {
+          "name": "KBPayJunkPickUp",
+          "slots": [],
+          "samples": [
+            "schedule for junk pickup",
+            "i used my two free junk appointment",
+            "i dont have anymore free junk appointments",
+            "can i pay for junk pickup",
+            "can i pay for a pickup",
+            "used up free junk appointment",
+            "used up free junk appointment what can i do ",
+            "I've used my free junk appointments can i pay for a pick up"
+          ]
+        },
+        {
+          "name": "KBReplacementContainer",
+          "slots": [],
+          "samples": [
+            "I need a new organics can",
+            "I need a new recycle can",
+            "I need a new organics container",
+            "I need a new recycle container",
+            "I need a new trash container",
+            "I need a new trash can",
+            "I need a replacement for my trash can",
+            "I need a replacement for my container",
+            "i am missing a organic can",
+            "i am missing a organic container",
+            "i am missing a recycle can",
+            "i am missing a recycle container",
+            "i am missing a garbage can",
+            "I am missing a garbage container",
+            "I am missing a garbage recycle or organics can Will the City deliver a replacement"
+          ]
+        },
+        {
+          "name": "FoundLostDogIntent",
+          "slots": [],
+          "samples": [
+            "found dog",
+            "found lost dog",
+            "i found a dog",
+            "i found a lost dog",
+            "I found a lost dog what should i do"
+          ]
+        },
+        {
+          "name": "CloggedStormDrainIntent",
+          "slots": [],
+          "samples": [
+            "The street drain is not working",
+            "A clogged street drain is causing flooding",
+            "My street is flooding because the drain is clogged",
+            "Leaves are blocking the storm drain",
+            "Water isn't draining in the gutter",
+            "Problem with gutter overflow",
+            "I need help with a clogged storm drain",
+            "There is water coming from the storm drain",
+            "The storm drain needs to be drained",
+            "The drain has overflowed with water",
+            "The street drain is plugged",
+            "There is a clogged storm drain",
+            "There is water pooling on the street",
+            "My street is flooding"
+          ]
+        },
+        {
+          "name": "GetGenericDescriptionFromUserIntent",
+          "slots": [
+            {
+              "name": "GenericDescription",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": []
         }
       ],
       "types": [
@@ -2124,7 +2239,7 @@
       ],
       "modelConfiguration": {
         "fallbackIntentSensitivity": {
-          "level": "HIGH"
+          "level": "MEDIUM"
         }
       }
     },
@@ -2213,6 +2328,28 @@
               }
             }
           ]
+        },
+        {
+          "name": "GetPhoneNumberIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "GetPhoneNumber",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.175030052075.639484144142"
+              }
+            }
+          ]
+        },
+        {
+          "name": "CloggedStormDrainIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": []
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -2675,8 +2812,26 @@
             "value": "Please say an address or cross street."
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.175030052075.639484144142",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Please provide the correct phone number."
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1671221247809",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "report clogged drain?"
+          }
+        ]
       }
     ]
   },
-  "version": "217"
+  "version": "231"
 }

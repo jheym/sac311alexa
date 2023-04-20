@@ -23,6 +23,8 @@ const getLocation = require("./addressCollectionFlow")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./trashPickupDay.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
+const cloggedStormDrain = require("./cloggedStormDrain.js");
+const genericDescription = require("./getGenericDescription.js");
 
 
 /*****************************************************************************/
@@ -273,7 +275,7 @@ const SessionEndedRequestHandler = {
 			let message = handlerInput.requestEnvelope.request.error.message;
 			console.log(`SessionEnded Error: ${type}: ${message}`);
 		}
-		console.log("Session ended");
+		console.log("Session ended"); //this is run everytime the skill is loaded
 
 		return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
 	},
@@ -535,7 +537,11 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
-	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler
+	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
+	genericDescription.GetGenericDescriptionFromUserIntentHandler,
+	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.StartedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler
 ]
 
 var requestInterceptors = [
