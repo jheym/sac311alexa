@@ -25,6 +25,8 @@ const trashPickupDay = require("./trashPickupDay.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
 const cloggedStormDrain = require("./cloggedStormDrain.js");
 const genericDescription = require("./getGenericDescription.js");
+const KnowledgeBaseIntent = require("./helper/KnowledgeBaseIntent.js");
+
 
 
 /*****************************************************************************/
@@ -537,6 +539,10 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
+	KnowledgeBaseIntent.StartedKBTrashCanIntent,
+	KnowledgeBaseIntent.StartedKBJunkPickUpIntent,
+	KnowledgeBaseIntent.StartedKBPayJunkPickup,
+	KnowledgeBaseIntent.StartedKBReplacementContainer,,
 	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
 	genericDescription.GetGenericDescriptionFromUserIntentHandler,
 	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
