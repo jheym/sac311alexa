@@ -46,7 +46,11 @@
             "CONFIRM_ADDRESS_MSG": "I found an address at {{address}}. Is this the correct address?",
             "INACCURATE_GEO_MSG": "Geo location is too inaccurate to use. Would you like to try another address?",
             "UNAUTHORIZED_GEO_MSG": "Sacramento311 would like to use your current location. To turn on location sharing, please go to your Alexa app, and follow the instructions.",
-            "UNAVAILABLE_GEO_MSG": "This device is stationary so geoLocation is unavaible. Would you like to use your home address instead?"
+            "UNAVAILABLE_GEO_MSG": "This device is stationary so geoLocation is unavaible. Would you like to use your home address instead?",
+
+            "CLOGGED_INTRO": "Please give us a location for the clogged drain. Please give us a nearby address.",
+            "CLOGGED_DESC": "Please provide a generic description of the clogged drain.",
+            "CLOGGED_THANKS": "Thank you for alerting us to the clogged street drain. We will send out a crew to resolve the issue as soon as possible. Is there anything else we can help you with."
         }
     },
     "es": {

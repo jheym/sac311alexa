@@ -23,6 +23,8 @@ const getLocation = require("./addressCollectionFlow")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./trashPickupDay.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
+const cloggedStormDrain = require("./cloggedStormDrain.js");
+const genericDescription = require("./getGenericDescription.js");
 
 
 /*****************************************************************************/
@@ -57,7 +59,7 @@ const LaunchRequestHandler = {
 		// You will get the address using the address collection.
 		// Address can be unverified, in which case you should first check if ValidatedAddressRes exists in sessionAttributes, otherwise use UnvalidatedAddressRes
 		
-		// // Create a salesforce case object to be passed to createGenericCase()
+		// Create a salesforce case object to be passed to createGenericCase()
 		// const token = await helper.getOAuthToken();
 		// const myCaseObj = new sfCase(token);
 		
@@ -273,7 +275,7 @@ const SessionEndedRequestHandler = {
 			let message = handlerInput.requestEnvelope.request.error.message;
 			console.log(`SessionEnded Error: ${type}: ${message}`);
 		}
-		console.log("Session ended");
+		console.log("Session ended"); //this is run everytime the skill is loaded
 
 		return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
 	},
@@ -535,7 +537,11 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
-	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler
+	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
+	genericDescription.GetGenericDescriptionFromUserIntentHandler,
+	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.StartedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler
 ]
 
 var requestInterceptors = [
@@ -568,7 +574,7 @@ if (process.env.ENVIRONMENT === "dev") {
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-			createTable: true,
+			createTable: false,
 			dynamoDBClient: new AWS.DynamoDB({
 				apiVersion: "latest",
 				region: process.env.DYNAMODB_PERSISTENCE_REGION,
