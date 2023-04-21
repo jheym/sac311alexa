@@ -131,6 +131,13 @@
           "name": "TrashPickupDayIntent",
           "slots": [],
           "samples": [
+            "My trash is full when does trash get picked up",
+            "when is my trash emptied",
+            "what day is my trash emptied",
+            "what day is my trashcan emptied",
+            "when is my trashcan emptied",
+            "what day does my trash get picked up",
+            "my trash pickup day",
             "what is my trash day",
             "what is my garbage pickup day",
             "what is my garbage day",
@@ -160,6 +167,22 @@
           "name": "GetPreviousCaseIntent",
           "slots": [],
           "samples": [
+            "Give information on last case",
+            "Give information on last ticket",
+            "Give information on my last case",
+            "Give information on my last ticket",
+            "Give me information on my last case",
+            "Give me information on my last ticket",
+            "What is my previous case ",
+            "What is my previous ticket ",
+            "latest ticket status",
+            "latest case status",
+            "recent ticket status",
+            "recent case status",
+            "last case status",
+            "last ticket status",
+            "get ticket status",
+            "get case status",
             "check ticket status",
             "check case status"
           ]
@@ -246,8 +269,30 @@
         },
         {
           "name": "FoundLostDogIntent",
-          "slots": [],
+          "slots": [
+            {
+              "name": "foundLostDogInfo",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
           "samples": [
+            "a dog is in my yard",
+            "a dog is wandering around my neighborhood",
+            "my kid found a lost dog",
+            "my friend found a lost dog",
+            "we found a lost dog",
+            "found a lost dog in my neighborhood",
+            "found dog in my neighborhood",
+            "found dog near park",
+            "i found a dog in the park",
+            "i found a dog in the street",
+            "i found a lost dog near my house",
+            "fount lost puppy",
+            "found a lost puppy",
+            "i found a lost puppy",
+            "i found a puppy",
+            "found a puppy",
+            "found a dog",
             "found dog",
             "found lost dog",
             "i found a dog",
@@ -259,8 +304,6 @@
           "name": "CloggedStormDrainIntent",
           "slots": [],
           "samples": [
-            "The street drain is not working",
-            "A clogged street drain is causing flooding",
             "My street is flooding because the drain is clogged",
             "Leaves are blocking the storm drain",
             "Water isn't draining in the gutter",
@@ -2827,11 +2870,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "report clogged drain?"
+            "value": "Just to confirm, would you like to report a clogged or overflowing street drain?"
           }
         ]
       }
     ]
   },
-  "version": "231"
+  "version": "234"
 }

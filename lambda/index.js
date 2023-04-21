@@ -22,6 +22,7 @@ const abandonedVehicle = require("./abandonedVehicle.js")
 const getLocation = require("./addressCollectionFlow")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./trashPickupDay.js");
+const foundLostDog = require("./foundLostDog.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
 const cloggedStormDrain = require("./cloggedStormDrain.js");
 const genericDescription = require("./getGenericDescription.js");
@@ -537,6 +538,10 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
+	foundLostDog.StartedFoundLostDogIntentHandler,
+	foundLostDog.InProgressFoundLostDogIntentHandler,
+	foundLostDog.yn_SubmitLostDogServiceRequestIntentHandler,
+	foundLostDog.CompletedFoundLostDogServiceRequest,
 	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
 	genericDescription.GetGenericDescriptionFromUserIntentHandler,
 	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
