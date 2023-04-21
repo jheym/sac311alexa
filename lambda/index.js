@@ -25,7 +25,7 @@ const trashPickupDay = require("./trashPickupDay.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
 const cloggedStormDrain = require("./cloggedStormDrain.js");
 const genericDescription = require("./getGenericDescription.js");
-
+const getPhoneNumber = require("./phoneNumberVerificaiton.js");
 
 /*****************************************************************************/
 /*                               INTENT HANDLERS                             */
@@ -89,14 +89,84 @@ const LaunchRequestHandler = {
 
 		const speechOutput = `<speak>Hello! Thank you for using the City of Sacramento Alexa skill. 
 							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
-							list of capabilities, you can say help. What can I do for you this evening?</speak>`
+							list of capabilities, you can say help. What can I do for you this evening?</speak>`;
+		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
+		//const speechOutput = `<speak>Hello! Thank you for using the City of Sacramento Alexa skill. 
+		//					I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
+		//				list of capabilities, you can say help. What can I do for you this evening?</speak>`
+
+	// 	if (getPhoneNumber.getPhoneNumber(handlerInput) !== null) {
+		
+	// 		await getPhoneNumber.getPhoneNumber(handlerInput);
+	// 		helper.setQuestion(handlerInput, 'IsPhoneNumCorrect?');
+	
+			
+	// 		const speechText = `<speak>Alright. Would you like to use your current phone number?</speak>`;
+	// 		return handlerInput.responseBuilder
+	// 			.speak(speechText)
+	// 			.withShouldEndSession(false)
+	// 			//.reprompt(handlerInput.t('WELCOME_REPROMPT'))
+	// 			.getResponse()
+
+	// 	  } else {
+	// 		//helper.setQuestion(handlerInput, 'IsUserPhoneNumCorrect?');
+	// 		const GetPhoneNumberIntent = {
+	// 		  name: 'GetPhoneNumberIntent',
+	// 		  confirmationStatus: 'NONE',
+	// 		  slots: {
+	// 			GetPhoneNumber: {
+	// 			  name: 'GetPhoneNumber',
+	// 			  value: null,
+	// 			  confirmationStatus: 'NONE',
+	// 			},
+	// 		  },
+	// 		};
+	// 		let speechOutput = `<speak>Before we begin, I need to verify your phone number.</speak>`;
+			
+		  
+		  
+	  
+	// 	return handlerInput.responseBuilder
+	// 		.speak(speechOutput)
+	// 		.withShouldEndSession(false)
+	// 		.addElicitSlotDirective('GetPhoneNumber', GetPhoneNumberIntent)
+			
+	// 		//.reprompt(handlerInput.t('WELCOME_REPROMPT'))
+	// 		.getResponse()
+	// }
+
 		return handlerInput.responseBuilder
 			.speak(speechOutput)
-			.withShouldEndSession(false) // keep the session open
+			.withShouldEndSession(false)
 			.reprompt(handlerInput.t('WELCOME_REPROMPT'))
 			.getResponse()
+
 	}
+  
+
 }
+
+/*const GetPhoneNumberQuestionHandler = {
+    canHandle(handlerInput) {
+        return (
+            Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+            (Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent' ||
+                Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent') &&
+            handlerInput.attributesManager.getSessionAttributes().questionAsked === 'GetPhoneNumber?'
+        );
+    },
+    handle(handlerInput) {
+        if (Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent') {
+            return GetPhoneNumberIntentHandler.handle(handlerInput);
+        } else {
+            // Handle 'No' response here, e.g., end the session or ask another question
+            return handlerInput.responseBuilder
+                .speak("Alright, let me know if you need any assistance.")
+                .getResponse();
+        }
+    },
+};
+		*/
 
 
 /**
@@ -514,6 +584,11 @@ if (process.env.ENVIRONMENT === "dev") {
 
 var requestHandlers = [
 	LaunchRequestHandler,
+	getPhoneNumber.GetPhoneNumberIntentHandler,	
+	getPhoneNumber.GetUserPhoneNumberIntentHandler,
+	getPhoneNumber.Yn_IsPhoneNumberCorrectIntentHandler,
+	getPhoneNumber.Yn_GetPhoneNumberIntentHandler,
+	getPhoneNumber.Yn_TryAnotherPhoneNumber,
 	SessionEndedRequestHandler,
 	HelpIntentHandler,
 	CancelAndStopIntentHandler,

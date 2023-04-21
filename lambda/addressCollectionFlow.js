@@ -83,6 +83,8 @@ const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 			.withShouldEndSession(false)
 			.reprompt(speechOutput)
 			.getResponse();
+
+
 	}
 };
 

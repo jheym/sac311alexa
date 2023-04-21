@@ -1,6 +1,7 @@
 const axios = require("axios")
 const iso8601 = require("iso8601-duration");
 
+
 /** //TODO: Get this working on a lambda environment
  * This function gets an OAuth token for use with the Salesforce API.
  * It returns a new token and should be used in every request to the Salesforce API.
@@ -261,6 +262,28 @@ function isGeolocationAvailable(handlerInput) {
 		return "not-available";
 	}
 }
+
+/*
+  check if they user has given permission to access their location
+  @param {Object} handlerInput
+  @returns {boolean} true if user has given permission to access their location
+*/
+async function isPhoneNumberAvailable(handlerInput) {
+	let phoneNumber = await getPhoneNumber(handlerInput);
+    return phoneNumber !== null;
+}
+
+
+function PhoneNumberFormat(phoneNum) {
+    let phone = phoneNum.replace(/\s/g, '');
+    if (phone.length > 9 && /^\d+$/.test(phone)) {
+      phone = phone.substring(phone.length - 10);
+      return phone;
+    }else{
+      return null;
+    }
+}
+  
 
 /**
  * Retrieves the user's geolocation from the handlerInput object.
@@ -538,35 +561,66 @@ async function isPhoneNumberAvailable(handlerInput) {
   }
 
 // Helper function to retrieve the user's phone number and save it in session attribute called phone else return null but do not throw an error
-async function getPhoneNumber(handlerInput) {
-	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
-	const url = `${apiEndpoint}/v2/accounts/~current/settings/Profile.mobileNumber`;
+// async function getPhoneNumber(handlerInput) {
+// 	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
+// 	const url = `${apiEndpoint}/v2/accounts/~current/settings/Profile.mobileNumber`;
 
-	try {
-		let res = await axios.get(url, {
-			headers: {
-				'Host': `api.amazonalexa.com`,
-				'Authorization': `Bearer ${apiAccessToken}`,
-				'Accept': 'application/json'
-			}
-		});
+// 	try {
+// 		let res = await axios.get(url, {
+// 			headers: {
+// 				'Host': `api.amazonalexa.com`,
+// 				'Authorization': `Bearer ${apiAccessToken}`,
+// 				'Accept': 'application/json'
+// 			}
+// 		});
 	
-		if (res.status === 200)
-			return res.data.phoneNumber;
-		else
-			return null;
-	} catch (error) {
-		if (error.response.status === 403) {
-			console.log('The user has not given permission to access their full address.')
-			return null;
-		}
-		else if (error.response.status) {
-			console.log('Error retrieving phone from device API: ', error.status, error.message);
-			return null;
-		}
-		else 
-			return null;
-	}
+// 		if (res.status === 200)
+// 			return res.data.phoneNumber;
+// 		else
+// 			return null;
+// 	} catch (error) {
+// 		if (error.response.status === 403) {
+// 			console.log('The user has not given permission to access their full address.')
+// 			return null;
+// 		}
+// 		else if (error.response.status) {
+// 			console.log('Error retrieving phone from device API: ', error.status, error.message);
+// 			return null;
+// 		}
+// 		else 
+// 			return null;
+// 	}
+//   }
+async function getPhoneNumber(handlerInput) {
+    const { permissions } = handlerInput.requestEnvelope.context.System.user;
+    if (!permissions || !permissions.consentToken) {
+      return null;
+    }
+  
+   
+    const serviceClientFactory = handlerInput.serviceClientFactory;
+    const upsServiceClient = serviceClientFactory.getUpsServiceClient();
+    try {
+      //add phone into session attributes
+      const profile = await upsServiceClient.getProfileMobileNumber();
+      handlerInput.attributesManager.setSessionAttributes({ phone: profile.phoneNumber });
+      return PhoneNumberFormat(profile.phoneNumber);
+    } catch (error) {
+      if (error.name !== 'ServiceError') {
+        const message = `There was a problem calling the Device Address API. ${error.message}`;
+        console.log(message);
+        throw error;
+      }
+      if (error.statusCode === 403) {
+        console.log('The user has not granted permissions to access their phone.');
+     
+      } else {
+        const message = `There was a problem calling the Device Address API. ${error.message}`;
+        console.log(message);
+        throw error;
+      }
+    }
+    return null;
   }
 
 
