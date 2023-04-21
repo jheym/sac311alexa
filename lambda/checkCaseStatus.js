@@ -25,7 +25,7 @@ const GetPreviousCaseIntentHandler = {
 		let caseMonthISO;
 		//let caseYearISO;			//Can add this if needed
 
-
+		//FIXME: Work in progress. Meet with Ronald to go over what needs to be done.
 
 		if (caseNumber) {
 			caseDetails = await helper.getCaseDetailsFromSalesForce(caseNumber); // Getting the case details from salesforce
@@ -36,7 +36,7 @@ const GetPreviousCaseIntentHandler = {
 			//TC
 
 			const serviceNameMap = new Map();
-			serviceNameMap.set('Vehicle On Street', 'I found a case for an abandoned vehicle');
+			serviceNameMap.set('Vehicle On Street', 'an abandoned vehicle');
 			//can add more service names here as needed same with caseStatusMap below
 
 			serviceName = serviceNameMap.get(serviceName);
@@ -62,12 +62,15 @@ const GetPreviousCaseIntentHandler = {
 		}
 		helper.setQuestion(handlerInput, 'AnythingElse?')
 		if (caseDetails) {	
-			const ssml = `<speak><p><say-as interpret-as="date" format="md">${caseMonthISO}-${caseDateISO}</say-as></p></speak>`;
+			const date = `<say-as interpret-as="date" format="md">${caseMonthISO} ${caseDateISO}</say-as>`;
+
+			const speechOutput = `<speak>Sure, you submitted a service request for ${serviceName} that was submitted on ${date}. ${caseStatus}. Is there anything else I can help you with?</speak>`
+
 			return responseBuilder
 				// Using SSML with <say-as> element
-				.speak(`Sure, I found a case for ${serviceName} that was submitted on`)
-				.speak(ssml) // Using SSML with <say-as> element
-				.speak(`It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
+				.speak(speechOutput)
+				// .speak(ssml) // Using SSML with <say-as> element
+				// .speak(`Its status is currently ${caseStatus}. Is there anything else I can help you with?`)
 				//.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDateISO}. It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
 				.withShouldEndSession(false)
 				.getResponse();
