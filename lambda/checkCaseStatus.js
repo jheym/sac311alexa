@@ -21,6 +21,10 @@ const GetPreviousCaseIntentHandler = {
 		let caseDateISO;
 		let caseStatus;
 		let serviceName;
+		let caseMonthValue;
+		let caseMonthISO;
+		//let caseYearISO;			//Can add this if needed
+
 
 
 		if (caseNumber) {
@@ -29,13 +33,42 @@ const GetPreviousCaseIntentHandler = {
 			caseStatus = caseDetails.status;
 			serviceName = caseDetails.subServiceType;
 
-			// let caseDate = new Date(caseDateISO); 
+			//TC
 
+			const serviceNameMap = new Map();
+			serviceNameMap.set('Vehicle On Street', 'I found a case for an abandoned vehicle');
+			//can add more service names here as needed same with caseStatusMap below
+
+			serviceName = serviceNameMap.get(serviceName);
+
+			const caseStatusMap = new Map();
+			caseStatusMap.set('NEW', 'The case status is still waiting to be assigned');
+
+			caseStatus = caseStatusMap.get(caseStatus);
+
+			let caseDate = new Date(caseDateISO);
+			caseDateISO = caseDate.getDate();
+
+			const monthNames = ["January", "February", "March", "April", "May", "June",
+			"July", "August", "September", "October", "November", "December"];
+
+			caseMonthValue = caseDate.getMonth(); //0-11, 0 is January
+			caseMonthISO = monthNames[caseMonthValue];
+
+			//caseYearISO = caseDate.getFullYear();			//Can add this if needed
+
+
+			//End TC
 		}
 		helper.setQuestion(handlerInput, 'AnythingElse?')
 		if (caseDetails) {	
+			const ssml = `<speak><p><say-as interpret-as="date" format="md">${caseMonthISO}-${caseDateISO}</say-as></p></speak>`;
 			return responseBuilder
-				.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDateISO}. It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
+				// Using SSML with <say-as> element
+				.speak(`Sure, I found a case for ${serviceName} that was submitted on`)
+				.speak(ssml) // Using SSML with <say-as> element
+				.speak(`It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
+				//.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDateISO}. It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
 				.withShouldEndSession(false)
 				.getResponse();
 		} else {
