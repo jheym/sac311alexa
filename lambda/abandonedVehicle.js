@@ -54,15 +54,26 @@ const InProgressAbandonedVehicleIntentHandler = {
 		
 		if (slots.licensePlate.value) {
 			slots.licensePlate.value = slots.licensePlate.value.replace(/\s+/g, '').toUpperCase();
-			//TODO: replace "for" with "4", "one" with "1", and "ate" with "8"
-			//TODO: slow down the speech when speaking the license plate number
-			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as>?</speak>`
+		  
+			// Replace "for" with "4", "one" with "1", and "ate" with "8"
+			const replacements = {
+			  'FOR': '4',
+			  'ONE': '1',
+			  'ATE': '8'
+			};
+		  
+			slots.licensePlate.value = slots.licensePlate.value.replace(/(FOR|ONE|ATE)/g, (match) => {
+			  return replacements[match];
+			});
+		  
+			// Slow down the speech when speaking the license plate number
+			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <prosody rate="75%"><say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as></prosody>?</speak>`;
 			helper.setQuestion(handlerInput, 'IsLicensePlateCorrect?');
 			return responseBuilder
-				.speak(speechOutput)
-				.withShouldEndSession(false)
-				.getResponse();
-		}
+			  .speak(speechOutput)
+			  .withShouldEndSession(false)
+			  .getResponse();
+		  }
 
 		if (slots.make.value && slots.model.value && slots.color.value) {
 			let { make, model, color } = slots;
