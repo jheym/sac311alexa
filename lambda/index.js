@@ -59,7 +59,7 @@ const LaunchRequestHandler = {
 		// You will get the address using the address collection.
 		// Address can be unverified, in which case you should first check if ValidatedAddressRes exists in sessionAttributes, otherwise use UnvalidatedAddressRes
 		
-		// // Create a salesforce case object to be passed to createGenericCase()
+		// Create a salesforce case object to be passed to createGenericCase()
 		// const token = await helper.getOAuthToken();
 		// const myCaseObj = new sfCase(token);
 		
@@ -574,7 +574,7 @@ if (process.env.ENVIRONMENT === "dev") {
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-			createTable: true,
+			createTable: false,
 			dynamoDBClient: new AWS.DynamoDB({
 				apiVersion: "latest",
 				region: process.env.DYNAMODB_PERSISTENCE_REGION,
