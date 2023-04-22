@@ -61,7 +61,7 @@ const LaunchRequestHandler = {
 		// You will get the address using the address collection.
 		// Address can be unverified, in which case you should first check if ValidatedAddressRes exists in sessionAttributes, otherwise use UnvalidatedAddressRes
 		
-		// // Create a salesforce case object to be passed to createGenericCase()
+		// Create a salesforce case object to be passed to createGenericCase()
 		// const token = await helper.getOAuthToken();
 		// const myCaseObj = new sfCase(token);
 		
@@ -409,7 +409,8 @@ const SetIntentFlagsRequestInterceptor = {
 const RestoreDummyValuesRequestInterceptor = {
 	process(handlerInput) {
 		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) {
+			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) 
+		{	
 			const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 			handlerInput.requestEnvelope.request.dialogState = "IN_PROGRESS";
 			const dummyIntent = handlerInput.requestEnvelope.request.intent;
@@ -449,16 +450,14 @@ const LocalisationRequestInterceptor = {
 */
 const LoadPersistentAttributesInterceptor = {
 	async process(handlerInput) {
-		if (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-		) {
+		if (handlerInput.requestEnvelope.session.new) {
 			const attributesManager = handlerInput.attributesManager;
 			const persistentAttributes = await attributesManager.getPersistentAttributes();
 			const sessionAttributes = attributesManager.getSessionAttributes();
 			if (sessionAttributes.caseNumber = persistentAttributes.caseNumber)
 				attributesManager.setSessionAttributes(sessionAttributes);
 		}
-	},
+	}
 };
 
 
@@ -539,10 +538,10 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
-	KnowledgeBaseIntent.StartedKBTrashCanIntent,
-	KnowledgeBaseIntent.StartedKBJunkPickUpIntent,
-	KnowledgeBaseIntent.StartedKBPayJunkPickup,
-	KnowledgeBaseIntent.StartedKBReplacementContainer,,
+	KnowledgeBaseIntent.StartedKBTrashCanIntentHandler,
+	KnowledgeBaseIntent.StartedKBJunkPickUpIntentHandler,
+	KnowledgeBaseIntent.StartedKBPayJunkPickupIntentHandler,
+	KnowledgeBaseIntent.StartedKBReplacementContainerIntentHandler,
 	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
 	genericDescription.GetGenericDescriptionFromUserIntentHandler,
 	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
@@ -580,7 +579,7 @@ if (process.env.ENVIRONMENT === "dev") {
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-			createTable: true,
+			createTable: false,
 			dynamoDBClient: new AWS.DynamoDB({
 				apiVersion: "latest",
 				region: process.env.DYNAMODB_PERSISTENCE_REGION,
