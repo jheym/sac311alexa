@@ -13,20 +13,9 @@ const StartedTrashPickupDayIntentHandler = {
         )
     },
     async handle(handlerInput) {
-
-        // helper.setQuestion(handlerInput, 'IsTrashPickupDayCorrect?')
-        // const speakOutput = handlerInput.t("Do you want to know your trash pickup day?")
-        // return handlerInput.responseBuilder
-        // .withShouldEndSession(false)
-        // .speak(speakOutput)
-        // .getResponse();
-
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-		const currentIntent = requestEnvelope.request.intent;
 		sessionAttributes.intentToRestore = 'TrashPickupDayIntent';
-		attributesManager.setSessionAttributes(sessionAttributes);
-		
 		
 		if (await helper.isHomeAddressAvailable(handlerInput)) {
 			const { addressLine1 } = await helper.getHomeAddress(handlerInput);
@@ -37,8 +26,12 @@ const StartedTrashPickupDayIntentHandler = {
 			}
 		}
 
+		var SpeechOutput = '';
 		if (validatorObj && validatorObj.Within_City === true) {
-			let speechOutput = `We found a city address associated with your Amazon account. Would you like to use it to check your garbage day?`;
+			sessionAttributes.confirmedValidatorRes = validatorObj;
+			attributesManager.setSessionAttributes(sessionAttributes);
+			let speechOutput = `Sure! I found a city address associated with your Amazon account. Would you like to use it to check your garbage day?`;
+			helper.setQuestion(handlerInput, 'UseHomeAddressForGarbage?')
 			return responseBuilder
 				.speak(speechOutput)
 				.withShouldEndSession(false)
@@ -67,37 +60,27 @@ const InProgressTrashPickupDayIntentHandler = {
 		return (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest"
 			&& Alexa.getIntentName(handlerInput.requestEnvelope) === "TrashPickupDayIntent"
-			&& Alexa.getDialogState(handlerInput.requestEnvelope) === "IN_PROGRESS"
+			&& Alexa.getDialogState(handlerInput.requestEnvelope) !== "STARTED"
 		)
 	},
 	async handle(handlerInput) {
 		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
-		const currentIntent = requestEnvelope.request.intent;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		const dialogState = Alexa.getDialogState(requestEnvelope);
-		const intentConfirmationStatus = currentIntent.confirmationStatus;
-		
 		const address = sessionAttributes.confirmedValidatorRes;
-		const worldAddressCandidate = await helper.getWorldAddress(address.Address);
-		const internalRes = await helper.getInternalAddress(worldAddressCandidate.data.candidates[0]);
-		console.log("Address within city:");
-		console.log(address.Within_City);
-		// use user_fld (unique address id) to look up garbage day
-		// case 1: no internal address -> can't get a garbage day
-		// case 2: no garbage day returned from api -> can't get a garbage day
-		var speakOutput = "uhhh";
+		const { internal_geocoder } = address.geocoderResponse;
+	
 		if(!address.Within_City) {
 			speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address")
 		}
 		else {
-			const user_fld = internalRes.data.candidates[0].attributes.User_fld; // idk something like this
+			const user_fld = internal_geocoder.candidates[0].attributes.User_fld;
 			const url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/37/query?where=ADDRESSID = ${user_fld}&outFields=GARBAGE_DAY&f=pjson`
 
 			try {
 				var res = await axios.get(encodeURI(url), {
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
-					"Accept" : "application/json", // maybe more headers idk
+					"Accept" : "application/json",
 				}
 			});
 				console.log(res);
@@ -135,13 +118,59 @@ const InProgressTrashPickupDayIntentHandler = {
 		speakOutput += handlerInput.t(" Is there anything else I can help you with?")
 		helper.setQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
-		.withshouldEndSession(false)
+		.withShouldEndSession(false)
 		.speak(speakOutput)
 		.getResponse();
 	}
 }
 
+
+const yn_UseHomeAddressForGarbageDayIntentHandler = {
+	canHandle(handlerInput) {
+		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
+		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		return (
+			requestType === "IntentRequest" && 
+			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
+			questionAsked === "UseHomeAddressForGarbage?"
+		);
+	},
+	async handle(handlerInput) {
+		helper.setQuestion(handlerInput, null)
+		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
+		
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
+			return responseBuilder
+				.addDelegateDirective({
+					name: 'TrashPickupDayIntent',
+					confirmationStatus: 'NONE',
+					slots: {}
+				})
+				.getResponse();
+		} 
+		
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") {
+			let speechOutput = `Okay, I can check any address within the city of Sacramento. What address should I check?`
+			let GetLocationFromUserIntent = {
+				name: 'GetLocationFromUserIntent',
+				confirmationStatus: 'NONE',
+				slots: {
+					userGivenAddress: {
+						name: 'userGivenAddress',
+						value: null,
+						confirmationStatus: 'NONE'
+			}}}
+			return responseBuilder
+				.speak(speechOutput)
+				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
+				.getResponse();
+		}
+	}
+}
+
 module.exports = {
     StartedTrashPickupDayIntentHandler,
-	InProgressTrashPickupDayIntentHandler
+	InProgressTrashPickupDayIntentHandler,
+	yn_UseHomeAddressForGarbageDayIntentHandler
 }

@@ -148,7 +148,7 @@ const CompletedAbandonedVehicleIntentHandler = {
 			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
 			const update_res = await helper.updateIntegratedCase(handlerInput, slots, caseId, myCaseObj, internalServiceName, address, null);
 			console.log(update_res)
-			// await helper.saveCaseToDynamo(handlerInput, caseNumber);
+			
 			// const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
 			// const caseUpdateRes = await myUpdateCaseObj.case_update(caseId, location, 'Vehicle On Street', null);
 		}
@@ -179,6 +179,7 @@ const CompletedAbandonedVehicleIntentHandler = {
 		var model = Alexa.getSlotValue(handlerInput.requestEnvelope, 'model');
 		var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color');
 		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${address}`, caseNumber: `${caseNumber}` })
+		
 		helper.clearContextIntent(handlerInput, sessionAttributes.AbandonedVehicleIntent.name)
 		helper.setQuestion(handlerInput, 'AnythingElse?')
 		return responseBuilder

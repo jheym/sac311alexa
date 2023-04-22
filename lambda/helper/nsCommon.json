@@ -7,7 +7,7 @@
             "REPORT_ISSUE": "Alright. What's the issue you're reporting?",
             "YES_RETRY": "Alright, what can I do for you?",
             "NO_RETRY": "Understood. Thank you for contacting Sacramento three one one. Goodbye!",
-            "HELP_MSG": "Welcome to the Sacramento 311 skill! To use the skill, simply say something like, when is my garbage pickup day?, report an abandoned vehicle, or check the status of my case. How can I help?",
+            "HELP_MSG": "<speak>To use the City of Sacramento <say-as interpret-as=\"digits\">311 </say-as> skill, you can say things like, when is my garbage pickup day, report an abandoned vehicle, or check the status of my case. How can I help?</speak>",
             "FALLBACK_MSG": "Sorry, I don't know about that. Please try again.",
             "FALLBACK_MSG_REPROMPT": "Please try again.",
             "FALLBACK_STILL_MSG": "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
@@ -25,7 +25,7 @@
             "TRASH_THANKS": "Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
 
             "ABANDONED_VEHICLE_CONFIRMATION": "Just to confirm, are you reporting an abandoned vehicle?",
-            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. <break time=\"1s\"/> We'll dispatch someone to the incident as soon as we can. To check the status of your case, you can always check back here and say, check case status. Is there anything else I can help you with?</speak>",
+            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. <break time=\"0.5s\"/> We'll dispatch someone to the incident as soon as we can. To check the status of your case, you can always check back here and say, check case status. Is there anything else I can help you with?</speak>",
             "ABANDONED_VEHICLE_72Q": "Has the vehicle been abandoned for more than seventy-two hours?",
             "ABANDONED_VEHICLE_72A": "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. Is there anything else I can help you with?",
 
@@ -46,7 +46,11 @@
             "CONFIRM_ADDRESS_MSG": "I found an address at {{address}}. Is this the correct address?",
             "INACCURATE_GEO_MSG": "Geo location is too inaccurate to use. Would you like to try another address?",
             "UNAUTHORIZED_GEO_MSG": "Sacramento311 would like to use your current location. To turn on location sharing, please go to your Alexa app, and follow the instructions.",
-            "UNAVAILABLE_GEO_MSG": "This device is stationary so geoLocation is unavaible. Would you like to use your home address instead?"
+            "UNAVAILABLE_GEO_MSG": "This device is stationary so geoLocation is unavaible. Would you like to use your home address instead?",
+
+            "CLOGGED_INTRO": "Please give us a location for the clogged drain. Please give us a nearby address.",
+            "CLOGGED_DESC": "Please provide a generic description of the clogged drain.",
+            "CLOGGED_THANKS": "Thank you for alerting us to the clogged street drain. We will send out a crew to resolve the issue as soon as possible. Is there anything else we can help you with."
         }
     },
     "es": {

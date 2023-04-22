@@ -103,15 +103,6 @@
           ]
         },
         {
-          "name": "ReportAnIssueIntent",
-          "slots": [],
-          "samples": [
-            "Report a complant",
-            "Report an incident",
-            "Report an issue"
-          ]
-        },
-        {
           "name": "GetLocationFromUserIntent",
           "slots": [
             {
@@ -140,6 +131,16 @@
           "name": "TrashPickupDayIntent",
           "slots": [],
           "samples": [
+            "My trash is full when does trash get picked up",
+            "when is my trash emptied",
+            "what day is my trash emptied",
+            "what day is my trashcan emptied",
+            "when is my trashcan emptied",
+            "what day does my trash get picked up",
+            "my trash pickup day",
+            "what is my trash day",
+            "what is my garbage pickup day",
+            "what is my garbage day",
             "when is garbage collection",
             "what day is garbage collection",
             "what day is waste collection",
@@ -166,9 +167,166 @@
           "name": "GetPreviousCaseIntent",
           "slots": [],
           "samples": [
+            "Give information on last case",
+            "Give information on last ticket",
+            "Give information on my last case",
+            "Give information on my last ticket",
+            "Give me information on my last case",
+            "Give me information on my last ticket",
+            "What is my previous case ",
+            "What is my previous ticket ",
+            "latest ticket status",
+            "latest case status",
+            "recent ticket status",
+            "recent case status",
+            "last case status",
+            "last ticket status",
+            "get ticket status",
+            "get case status",
             "check ticket status",
             "check case status"
           ]
+        },
+        {
+          "name": "KBJunkPickUpIntent",
+          "slots": [],
+          "samples": [
+            "schedule household junk pick up",
+            "schedule a household junk pick up",
+            "How can I schedule a househould junk pick up",
+            "I want to schedule a household junk pick up",
+            "I've used my free junk appointment can I pay for a pickup ",
+            "junk pickup",
+            "I need to schedule a household junk pick up",
+            "Schedule a household junk pickup",
+            "I need assistance getting my trash cans. Can the city help",
+            "Can a household junk pick up be scheduled if I live on a private street"
+          ]
+        },
+        {
+          "name": "GetPhoneNumberIntent",
+          "slots": [
+            {
+              "name": "GetPhoneNumber",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{GetPhoneNumber}"
+              ]
+            }
+          ],
+          "samples": []
+        },
+        {
+          "name": "KBTrashCanIntent",
+          "slots": [],
+          "samples": [
+            "Request to change the size of recycle can",
+            "Request to change the size of organics can",
+            "Request to change the size of garbage can",
+            "Can i change the size of my recycle can",
+            "Can i change the size of my organics can",
+            "Can i change the size of my garbage can",
+            "i want to change the size of my organics can",
+            "i want to change the size of my recycle can",
+            "i want to change the size of my garbage can",
+            "How can i change the size of my garbage recycle or organics can"
+          ]
+        },
+        {
+          "name": "KBPayJunkPickUp",
+          "slots": [],
+          "samples": [
+            "schedule for junk pickup",
+            "i used my two free junk appointment",
+            "i dont have anymore free junk appointments",
+            "can i pay for junk pickup",
+            "can i pay for a pickup",
+            "used up free junk appointment",
+            "used up free junk appointment what can i do ",
+            "I've used my free junk appointments can i pay for a pick up"
+          ]
+        },
+        {
+          "name": "KBReplacementContainer",
+          "slots": [],
+          "samples": [
+            "I need a new organics can",
+            "I need a new recycle can",
+            "I need a new organics container",
+            "I need a new recycle container",
+            "I need a new trash container",
+            "I need a new trash can",
+            "I need a replacement for my trash can",
+            "I need a replacement for my container",
+            "i am missing a organic can",
+            "i am missing a organic container",
+            "i am missing a recycle can",
+            "i am missing a recycle container",
+            "i am missing a garbage can",
+            "I am missing a garbage container",
+            "I am missing a garbage recycle or organics can Will the City deliver a replacement"
+          ]
+        },
+        {
+          "name": "FoundLostDogIntent",
+          "slots": [
+            {
+              "name": "foundLostDogInfo",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "a dog is in my yard",
+            "a dog is wandering around my neighborhood",
+            "my kid found a lost dog",
+            "my friend found a lost dog",
+            "we found a lost dog",
+            "found a lost dog in my neighborhood",
+            "found dog in my neighborhood",
+            "found dog near park",
+            "i found a dog in the park",
+            "i found a dog in the street",
+            "i found a lost dog near my house",
+            "fount lost puppy",
+            "found a lost puppy",
+            "i found a lost puppy",
+            "i found a puppy",
+            "found a puppy",
+            "found a dog",
+            "found dog",
+            "found lost dog",
+            "i found a dog",
+            "i found a lost dog",
+            "I found a lost dog what should i do"
+          ]
+        },
+        {
+          "name": "CloggedStormDrainIntent",
+          "slots": [],
+          "samples": [
+            "My street is flooding because the drain is clogged",
+            "Leaves are blocking the storm drain",
+            "Water isn't draining in the gutter",
+            "Problem with gutter overflow",
+            "I need help with a clogged storm drain",
+            "There is water coming from the storm drain",
+            "The storm drain needs to be drained",
+            "The drain has overflowed with water",
+            "The street drain is plugged",
+            "There is a clogged storm drain",
+            "There is water pooling on the street",
+            "My street is flooding"
+          ]
+        },
+        {
+          "name": "GetGenericDescriptionFromUserIntent",
+          "slots": [
+            {
+              "name": "GenericDescription",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": []
         }
       ],
       "types": [
@@ -2124,7 +2282,7 @@
       ],
       "modelConfiguration": {
         "fallbackIntentSensitivity": {
-          "level": "HIGH"
+          "level": "MEDIUM"
         }
       }
     },
@@ -2213,6 +2371,28 @@
               }
             }
           ]
+        },
+        {
+          "name": "GetPhoneNumberIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "GetPhoneNumber",
+              "type": "AMAZON.SearchQuery",
+              "elicitationRequired": true,
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.175030052075.639484144142"
+              }
+            }
+          ]
+        },
+        {
+          "name": "CloggedStormDrainIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": []
         }
       ],
       "delegationStrategy": "SKILL_RESPONSE"
@@ -2675,8 +2855,26 @@
             "value": "Please say an address or cross street."
           }
         ]
+      },
+      {
+        "id": "Elicit.Slot.175030052075.639484144142",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Please provide the correct phone number."
+          }
+        ]
+      },
+      {
+        "id": "Confirm.Intent.1671221247809",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Just to confirm, would you like to report a clogged or overflowing street drain?"
+          }
+        ]
       }
     ]
   },
-  "version": "217"
+  "version": "234"
 }
