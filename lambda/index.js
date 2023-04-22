@@ -407,7 +407,8 @@ const SetIntentFlagsRequestInterceptor = {
 const RestoreDummyValuesRequestInterceptor = {
 	process(handlerInput) {
 		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) {
+			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) 
+		{	
 			const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 			handlerInput.requestEnvelope.request.dialogState = "IN_PROGRESS";
 			const dummyIntent = handlerInput.requestEnvelope.request.intent;
@@ -447,16 +448,14 @@ const LocalisationRequestInterceptor = {
 */
 const LoadPersistentAttributesInterceptor = {
 	async process(handlerInput) {
-		if (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-		) {
+		if (handlerInput.requestEnvelope.session.new) {
 			const attributesManager = handlerInput.attributesManager;
 			const persistentAttributes = await attributesManager.getPersistentAttributes();
 			const sessionAttributes = attributesManager.getSessionAttributes();
 			if (sessionAttributes.caseNumber = persistentAttributes.caseNumber)
 				attributesManager.setSessionAttributes(sessionAttributes);
 		}
-	},
+	}
 };
 
 

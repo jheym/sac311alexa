@@ -148,7 +148,7 @@ const CompletedAbandonedVehicleIntentHandler = {
 			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
 			const update_res = await helper.updateIntegratedCase(handlerInput, slots, caseId, myCaseObj, internalServiceName, address, null);
 			console.log(update_res)
-			await helper.saveCaseToDynamo(handlerInput, update_res.case_number);
+			
 			// const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
 			// const caseUpdateRes = await myUpdateCaseObj.case_update(caseId, location, 'Vehicle On Street', null);
 		}

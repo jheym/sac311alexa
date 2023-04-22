@@ -14,73 +14,53 @@ const GetPreviousCaseIntentHandler = {
 		);
 	},
 	async handle(handlerInput) {
-		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
+		const { responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 		const { caseNumber } = sessionAttributes;
-		let caseDetails;
-		let caseDateISO;
-		let caseStatus;
-		let serviceName;
-		let caseMonthValue;
-		let caseMonthISO;
-		//let caseYearISO;			//Can add this if needed
 
-		//FIXME: Work in progress. Meet with Ronald to go over what needs to be done.
-
-		if (caseNumber) {
-			caseDetails = await helper.getCaseDetailsFromSalesForce(caseNumber); // Getting the case details from salesforce
-			caseDateISO = caseDetails.createdDate;
-			caseStatus = caseDetails.status;
-			serviceName = caseDetails.subServiceType;
-
-			//TC
-
-			const serviceNameMap = new Map();
-			serviceNameMap.set('Vehicle On Street', 'an abandoned vehicle');
-			//can add more service names here as needed same with caseStatusMap below
-
-			serviceName = serviceNameMap.get(serviceName);
-
-			const caseStatusMap = new Map();
-			caseStatusMap.set('NEW', 'The case status is still waiting to be assigned');
-
-			caseStatus = caseStatusMap.get(caseStatus);
-
-			let caseDate = new Date(caseDateISO);
-			caseDateISO = caseDate.getDate();
-
-			const monthNames = ["January", "February", "March", "April", "May", "June",
-			"July", "August", "September", "October", "November", "December"];
-
-			caseMonthValue = caseDate.getMonth(); //0-11, 0 is January
-			caseMonthISO = monthNames[caseMonthValue];
-
-			//caseYearISO = caseDate.getFullYear();			//Can add this if needed
-
-
-			//End TC
-		}
-		helper.setQuestion(handlerInput, 'AnythingElse?')
-		if (caseDetails) {	
-			const date = `<say-as interpret-as="date" format="md">${caseMonthISO} ${caseDateISO}</say-as>`;
-
-			const speechOutput = `<speak>Sure, you submitted a service request for ${serviceName} that was submitted on ${date}. ${caseStatus}. Is there anything else I can help you with?</speak>`
-
+		if (!caseNumber) {
 			return responseBuilder
-				// Using SSML with <say-as> element
-				.speak(speechOutput)
-				// .speak(ssml) // Using SSML with <say-as> element
-				// .speak(`Its status is currently ${caseStatus}. Is there anything else I can help you with?`)
-				//.speak(`Sure, I found a case for ${serviceName} that was submitted on ${caseDateISO}. It's status is currently ${caseStatus}. Is there anything else I can help you with?`)
+				.speak(`Hmm, I'm sorry, I could not find a case for you. If you've submitted a case before, it's possible it was submitted with a different Amazon account or profile. Is there anything else I can help you with?`)
 				.withShouldEndSession(false)
 				.getResponse();
-		} else {
+		}
+
+		let caseDetails;
+
+		if (!(caseDetails = await helper.getCaseDetailsFromSalesForce(caseNumber))) {
 			return responseBuilder
-			.speak(`I'm sorry. I could not find a case for you. Is there anything else I can help you with?`)
+				.speak(`Hmm, I'm sorry, I could not find a case for you. If you've submitted a case before, it's possible it was submitted with a different Amazon account or profile. Is there anything else I can help you with?`)
+				.withShouldEndSession(false)
+				.getResponse();
+		}
+
+		const caseDateISO = caseDetails.createdDate;
+		const caseStatus = caseDetails.status;
+		const serviceName = caseDetails.subServiceType;
+
+		let dateObj = new Date(caseDateISO);
+		let date = dateObj.getDate();
+		let month = dateObj.getMonth() + 1;
+		let year = dateObj.getFullYear();
+		helper.setQuestion(handlerInput, 'AnythingElse?')
+		
+		const dateString = `<say-as interpret-as="date" format="mdy">${month}-${date}-${year}</say-as>`
+		return responseBuilder
+			.speak(`<speak>Sure, I found a case for ${serviceNameMap[serviceName]} that was submitted on ${dateString}. The status of your case is ${caseStatusMap[caseStatus]}. Is there anything else I can help you with?</speak>`)
 			.withShouldEndSession(false)
 			.getResponse();
-		}
-	},
+	}
+}
+
+
+const serviceNameMap = {
+	'Vehicle On Street': 'an abandoned vehicle'
+}
+
+const caseStatusMap = {
+	'NEW': 'new, in other words, it is still waiting to be assigned',
+	'IN PROGRESS' : 'in progress, in other words, it is currently being serviced',
+	'CLOSED' : 'complete, in other words, it has been serviced and completed'
 }
 
 module.exports = { GetPreviousCaseIntentHandler };
