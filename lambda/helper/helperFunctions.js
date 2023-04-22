@@ -112,8 +112,11 @@ async function querySFDB(query, token) {
 }
 
 async function openIntegratedCase(handlerInput, slots, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
+		const { attributesManager } = handlerInput;
 		SalesforceCaseObject.set_service_questions(handlerInput, slots);
 		const case_response = await SalesforceCaseObject.create_basic_case(serviceName, phoneNumber, address, null, true);
+		saveCaseToDynamo(handlerInput, case_response.case_number);
+
 		return case_response;
 }
 
@@ -147,6 +150,7 @@ async function createGenericCase(SalesforceCaseObject, serviceName, userResponse
 		json_input[key] = value;
 
 	const case_response = await SalesforceCaseObject.create_generic_case(serviceName, json_input);
+	saveCaseToDynamo(handlerInput, case_response.case_number);
 	return case_response;
 
 }
@@ -561,67 +565,68 @@ async function isPhoneNumberAvailable(handlerInput) {
   }
 
 // Helper function to retrieve the user's phone number and save it in session attribute called phone else return null but do not throw an error
-// async function getPhoneNumber(handlerInput) {
-// 	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
-// 	const url = `${apiEndpoint}/v2/accounts/~current/settings/Profile.mobileNumber`;
-
-// 	try {
-// 		let res = await axios.get(url, {
-// 			headers: {
-// 				'Host': `api.amazonalexa.com`,
-// 				'Authorization': `Bearer ${apiAccessToken}`,
-// 				'Accept': 'application/json'
-// 			}
-// 		});
-	
-// 		if (res.status === 200)
-// 			return res.data.phoneNumber;
-// 		else
-// 			return null;
-// 	} catch (error) {
-// 		if (error.response.status === 403) {
-// 			console.log('The user has not given permission to access their full address.')
-// 			return null;
-// 		}
-// 		else if (error.response.status) {
-// 			console.log('Error retrieving phone from device API: ', error.status, error.message);
-// 			return null;
-// 		}
-// 		else 
-// 			return null;
-// 	}
-//   }
 async function getPhoneNumber(handlerInput) {
-    const { permissions } = handlerInput.requestEnvelope.context.System.user;
-    if (!permissions || !permissions.consentToken) {
-      return null;
-    }
+	const { apiEndpoint, apiAccessToken } = handlerInput.requestEnvelope.context.System;
+	const url = `${apiEndpoint}/v2/accounts/~current/settings/Profile.mobileNumber`;
+
+	try {
+		let res = await axios.get(url, {
+			headers: {
+				'Host': `api.amazonalexa.com`,
+				'Authorization': `Bearer ${apiAccessToken}`,
+				'Accept': 'application/json'
+			}
+		});
+	
+		if (res.status === 200)
+			return res.data.phoneNumber;
+		else
+			return null;
+	} catch (error) {
+		if (error.response.status === 403) {
+			console.log('The user has not given permission to access their full address.')
+			return null;
+		}
+		else if (error.response.status) {
+			console.log('Error retrieving phone from device API: ', error.status, error.message);
+			return null;
+		}
+		else 
+			return null;
+	}
+  }
+
+// async function getPhoneNumber(handlerInput) {
+//     const { permissions } = handlerInput.requestEnvelope.context.System.user;
+//     if (!permissions || !permissions.consentToken) {
+//       return null;
+//     }
   
    
-    const serviceClientFactory = handlerInput.serviceClientFactory;
-    const upsServiceClient = serviceClientFactory.getUpsServiceClient();
-    try {
-      //add phone into session attributes
-      const profile = await upsServiceClient.getProfileMobileNumber();
-      handlerInput.attributesManager.setSessionAttributes({ phone: profile.phoneNumber });
-      return PhoneNumberFormat(profile.phoneNumber);
-    } catch (error) {
-      if (error.name !== 'ServiceError') {
-        const message = `There was a problem calling the Device Address API. ${error.message}`;
-        console.log(message);
-        throw error;
-      }
-      if (error.statusCode === 403) {
-        console.log('The user has not granted permissions to access their phone.');
+//     const serviceClientFactory = handlerInput.serviceClientFactory;
+//     const upsServiceClient = serviceClientFactory.getUpsServiceClient();
+//     try {
+//       //add phone into session attributes
+//       const profile = await upsServiceClient.getProfileMobileNumber();
+//       handlerInput.attributesManager.setSessionAttributes({ phone: profile.phoneNumber });
+//       return PhoneNumberFormat(profile.phoneNumber);
+//     } catch (error) {
+//       if (error.name !== 'ServiceError') {
+//         const message = `There was a problem calling the Device Address API. ${error.message}`;
+//         console.log(message);
+//         throw error;
+//       }
+//       if (error.statusCode === 403) {
+//         console.log('The user has not granted permissions to access their phone.');
      
-      } else {
-        const message = `There was a problem calling the Device Address API. ${error.message}`;
-        console.log(message);
-        throw error;
-      }
-    }
-    return null;
-  }
+//       } else {
+//         const message = `There was a problem calling the Device Address API. ${error.message}`;
+//         console.log(message);
+//         throw error;
+//       }
+//     }
+//     return null;
+//   }
 
 
 module.exports = {

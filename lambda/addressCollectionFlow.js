@@ -4,39 +4,6 @@ const format = require('./helper/formatAddress.js')
 const sfCase = require('./helper/SalesforceCaseObject.js')
 const { default: axios } = require('axios')
 
-const GetLocationIntentHandler = { //TODO: Is this handler necessary?
-	canHandle(handlerInput) {
-		return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
-			Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent')
-	},
-	handle(handlerInput) {
-		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
-		const sessionAttributes = attributesManager.getSessionAttributes();
-		const geoLocationFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getGeolocation;
-		const homeAddressFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getHomeAddress;
-		const geolocation = sessionAttributes.getLocation && sessionAttributes.getLocation.geolocation // Set by GetLocationInterceptor
-		const homeAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.homeAddress // Set by GetLocationInterceptor
-
-
-
-		if (geoLocationFlag && geolocation) {
-			// Ask user if they would like to use their current location
-			// Validate the geolocation by reverse geocoding and using sf case object
-			// Confirm validated address with the user (new yn_intent)
-			// if yes, set the sessionAttributes.confirmedLocation to the validated address
-			// if no, ask the user for an address (GetAddressFromUserIntent)
-		}
-
-
-		if (homeAddressFlag && homeAddress) {
-			// Validate the home address by using sf case object
-			// Confirm validated address with the user (new yn_intent)
-			// if yes, set the sessionAttributes.confirmedLocation to the validated address
-			// if no, ask the user for an address (GetAddressFromUserIntent)
-		}
-	}
-}
-
 
 const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 	canHandle(handlerInput) {
@@ -126,7 +93,7 @@ const yn_IsAddressCorrectIntentHandler = {
 			sessionAttributes.confirmedValidatorRes = unconfirmedValidatorRes;
 			delete sessionAttributes.unconfirmedValidatorRes;
 			attributesManager.setSessionAttributes(sessionAttributes);
-			let updatedIntent = helper.switchIntent(handlerInput, sessionAttributes.intentToRestore)
+			let updatedIntent = helper.switchIntent(handlerInput, sessionAttributes.intentToRestore);
 			return responseBuilder
 				.addDelegateDirective(updatedIntent)
 				.getResponse()
@@ -422,7 +389,6 @@ const GetLocationRequestInterceptor = {
 
 
 module.exports = {
-	GetLocationIntentHandler,
 	SIPGetLocationFromUserIntentHandler,
 	yn_IsAddressCorrectIntentHandler,
 	yn_TryAnotherAddress,
@@ -431,6 +397,40 @@ module.exports = {
 	GetLocationRequestInterceptor
 }
 
+
+/** Not currently in use */
+const GetLocationIntentHandler = { //TODO: Is this handler necessary?
+	canHandle(handlerInput) {
+		return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+			Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent')
+	},
+	handle(handlerInput) {
+		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
+		const sessionAttributes = attributesManager.getSessionAttributes();
+		const geoLocationFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getGeolocation;
+		const homeAddressFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getHomeAddress;
+		const geolocation = sessionAttributes.getLocation && sessionAttributes.getLocation.geolocation // Set by GetLocationInterceptor
+		const homeAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.homeAddress // Set by GetLocationInterceptor
+
+
+
+		if (geoLocationFlag && geolocation) {
+			// Ask user if they would like to use their current location
+			// Validate the geolocation by reverse geocoding and using sf case object
+			// Confirm validated address with the user (new yn_intent)
+			// if yes, set the sessionAttributes.confirmedLocation to the validated address
+			// if no, ask the user for an address (GetAddressFromUserIntent)
+		}
+
+
+		if (homeAddressFlag && homeAddress) {
+			// Validate the home address by using sf case object
+			// Confirm validated address with the user (new yn_intent)
+			// if yes, set the sessionAttributes.confirmedLocation to the validated address
+			// if no, ask the user for an address (GetAddressFromUserIntent)
+		}
+	}
+}
 
 
 /** 

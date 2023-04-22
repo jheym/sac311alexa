@@ -5,6 +5,11 @@ const axios = require('axios');
 const iso8601 = require('iso8601-duration');
 
 
+
+
+
+//TODO: Store the confirmed phone number in sessionAttributes.confirmedPhone
+
 function PhoneNumberFormat(phoneNum) {
     let phone = phoneNum.replace(/\s/g, '');
     if (phone.length > 9 && /^\d+$/.test(phone)) {
@@ -17,37 +22,6 @@ function PhoneNumberFormat(phoneNum) {
   
     
   }
-  async function getPhoneNumber(handlerInput) {
-    const { permissions } = handlerInput.requestEnvelope.context.System.user;
-    if (!permissions || !permissions.consentToken) {
-      return null;
-    }
-  
-   
-    const serviceClientFactory = handlerInput.serviceClientFactory;
-    const upsServiceClient = serviceClientFactory.getUpsServiceClient();
-    try {
-      //add phone into session attributes
-      const profile = await upsServiceClient.getProfileMobileNumber();
-      handlerInput.attributesManager.setSessionAttributes({ phone: profile.phoneNumber });
-      return PhoneNumberFormat(profile.phoneNumber);
-    } catch (error) {
-      if (error.name !== 'ServiceError') {
-        const message = `There was a problem calling the Device Address API. ${error.message}`;
-        console.log(message);
-        throw error;
-      }
-      if (error.statusCode === 403) {
-        console.log('The user has not granted permissions to access their phone.');
-     
-      } else {
-        const message = `There was a problem calling the Device Address API. ${error.message}`;
-        console.log(message);
-        throw error;
-      }
-    }
-    return null;
-  }
 
   //Create a GetPhoneNumberIntentHandler that will call the getPhoneNumber function and return the phone number to the user if they have given permission to access their phone
    //number. Ask them to verify it if no then ask them for a phone number. if they don't have permission to access their phone number ask them for one and save it in the session attribute called phone.
@@ -55,43 +29,48 @@ function PhoneNumberFormat(phoneNum) {
    const GetPhoneNumberIntentHandler = {
     canHandle(handlerInput) {
         return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetPhoneNumberIntent');
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetPhoneNumberIntent'
+            // && Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED'
+      );
     },
     async handle(handlerInput) {
-        let phone = await getPhoneNumber(handlerInput);
-        if (phone == null) {
+      let phone = await helper.getPhoneNumber(handlerInput);
+      if (phone == null) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes.questionAsked = 'GetUserPhoneNumber?'; 
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        return GetUserPhoneNumberIntentHandler.handle(handlerInput);
+        
+      }
+      else {
           const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-          sessionAttributes.questionAsked = 'GetUserPhoneNumber?'; 
+          sessionAttributes.questionAsked = 'IsPhoneNumCorrect?'; 
           handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-          return GetUserPhoneNumberIntentHandler.handle(handlerInput);
-          
-        }
-        else {
-            const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-            sessionAttributes.questionAsked = 'IsPhoneNumCorrect?'; 
-            handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-            return Yn_GetPhoneNumberIntentHandler.handle(handlerInput);
-        }
-    }
+          return Yn_GetPhoneNumberIntentHandler.handle(handlerInput);
+      }
+  }
 };
+      
+
+
 
   //Get the phone number from the user and save it in the session attribute called phone. If the user has given permission to access their phone number then call the getPhoneNumber function to retrieve it.
   const GetUserPhoneNumberIntentHandler = {
     canHandle(handlerInput) {
         return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
-        Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationFromUserIntent' &&
+        Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetPhoneNumberIntent' &&
         Alexa.getDialogState(handlerInput.requestEnvelope) !== 'COMPLETED' &&
         handlerInput.attributesManager.getSessionAttributes().questionAsked === 'GetUserPhoneNumber?'
-
     );
   },
   async handle(handlerInput) {
     const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
     const sessionAttributes = attributesManager.getSessionAttributes();
     let getPhoneNumber = Alexa.getSlotValue(requestEnvelope, 'GetPhoneNumber');
-   
+
     attributesManager.setSessionAttributes(sessionAttributes);
-    getPhoneNumber = PhoneNumberFormat(getPhoneNumber);
+    //getPhoneNumber = PhoneNumberFormat(getPhoneNumber);
+    helper.setQuestion(handlerInput, null);
     if (getPhoneNumber) {
     
       let speechOutput = handlerInput.t("PHONE_CONFIRM", { phone: getPhoneNumber });
@@ -103,8 +82,7 @@ function PhoneNumberFormat(phoneNum) {
       .withShouldEndSession(false)
       .reprompt(speechOutput)
       .getResponse();
-    }   
-    if (Alexa.getIntentName(requestEnvelope) === 'AMAZON.NoIntent') {
+    }   else {
       if(helper.getFailCounter(handlerInput) >=2){
        helper.clearFailCounter(handlerInput);
        
@@ -149,6 +127,7 @@ function PhoneNumberFormat(phoneNum) {
       async handle(handlerInput) {
           const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
           const sessionAttributes = attributesManager.getSessionAttributes();
+        
           helper.setQuestion(handlerInput, null);
           const GetPhoneNumberIntent = {
             name: 'GetPhoneNumberIntent',
@@ -165,12 +144,16 @@ function PhoneNumberFormat(phoneNum) {
   
           if (Alexa.getIntentName(requestEnvelope) === 'AMAZON.YesIntent') {
               helper.setQuestion(handlerInput, null);
+              const phone = await helper.getPhoneNumber(handlerInput);
+              sessionAttributes.phone = phone;
               if (!sessionAttributes.phone) {
                   throw new Error('No phone number in session');
               }
-   
-              if (sessionAttributes.phone) {
-                  let speechOutput = handlerInput.t("PHONE_CONFIRM", { phone: sessionAttributes.phone });
+            
+            
+              if (phone != null) {
+                  let speechOutput = handlerInput.t("PHONE_CONFIRM", { phone: phone});
+                  sessionAttributes.confirmPhone = phone;
                   helper.setQuestion(handlerInput, 'IsUserPhoneNumCorrect?');
                   return responseBuilder
                       .speak(speechOutput)
@@ -186,12 +169,10 @@ function PhoneNumberFormat(phoneNum) {
           }
   
           if (Alexa.getIntentName(requestEnvelope) === 'AMAZON.NoIntent' ) {
-              let speechOutput = "Okay, please provide a new phone number.";
-              attributesManager.setSessionAttributes(sessionAttributes);
-              console.log(GetPhoneNumberIntent)
+              helper.setQuestion(handlerInput, 'GetUserPhoneNumber?');
+    
               return responseBuilder
                   .speak(speechOutput)
-                  .withShouldEndSession(false)
                   .addElicitSlotDirective('GetPhoneNumber', GetPhoneNumberIntent)
                   .getResponse();
           }
@@ -218,10 +199,8 @@ function PhoneNumberFormat(phoneNum) {
                 if (sessionAttributes.phone == null) {
                   throw new Error('yn_IsPhoneNumberCorrectIntentHandler: phone number is null');
                 }
-               
-                //  let speechOutput = handlerInput.t('PHONE_CONFIRM', { phone: sessionAttributes.phone });
+               ;
                  attributesManager.setSessionAttributes(sessionAttributes);
-                  //let updatedIntent = helper.switchIntent(handlerInput, 'GetLocationFromUserIntent');
 
                   return responseBuilder
                     .speak('Okay, I will use this number, now how may I help you?')
@@ -308,7 +287,7 @@ function PhoneNumberFormat(phoneNum) {
 
 
 
-    module.exports = { getPhoneNumber,GetPhoneNumberIntentHandler, GetUserPhoneNumberIntentHandler,Yn_IsPhoneNumberCorrectIntentHandler,
+    module.exports = {GetPhoneNumberIntentHandler, GetUserPhoneNumberIntentHandler,Yn_IsPhoneNumberCorrectIntentHandler,
       Yn_GetPhoneNumberIntentHandler, 
       Yn_TryAnotherPhoneNumber };
 
