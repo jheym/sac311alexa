@@ -300,27 +300,6 @@ function isGeolocationAvailable(handlerInput) {
 		return "not-available";
 	}
 }
-
-/*
-  check if they user has given permission to access their location
-  @param {Object} handlerInput
-  @returns {boolean} true if user has given permission to access their location
-*/
-async function isPhoneNumberAvailable(handlerInput) {
-	let phoneNumber = await getPhoneNumber(handlerInput);
-    return phoneNumber !== null;
-}
-
-
-function PhoneNumberFormat(phoneNum) {
-    let phone = phoneNum.replace(/\s/g, '');
-    if (phone.length > 9 && /^\d+$/.test(phone)) {
-      phone = phone.substring(phone.length - 10);
-      return phone;
-    }else{
-      return null;
-    }
-}
   
 
 /**
@@ -629,6 +608,17 @@ async function getPhoneNumber(handlerInput) {
 			return null;
 	}
   }
+
+
+function PhoneNumberFormat(phoneNum) {
+    let phone = phoneNum.replace(/\s/g, '');
+    if (phone.length > 9 && /^\d+$/.test(phone)) {
+      phone = phone.substring(phone.length - 10);
+      return phone;
+    }else{
+      return null;
+    }
+}
 
 // async function getPhoneNumber(handlerInput) {
 //     const { permissions } = handlerInput.requestEnvelope.context.System.user;

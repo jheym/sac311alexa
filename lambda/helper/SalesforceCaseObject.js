@@ -562,7 +562,7 @@ class Salesforce_Case_object {
 		if (!this.case_id || this.case_id.length === 0)
 			this.case_id = null;
 
-		var addr_id = addr_resp.candidates[0].attributes.User_fld
+		var addr_id = addr_resp.candidates[0].attributes.User_fld //FIXME: Breaks here when no candidates are found
 		var { out_json, dtpr } = await this.overlay(addr_resp);
 		
 		if (addr_resp.candidates[0].attributes.Addr_type === 'Address') {

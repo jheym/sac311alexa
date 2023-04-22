@@ -20,6 +20,7 @@ const helper = require("./helper/helperFunctions.js")
 const languageStrings = require("./helper/nsCommon.json")
 const abandonedVehicle = require("./abandonedVehicle.js")
 const getLocation = require("./addressCollectionFlow")
+const getPhoneNumber = require("./phoneNumberCollection.js")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./trashPickupDay.js");
 const foundLostDog = require("./foundLostDog.js");
@@ -489,7 +490,7 @@ const LoadPersistentAttributesInterceptor = {
 var ddbClient;
 
 if (process.env.ENVIRONMENT === "dev") {
-	console.log("Not running on Alexa-Hosted Lambda Environment")
+	console.log("Configuring dev environment...")
 
 	// require('dotenv').config() //TODO: Restore this for prod env?
 	const { exec } = require('child_process');
@@ -542,12 +543,12 @@ var requestHandlers = [
 	yn_RetryIntentHandler,
 	checkCaseStatus.GetPreviousCaseIntentHandler,
 	abandonedVehicle.StartedAbandonedVehicleIntentHandler,
-	getLocation.GetLocationIntentHandler,
 	getLocation.SIPGetLocationFromUserIntentHandler,
 	getLocation.yn_IsAddressCorrectIntentHandler,
 	getLocation.yn_UseGeoLocationIntentHandler,
 	getLocation.yn_UseHomeAddressIntentHandler,
 	getLocation.yn_TryAnotherAddress,
+	getPhoneNumber.GetPhoneNumberIntentHandler,
 	abandonedVehicle.InProgressAbandonedVehicleIntentHandler,
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	abandonedVehicle.yn_IsAbandonedVehicleIntentHandler,
@@ -590,6 +591,7 @@ skillBuilder
 	.withCustomUserAgent("BigDino")
 
 if (process.env.ENVIRONMENT === "dev") {
+	console.log("Setting up persistence adapter for dev environment...")
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: "sac311table",
@@ -598,6 +600,7 @@ if (process.env.ENVIRONMENT === "dev") {
 		})
 	)
 } else if (process.env.ENVIRONMENT === "lambda") {
+	console.log("Setting up persistence adapter for lambda environment...")
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,

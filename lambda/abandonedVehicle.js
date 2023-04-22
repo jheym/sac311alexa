@@ -42,6 +42,21 @@ const InProgressAbandonedVehicleIntentHandler = {
 		const dialogState = Alexa.getDialogState(requestEnvelope);
 		const intentConfirmationStatus = currentIntent.confirmationStatus;
 		const slots = currentIntent.slots;
+		const getPhoneNumberIntent = {
+			name: 'GetPhoneNumberIntent',
+			confirmationStatus: 'NONE',
+			slots: {
+				userGivenPhoneNumber: {
+					name: 'userGivenPhoneNumber',
+					confirmationStatus: 'NONE',
+					value: null
+		}}}
+
+		if (!sessionAttributes.confirmedPhoneNumber) {
+			return responseBuilder
+				.addDelegateDirective(getPhoneNumberIntent)
+				.getResponse();
+		}
 
 		if (slots.timePeriod.value) {
 			// we have to send the progressive response before we add the delegate directive. Not sure why.
