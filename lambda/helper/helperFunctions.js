@@ -111,8 +111,11 @@ async function querySFDB(query, token) {
 }
 
 async function openIntegratedCase(handlerInput, slots, SalesforceCaseObject, serviceName, address, phoneNumber=null) {
+		const { attributesManager } = handlerInput;
 		SalesforceCaseObject.set_service_questions(handlerInput, slots);
 		const case_response = await SalesforceCaseObject.create_basic_case(serviceName, phoneNumber, address, null, true);
+		saveCaseToDynamo(handlerInput, case_response.case_number);
+
 		return case_response;
 }
 
@@ -146,6 +149,7 @@ async function createGenericCase(SalesforceCaseObject, serviceName, userResponse
 		json_input[key] = value;
 
 	const case_response = await SalesforceCaseObject.create_generic_case(serviceName, json_input);
+	saveCaseToDynamo(handlerInput, case_response.case_number);
 	return case_response;
 
 }
