@@ -80,6 +80,40 @@ async function sendProgressiveResponse(handlerInput, speechOutput) {
 	}
 }
 
+
+function getTimeOfDay() {
+	// Get the current hour
+	const now = new Date();
+	const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+	const currentHour = new Date(utcTime + (3600000*-7));
+
+	// Set the morning, afternoon, evening, and night hours
+
+	const morningStart = 5;
+	const morningEnd = 11;
+	const afternoonStart = 12;
+	const afternoonEnd = 17;
+	const eveningStart = 18;
+	const eveningEnd = 22;
+  
+	// Determine the time of day
+	let timeOfDay;
+	const localHour = currentHour.getHours();
+	if (localHour >= morningStart && localHour <= morningEnd) {
+	  timeOfDay = 'morning';
+	} else if (localHour >= afternoonStart && localHour <= afternoonEnd) {
+	  timeOfDay = 'afternoon';
+	} else if (localHour >= eveningStart && localHour <= eveningEnd) {
+	  timeOfDay = 'evening';
+	} else {
+	  timeOfDay = 'night';
+	}
+  
+	// Return the time of day
+	return timeOfDay;
+  }
+
+
 /**
  * This function should be able to make any query to the SF API. Just pass in
  * the SOQL query you want to use. No URL encoding required.
@@ -659,7 +693,8 @@ module.exports = {
 	saveToDynamo,
 	sendProgressiveResponse,
 	getInternalAddress,
-	getWorldAddressCandidate
+	getWorldAddressCandidate,
+	getTimeOfDay
 }
 
 // Unused functions //
