@@ -16,7 +16,7 @@ const GetPreviousCaseIntentHandler = {
 	async handle(handlerInput) {
 		const { responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		const { caseNumber } = sessionAttributes;
+		const caseNumber = sessionAttributes.caseNumber || null;
 
 		if (!caseNumber) {
 			return responseBuilder
@@ -46,7 +46,7 @@ const GetPreviousCaseIntentHandler = {
 		
 		const dateString = `<say-as interpret-as="date" format="mdy">${month}-${date}-${year}</say-as>`
 		return responseBuilder
-			.speak(`<speak>Sure, I found a case for ${serviceNameMap[serviceName]} that was submitted on ${dateString}. The status of your case is ${caseStatusMap[caseStatus]}. Is there anything else I can help you with?</speak>`)
+			.speak(`<speak>Sure, ${serviceNameMap[serviceName]} that was submitted on ${dateString}. The status of your case is ${caseStatusMap[caseStatus]}. Is there anything else I can help you with?</speak>`)
 			.withShouldEndSession(false)
 			.getResponse();
 	}
@@ -54,13 +54,14 @@ const GetPreviousCaseIntentHandler = {
 
 
 const serviceNameMap = {
-	'Vehicle On Street': 'an abandoned vehicle'
+	'Vehicle On Street': 'I found a case for an abandoned vehicle',
+	'IVR Review' : 'I found a generic case'
 }
 
 const caseStatusMap = {
-	'NEW': 'new, in other words, it is still waiting to be assigned',
-	'IN PROGRESS' : 'in progress, in other words, it is currently being serviced',
-	'CLOSED' : 'complete, in other words, it has been serviced and completed'
+	'NEW': 'new, in other words, it is still waiting to be reviewed',
+	'IN PROGRESS' : 'in progress, in other words, it is has been reviewed and is being worked on',
+	'CLOSED' : 'closed, in other words, it has been serviced and completed'
 }
 
 module.exports = { GetPreviousCaseIntentHandler };

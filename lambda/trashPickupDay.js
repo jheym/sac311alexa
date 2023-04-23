@@ -26,7 +26,7 @@ const StartedTrashPickupDayIntentHandler = {
 			}
 		}
 
-		var SpeechOutput = '';
+
 		if (validatorObj && validatorObj.Within_City === true) {
 			sessionAttributes.confirmedValidatorRes = validatorObj;
 			attributesManager.setSessionAttributes(sessionAttributes);

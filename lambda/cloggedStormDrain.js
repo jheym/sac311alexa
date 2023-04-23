@@ -125,6 +125,7 @@ const CompletedCloggedStormDrainIntentHandler = {
         helper.setQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
 		    .speak(handlerInput.t('CLOGGED_THANKS'))
+			.withShouldEndSession(false)
 		    .getResponse();
     }
 }

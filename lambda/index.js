@@ -48,7 +48,6 @@ const LaunchRequestHandler = {
 
 		// DYNAMODB TEST CODE //
 		let persistentAttributes = (await attributesManager.getPersistentAttributes()) || {};
-		console.log("persistentAttributes: " + JSON.stringify(persistentAttributes));
 
 		// ***************************CREATING A GENERIC CASE************************** //
 		
@@ -218,6 +217,7 @@ const HelpIntentHandler = {
 	},
 };
 
+// TODO: Delegate back to the launchrequest handler
 const CancelAndStopIntentHandler = {
 	canHandle(handlerInput) {
 		return (
@@ -467,14 +467,15 @@ const LocalisationRequestInterceptor = {
  * When a new session starts, this interceptor loads the persistent attributes
  * from DynamoDB into the session attributes.
 */
-const LoadPersistentAttributesInterceptor = {
+const NewSessionInterceptor = {
 	async process(handlerInput) {
 		if (handlerInput.requestEnvelope.session.new) {
-			const attributesManager = handlerInput.attributesManager;
+			const { attributesManager } = handlerInput;
 			const persistentAttributes = await attributesManager.getPersistentAttributes();
 			const sessionAttributes = attributesManager.getSessionAttributes();
-			if (sessionAttributes.caseNumber = persistentAttributes.caseNumber)
-				attributesManager.setSessionAttributes(sessionAttributes);
+			sessionAttributes.caseNumber = persistentAttributes.caseNumber;
+			console.log("persistentAttributes loaded into sessionAttributes: " + JSON.stringify(persistentAttributes, null, 2));
+			attributesManager.setSessionAttributes(sessionAttributes);
 		}
 	}
 };
@@ -573,8 +574,8 @@ var requestHandlers = [
 ]
 
 var requestInterceptors = [
+	NewSessionInterceptor,
 	LocalisationRequestInterceptor,
-	LoadPersistentAttributesInterceptor,
 	RestoreDummyValuesRequestInterceptor, // This might have to be before ContextSwitchingRequestInterceptor
 	ContextSwitchingRequestInterceptor,
 	getLocation.GetLocationRequestInterceptor,

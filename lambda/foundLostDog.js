@@ -40,25 +40,26 @@ const StartedFoundLostDogIntentHandler = {
         const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 		const currentIntent = requestEnvelope.request.intent;
-		sessionAttributes.intentToRestore = 'FoundLostDogIntent';
+		sessionAttributes.intentToRestore = 'FoundLostDogIntent'; // Good practice to save the intent name in case we need to restore it later.
 		attributesManager.setSessionAttributes(sessionAttributes);
 
-        if (await helper.isHomeAddressAvailable(handlerInput)) {
-			const { addressLine1 } = await helper.getHomeAddress(handlerInput);
-			if (addressLine1.length > 0) {
-				const token = await helper.getOAuthToken(handlerInput);
-				const myCaseObj = new sfCase(token);
-				var validatorObj = await myCaseObj.address_case_validator(addressLine1);
-			}
-		}
-		var speechOutput = '';
-		if (validatorObj && validatorObj.Within_City === true) {
-			let speechOutput = `We found a city address associated with your Amazon account. Is this where the dog was found?`;
-			return responseBuilder
-				.speak(speechOutput)
-				.withShouldEndSession(false)
-				.getResponse();
-		} else {
+        // if (await helper.isHomeAddressAvailable(handlerInput)) {
+		// 	const { addressLine1 } = await helper.getHomeAddress(handlerInput);
+		// 	if (addressLine1.length > 0) {
+		// 		const token = await helper.getOAuthToken(handlerInput);
+		// 		const myCaseObj = new sfCase(token);
+		// 		var validatorObj = await myCaseObj.address_case_validator(addressLine1);
+		// 	}
+		// }
+		// var speechOutput = '';
+		// if (validatorObj && validatorObj.Within_City === true) { // FIXME:  There is no yn_intent for this. Disabling it for now.
+		// 	let speechOutput = `We found a city address associated with your Amazon account. Is this where the dog was found?`;
+		// 	return responseBuilder
+		// 		.speak(speechOutput)
+		// 		.withShouldEndSession(false)
+		// 		.getResponse();
+		// } else {
+			//TODO: Where are confirming whether or not the caller's intent is correct (i.e. "Are you concerned about a lost dog?")?
 			let speechOutput = `Can you tell me where the dog was found? I can check any address within the city of Sacramento. What address should I check?`
 			let GetLocationFromUserIntent = {
 				name: 'GetLocationFromUserIntent',
@@ -74,7 +75,7 @@ const StartedFoundLostDogIntentHandler = {
 			.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
 			.getResponse();
 		}
-    }
+    // }
  }
 
  const InProgressFoundLostDogIntentHandler = {
@@ -150,6 +151,8 @@ const StartedFoundLostDogIntentHandler = {
         
     }
  }
+
+// TODO: This never gets triggered because the question never gets asked?
 const yn_SubmitLostDogServiceRequestIntentHandler = {
 	canHandle(handlerInput) {
 		return ( 
