@@ -23,6 +23,13 @@ const intentFlags = {
             getGeolocation : false,
             getHomeAddress : true
         }
+    },
+    GenericServiceRequestIntent : {
+        intentName : 'GenericServiceRequestIntent',
+        flags : {
+            getGeolocation : true,
+            getHomeAddress : true
+        }
     }
 }
 

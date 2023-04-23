@@ -16,7 +16,7 @@ const GetPreviousCaseIntentHandler = {
 	async handle(handlerInput) {
 		const { responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		const caseNumber = sessionAttributes.caseNumber || null;
+		const caseNumber = sessionAttributes.lastCaseSubmitted || null;
 
 		if (!caseNumber) {
 			return responseBuilder

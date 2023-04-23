@@ -71,7 +71,7 @@ const InProgressCloggedStormDrainIntentHandler = {
         sessionAttributes.intentToRestore = 'CloggedStormDrainIntent';
         attributesManager.setSessionAttributes(sessionAttributes);
 
-        let GetGenericDescriptionFromUserIntent = {
+        let GetGenericDescriptionFromUserIntent = { //TODO: Remove this intent and replace it with a slot in your own intent. Doing it this way will not scale well.
 			name: 'GetGenericDescriptionFromUserIntent',
 			confirmationStatus: 'NONE',
 			slots: {
@@ -82,7 +82,7 @@ const InProgressCloggedStormDrainIntentHandler = {
 		}}}
 		return responseBuilder
 		    .speak(handlerInput.t('CLOGGED_DESC'))
-		    .addElicitSlotDirective('GenericDescription', GetGenericDescriptionFromUserIntent)
+		    .addElicitSlotDirective('GenericDescription', GetGenericDescriptionFromUserIntent) 
 		    .getResponse();
     }
 }

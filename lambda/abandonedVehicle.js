@@ -138,75 +138,59 @@ const CompletedAbandonedVehicleIntentHandler = {
 		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const currentIntent = requestEnvelope.request.intent;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		
-		// Send a progressive response while the case is being created. 
-		//FIXME: Getting 403 Unrecognized requestId error. Not sure why this is
-		//happening. See https://amazon.developer.forums.answerhub.com/questions/228211/unexpected-service-error-with-progressive-response.html
-		// const prSpeechOutput = `Perfect. That's all the information I need. Please give me a moment while I enter your case.`;
-		// await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
-	
 		const slots = currentIntent.slots;
 		const internalServiceName = 'Vehicle On Street'; // Need to use the correct service name associated with the service type
-		// const phoneNumber = await helper.isPhoneNumberAvailable(handlerInput) ? await helper.getPhoneNumber(handlerInput) : null; //TODO: Use phone number collection flow instead
-		const token = await helper.getOAuthToken();
-		// sessionAttributes.phoneNumber = phoneNumber;
-		// attributesManager.setSessionAttributes(sessionAttributes);
+		// const caseNumber = sessionAttributes.caseNumber;
+		// const caseId = sessionAttributes.caseId;
+		const isAddressValidated = sessionAttributes.confirmedValidatorRes.Validated || null;
+		const isWithinCity = sessionAttributes.confirmedValidatorRes.Within_City;
+		const address = sessionAttributes.confirmedValidatorRes.Address;
 		slots.timePeriod.value = helper.toDays(currentIntent.slots.timePeriod.value);
-		const caseNumber = sessionAttributes.caseNumber;
-		const caseId = sessionAttributes.caseId;
+		var phoneNumber = null;
 
+		if (sessionAttributes.confirmedPhoneNumber && sessionAttributes.confirmedPhoneNumber !== 'FAILED') {
+			phoneNumber = sessionAttributes.confirmedPhoneNumber;
+		}
 
-		if (!sessionAttributes.confirmedValidatorRes.geocoderReponse &&
-			!sessionAttributes.confirmedValidatorRes.geocoderReponse.internal_address) {
+		// const myCaseObj = new sfCase(token);
+		const token = await helper.getOAuthToken();
+
+		// If address, is not validated or within the city, create a generic case
+		if (!isAddressValidated || !isWithinCity) {
 			// TODO: Submit generic case with unvalidated location
 			console.log('Creating generic case')
+			const userResponses = {
+				'Make' : slots.make.value,
+				'Model' : slots.model.value,
+				'Color' : slots.color.value,
+				'License Plate' : slots.licensePlate.value,
+				'Time Period' : slots.timePeriod.value,
+			}
+			const myCaseObj = new sfCase(token);
+			// address = sessionAttributes.confirmedValidatorRes.Address;
+			const create_case_res = await helper.createGenericCase(handlerInput, myCaseObj, 'Vehicle On Street', userResponses, address, phoneNumber);
+			await helper.updateGenericCase(myCaseObj, 'Vehicle On Street', userResponses, create_case_res.case_id, address, phoneNumber);
+			
 			helper.setQuestion(handlerInput, "AnythingElse?")
 			return responseBuilder
 				.speak(`Thank you for reporting the abandoned vehicle. Your case will be reviewed by a service agent. Is there anything else I can help you with?`)
 				.withShouldEndSession(false)
 				.getResponse();
-		} else {
-			var address = sessionAttributes.confirmedValidatorRes.Address;
-			// const myCaseObj = new sfCase(token);
-			// const open_res = await helper.openIntegratedCase(handlerInput, myCaseObj, internalServiceName, address, phoneNumber);
-			// [caseNumber, caseId] = [open_res.case_number, open_res.case_id];
-			// const myUpdateCaseObj = new sfCase(token);
-			const caseObj = sessionAttributes.caseObj
-			const myCaseObj = new sfCase(token); // Reconstruct the case object
-			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
-			const update_res = await helper.updateIntegratedCase(handlerInput, slots, caseId, myCaseObj, internalServiceName, address, null);
-			console.log(update_res)
-			
-			// const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
-			// const caseUpdateRes = await myUpdateCaseObj.case_update(caseId, location, 'Vehicle On Street', null);
 		}
 		
-		// TEST CODE FOR CASE CREATION
-		// Test code - checking the case in the db
-		// let query1 = `SELECT CreatedDate, Id, CaseNumber, Service_Type__c, Sub_Service_Type__c, Subject, Status, Origin, ContactId, Description, Email_Web_Notes__c
-		// 						FROM Case
-		// 						WHERE CaseNumber = '${case_number}'`;
-		// let res1 = await helper.querySFDB(query1, token);
-		// if (res1.data.records[0]) { console.log(res1.data.records[0]) };
+		// address = sessionAttributes.confirmedValidatorRes.Address;
+		// const caseObj = sessionAttributes.caseObj
+		// const myCaseObj = new sfCase(token); // Reconstruct the case object
+		// for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: Should we reconstruct the sfcaseobj in an interceptor, possibly with new token each time?
+		const myCaseObj = new sfCase(token);
+		const basic_res = await helper.openIntegratedCase(handlerInput, slots, myCaseObj, 'Vehicle On Street', address, phoneNumber);
+		const update_res = await helper.updateIntegratedCase(handlerInput, slots, basic_res.case_id, myCaseObj, internalServiceName, address, phoneNumber);
+		console.log(update_res)
 		
-		
-		
-		// const myUpdateCaseObj = new sfCase(handlerInput, 'Vehicle On Street', token); // TODO: Try case_update on the same object (dont create a new one!)
-		// const update_res = await my_case_obj.case_update(case_id, location, 'Vehicle On Street', null);
-		
-		// // test code, checking the case in the db
-		// let query2 = `SELECT CreatedDate, Id, CaseNumber, Service_Type__c, Sub_Service_Type__c, Subject, Status, Origin, Anonymous_Contact__c, ContactId, Description, Email_Web_Notes__c,
-		// 							Address_Geolocation__Latitude__s, Address_Geolocation__Longitude__s, Address_X__c, Address_Y__c, Address__c, GIS_City__c, Street_Center_Line__c, Case_Gis_Info_JSON__c
-		// 							FROM Case
-		// 							WHERE CaseNumber = '${case_number}'`;
-		// const res2 = await helper.querySFDB(query2, token);
-		// if (res2.data.records[0]) { console.log(res2.data.records[0]); };
-		// // end test code
-
 		var make = Alexa.getSlotValue(handlerInput.requestEnvelope, 'make');
 		var model = Alexa.getSlotValue(handlerInput.requestEnvelope, 'model');
 		var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color');
-		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${address}`, caseNumber: `${caseNumber}` })
+		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${address}`, caseNumber: `${basic_res.case_number}` })
 		
 		helper.clearContextIntent(handlerInput, sessionAttributes.AbandonedVehicleIntent.name)
 		helper.setQuestion(handlerInput, 'AnythingElse?')
@@ -246,25 +230,33 @@ const yn_IsAbandonedVehicleIntentHandler = {
 					.speak(speechOutput)
 					.withShouldEndSession(false)
 					.getResponse();
-			} else {
-				let speechOutput = `Alright. Where is the abandoned vehicle located? You can give an address or nearest cross street.`
-				let GetLocationFromUserIntent = {
-					name: 'GetLocationFromUserIntent',
-					confirmationStatus: 'NONE',
-					slots: {
-						userGivenAddress: {
-							name: 'userGivenAddress',
-							value: null,
-							confirmationStatus: 'NONE'
-						}
+			} 
+			
+			// If we've already collected an address, delegate back to abandoned vehicle
+			if (sessionAttributes.confirmedValidatorRes) {
+				return responseBuilder
+				.addDelegateDirective(sessionAttributes.AbandonedVehicleIntent)
+				.getResponse();
+			}
+			
+			let speechOutput = `Alright. Where is the abandoned vehicle located? You can give an address or nearest cross street.`
+			let GetLocationFromUserIntent = {
+				name: 'GetLocationFromUserIntent',
+				confirmationStatus: 'NONE',
+				slots: {
+					userGivenAddress: {
+						name: 'userGivenAddress',
+						value: null,
+						confirmationStatus: 'NONE'
 					}
 				}
-				return responseBuilder
-					.speak(speechOutput)
-					.withShouldEndSession(false)
-					.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
-					.getResponse();
 			}
+			return responseBuilder
+				.speak(speechOutput)
+				.withShouldEndSession(false)
+				.addElicitSlotDirective('userGivenAddress', GetLocationFromUserIntent)
+				.getResponse();
+			
 		} // YesIntent
 
 		// TODO: Create an interceptor for clearing 'Tryagain?' question.. If
@@ -309,19 +301,21 @@ const yn_ConfirmVehicleDescriptionIntentHandler = {
 
 			const prSpeechOutput = `<say-as interpret-as="interjection">Great.</say-as> I just have a few more questions to ask. <break time="1s"/>`;
 			await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
-			const internalServiceName = 'Vehicle On Street';
-			let phoneNumber = '9165551111'
-			var address = sessionAttributes.confirmedValidatorRes.Address;
-			const caseObj = sessionAttributes.caseObj
-			const myCaseObj = new sfCase(caseObj.token); // Reconstruct the case object
-			for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
-			const slots = sessionAttributes.AbandonedVehicleIntent.slots;
-			const open_res = await helper.openIntegratedCase(handlerInput, slots, myCaseObj, internalServiceName, address, phoneNumber);
-			console.log(open_res);
-			sessionAttributes.caseNumber = open_res.case_number;
-			sessionAttributes.caseId = open_res.case_id
-			sessionAttributes.caseObj = myCaseObj;
-			attributesManager.setSessionAttributes(sessionAttributes);
+			
+			// Create basic case
+			// phoneNumber = null;
+			// const internalServiceName = 'Vehicle On Street';
+			// var address = sessionAttributes.confirmedValidatorRes.Address;
+			// const caseObj = sessionAttributes.caseObj
+			// const myCaseObj = new sfCase(caseObj.token); // Reconstruct the case object
+			// for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; } // TODO: reconstruct the sfcaseobj in an interceptor. possibly with new token each time?
+			// const slots = sessionAttributes.AbandonedVehicleIntent.slots;
+			// const open_res = await helper.openIntegratedCase(handlerInput, slots, myCaseObj, internalServiceName, address, phoneNumber);
+			// console.log(open_res);
+			// sessionAttributes.caseNumber = open_res.case_number;
+			// sessionAttributes.caseId = open_res.case_id
+			// sessionAttributes.caseObj = myCaseObj;
+			// attributesManager.setSessionAttributes(sessionAttributes);
 
 			let speechOutput = `What is the license plate number of the vehicle?`;
 			return responseBuilder

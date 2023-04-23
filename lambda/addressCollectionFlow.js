@@ -263,13 +263,26 @@ const yn_UseHomeAddressIntentHandler = {
 				}
 			}
 		}
-		// TODO: Permission card for address
+		// TODO: Permission card for address?
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") { // FIXME: Breaks here
 			if (!sessionAttributes.getLocation)
 				throw new Error('yn_UseHomeAddressIntentHandler Error: GetLocationInterceptor was never triggered.')
 			const homeAddress = await helper.isHomeAddressAvailable(handlerInput) ? await helper.getHomeAddress(handlerInput) : null;
 			if (homeAddress) {
-				let speechOutput = `<speak>Is the location near <say-as interpret-as='address'>${homeAddress.addressLine1} in ${homeAddress.city}</say-as>?</speak>`;
+				attributesManager.setSessionAttributes(sessionAttributes);
+				
+				let prSpeechOutput = `One moment while I check our system. <audio src="https://alexa311resources.s3.us-west-1.amazonaws.com/mechanical-keyboard-typing_trimmed.mp3" /> <break time="1s"/> Okay <break time="1s"/>`
+				await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
+				
+				const token = await helper.getOAuthToken();
+				const myCaseObj = new sfCase(token);
+				const unconfirmedValidatorRes = await myCaseObj.address_case_validator(homeAddress.addressLine1);
+				sessionAttributes.getLocation.unconfirmedValidatorRes = unconfirmedValidatorRes;
+
+				const address = unconfirmedValidatorRes.Address;
+
+
+				let speechOutput = `<speak>Just to confirm, is the location near <say-as interpret-as='address'>${address}</say-as>?</speak>`;
 				helper.setQuestion(handlerInput, 'IsAddressCorrect?')
 				return responseBuilder
 					.speak(speechOutput)

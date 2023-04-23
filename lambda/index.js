@@ -26,8 +26,9 @@ const trashPickupDay = require("./trashPickupDay.js");
 const foundLostDog = require("./foundLostDog.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
 const cloggedStormDrain = require("./cloggedStormDrain.js");
-const genericDescription = require("./getGenericDescription.js");
+const genericDescription = require("./unused/getGenericDescription.js");
 const KnowledgeBaseIntent = require("./helper/KnowledgeBaseIntent.js");
+const genericServiceRequest = require("./genericServiceRequest.js");
 
 
 
@@ -44,46 +45,8 @@ const LaunchRequestHandler = {
 	},
 	async handle(handlerInput) {
 		const { attributesManager, requestEnvelope } = handlerInput;
-		const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
-
-		// DYNAMODB TEST CODE //
+		// const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
 		let persistentAttributes = (await attributesManager.getPersistentAttributes()) || {};
-
-		// ***************************CREATING A GENERIC CASE************************** //
-		
-		// Normally you will create the userResponses object from the slot values in handlerInput
-		// You will get the phone number using the phone number collection.
-		// You will get the address using the address collection.
-		// Address can be unverified, in which case you should first check if ValidatedAddressRes exists in sessionAttributes, otherwise use UnvalidatedAddressRes
-		
-		// Create a salesforce case object to be passed to createGenericCase()
-		// const token = await helper.getOAuthToken();
-		// const myCaseObj = new sfCase(token);
-		
-		// // Imagine these slots came from handlerInput
-		// const slots = {
-		// 	genericDescription: {
-		// 		name: 'genericDescription',
-		// 		value: 'The storm drain is clogged and our street is flooding.'
-		// 	}
-		// }
-		
-		// // Create a userReponses object from the slot values you want to submit to Salesforce
-		// const userResponses = {
-		// 	'GenericDescription': slots.genericDescription.value
-		// }
-		// // Create a generic case
-		// const create_case_response = await helper.createGenericCase(myCaseObj, 'Curb/Gutter', userResponses, null, '1800 F Street', '2095686272');
-		// console.log('create_case_response: ' + JSON.stringify(create_case_response, null, 2));
-
-		// // Finalize the case by updating the case using the case_id from createGenericCase()
-		// const update_case_response = await helper.updateGenericCase(myCaseObj, 'Curb/Gutter', userResponses, create_case_response.case_id, '1800 F Street', '2095686272');
-		// console.log('update_case_response: ' + JSON.stringify(update_case_response, null, 2));
-
-		// ****************************END CREATING A GENERIC CASE EXAMPLE*************************** //
-
-		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
-		  
 		
 		// call the function to get the time of day.
 		const greeting = helper.getTimeOfDay();
@@ -96,19 +59,19 @@ const LaunchRequestHandler = {
 		let personId = 	requestEnvelope.context.System.person &&
 						requestEnvelope.context.System.person.personId;
 
-		if (personId && persistentAttributes.hasOwnProperty("counter")) {
+		if (personId && persistentAttributes.visitCount > 1) {
 			let firstName = `<alexa:name type="first" personId="${personId}"/>`
 			speechOutput = 
-			`<speak> Hi ${firstName}, welcome back. Thank you for using the City of Sacramento Alexa skill. 
+			`<speak> Hi ${firstName}, welcome back to the City of Sacramento Alexa skill. 
 			I can help you make service requests or answer any city related questions you may have. To hear my full 
 			list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
 		}
 
 		// Save Skill visit count to DynamoDB
-		var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
-		persistentAttributes.counter = counter + 1;
-		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
-		await attributesManager.savePersistentAttributes(); // and then save
+		// var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
+		// persistentAttributes.counter = counter + 1;
+		// attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
+		// await attributesManager.savePersistentAttributes(); // and then save
 		
 		return handlerInput.responseBuilder
 			.speak(speechOutput)
@@ -202,6 +165,58 @@ const yn_AnythingElseIntentHandler = {
 
 }
 
+const yn_SubmitGenericServiceRequestIntentHandler = {
+	canHandle(handlerInput) {
+		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
+		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		return (
+			requestType === "IntentRequest" && 
+			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
+			questionAsked === 'SubmitGenericServiceRequest?'
+		);
+	},
+	handle(handlerInput) {
+		helper.setQuestion(handlerInput, null)
+		const { requestEnvelope, responseBuilder } = handlerInput;
+		
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
+			
+			const genericServiceRequestIntent = {
+				name: 'GenericServiceRequestIntent',
+				confirmationStatus: 'NONE',
+				slots: {
+					genericServiceDescription: {
+						name: 'genericServiceDescription',
+						value: null,
+						confirmationStatus: 'NONE',
+			}}}
+			let speechOutput = 
+			`Sure, we can submit a generic service request. The more descriptive you are, the better we can help you. \
+			 I'll give you a chance to review your description before submitting. Okay, I'm ready. Please describe your issue.`
+			
+			 return responseBuilder
+			.speak(speechOutput)
+			.addElicitSlotDirective('genericServiceDescription', genericServiceRequestIntent)
+			.getResponse();
+		} 
+		
+		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.NoIntent") {
+			
+			speechOutput = `I'm sorry I wasn't able to help you with that. You can always reach out to the \
+			City of Sacramento by calling 3-1-1 or by visiting the website at 3-1-1.cityofsacramento.org. \
+			Is there anything else I can help you with?`
+			
+			helper.setQuestion(handlerInput, 'AnythingElse?');
+			
+			return responseBuilder
+			.speak(speechOutput)
+			.withShouldEndSession(false)
+			.getResponse();
+		}
+	}
+}
+
 const HelpIntentHandler = {
 	canHandle(handlerInput) {
 		return (
@@ -250,31 +265,102 @@ const FallbackIntentHandler = {
 			"AMAZON.FallbackIntent"
 		);
 	},
-	// TODO: Add sessionattributes counter for fallbacks. If 3 fallbacks then
-	// offer to send to live agent or end the session.
-	handle(handlerInput) {
-		const sessionAttributes =
-			handlerInput.attributesManager.getSessionAttributes();
 
-		if (!sessionAttributes.fallbackCount) {
-			sessionAttributes.fallbackCount = 1;
-		} else {
-			sessionAttributes.fallbackCount++;
-			if (sessionAttributes.fallbackCount >= 3) {
+	handle(handlerInput) {
+		let sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+		
+		// If the user is in the middle of slot elicitation, then we need to elicit the slot again
+		if (sessionAttributes.isElicitingSlot && sessionAttributes.responseToRestore) {
+			let { directives, outputSpeech } = sessionAttributes.responseToRestore;
+			sessionAttributes.elicitCount = sessionAttributes.elicitCount ? sessionAttributes.elicitCount + 1 : 1;
+			handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+			if (sessionAttributes.elicitCount > 2 || (!directives || !directives[0])) {
+				// TODO: Don't submit generic service request when asking for phone number
+				delete sessionAttributes.elicitCount;
+				delete sessionAttributes.responseToRestore;
+				sessionAttributes.isElicitingSlot = false;
 				handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+				helper.setQuestion(handlerInput, 'SubmitGenericServiceRequest?')
 				return handlerInput.responseBuilder
-					.speak(handlerInput.t("FALLBACK_STILL_MSG"))
-					.reprompt(handlerInput.t("FALLBACK_STILL_MSG_REPROMPT"))
+					.speak(`I'm sorry, let's try something else. Would you like to describe your issue to be reviewed by a service agent later? You can say yes or no.`)
+					.withShouldEndSession(false)
 					.getResponse();
 			}
+			
+			if (sessionAttributes.elicitCount == 1) {
+				outputSpeech.ssml = outputSpeech.ssml.replace(/<\/?speak>/g, ''); // remove ssml speak tags
+				outputSpeech.ssml = `<speak>Sorry, I didn't quite catch that, ${outputSpeech.ssml}</speak>`
+			}
+
+			if (sessionAttributes.elicitCount == 2) {
+				outputSpeech.ssml = outputSpeech.ssml.replace(/<\/?speak>/g, ''); // remove ssml speak tags
+				outputSpeech.ssml = outputSpeech.ssml.replace(/Let's try that again, /g, '');
+				outputSpeech.ssml = `<speak>One more time, ${outputSpeech.ssml}</speak>`
+			}
+			
+			return handlerInput.responseBuilder
+			.speak(outputSpeech.ssml)
+			.addDirective(directives[0])
+			.getResponse();
 		}
 
-		handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-		return handlerInput.responseBuilder
-			.speak(handlerInput.t("FALLBACK_MSG"))
-			.reprompt(handlerInput.t("FALLBACK_MSG_REPROMPT"))
-			.getResponse();
-	},
+		// Note: fallbackCount gets set by the GenericRequestInterceptor
+		if (sessionAttributes.fallbackCount > 2) {
+			// Offer to submit a generic case
+			console.log('fallback failed > 2 times')
+			let speechOutput = 
+			`I'm sorry, I'm having trouble understanding. If you'd like, \
+			I can collect a description of your issue and submit it to the \
+			city to be reviewed by a service agent later. Would you like to \
+			submit a generic case? You can say yes or no.`;
+			helper.setQuestion(handlerInput, 'SubmitGenericServiceRequest?')
+			return handlerInput.responseBuilder
+				.speak(speechOutput)
+				.withShouldEndSession(false)
+				.getResponse();
+		}
+
+		if (sessionAttributes.fallbackCount == 1) {
+			speechOutput = `Hmm, I'm not sure I understand, could you repeat that?`;
+			repromptOutput = `I didnt understand what you said, can you repeat that?`;
+			return handlerInput.responseBuilder
+				.speak(speechOutput)
+				.reprompt(repromptOutput)
+				.getResponse();
+		}
+
+		if (sessionAttributes.fallbackCount == 2) {
+			speechOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
+			repromptOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
+			return handlerInput.responseBuilder
+				.speak(speechOutput)
+				.reprompt(repromptOutput)
+				.getResponse();
+		}
+		
+		throw new Error('Unhandled case in FallbackIntent');
+
+	}
+
+	// 	if (!sessionAttributes.fallbackCount) {
+	// 		sessionAttributes.fallbackCount = 1;
+	// 	} else {
+	// 		sessionAttributes.fallbackCount++;
+	// 		if (sessionAttributes.fallbackCount >= 3) {
+	// 			handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+	// 			return handlerInput.responseBuilder
+	// 				.speak(handlerInput.t("FALLBACK_STILL_MSG"))
+	// 				.reprompt(handlerInput.t("FALLBACK_STILL_MSG_REPROMPT"))
+	// 				.getResponse();
+	// 		}
+	// 	}
+
+	// 	handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+	// 	return handlerInput.responseBuilder
+	// 		.speak(handlerInput.t("FALLBACK_MSG"))
+	// 		.reprompt(handlerInput.t("FALLBACK_MSG_REPROMPT"))
+	// 		.getResponse();
+	// },
 }
 
 
@@ -349,6 +435,80 @@ const ErrorHandler = {
 /*                               INTERCEPTORS                                */
 /*****************************************************************************/
 
+/**
+ * When a new session starts, this interceptor loads the persistent attributes
+ * from DynamoDB into the session attributes.
+*/
+const NewSessionInterceptor = {
+	async process(handlerInput) {
+		if (handlerInput.requestEnvelope.session.new) {
+			const { attributesManager } = handlerInput;
+			let persistentAttributes = await attributesManager.getPersistentAttributes() || {};
+			let sessionAttributes = attributesManager.getSessionAttributes() || {};
+
+			persistentAttributes.visitCount = persistentAttributes.visitCount ? persistentAttributes.visitCount + 1 : 1;
+			console.log(`Visit count: ${persistentAttributes.visitCount}`);
+			attributesManager.setPersistentAttributes(persistentAttributes);
+			await attributesManager.savePersistentAttributes();
+			
+			sessionAttributes.lastCaseSubmitted = persistentAttributes.caseNumber;
+			console.log("persistentAttributes loaded into sessionAttributes:\nSessionAttributes = " + JSON.stringify(sessionAttributes, null, 2));
+			attributesManager.setSessionAttributes(sessionAttributes);
+		}
+	}
+};
+
+/**
+ * Generic request interceptor runs tasks on every request that comes in from Alexa
+ */
+const GenericRequestInterceptor = {
+	process(handlerInput) {
+		if (handlerInput.requestEnvelope.request.type === "IntentRequest") {
+			const { attributesManager } = handlerInput;
+			const sessionAttributes = attributesManager.getSessionAttributes();
+			
+			// Increment the fallback count if the request is a fallback intent, else delete the fallbackCount if exists
+			if (handlerInput.requestEnvelope.request.intent.name === "AMAZON.FallbackIntent") {
+				sessionAttributes.fallbackCount = sessionAttributes.fallbackCount ? sessionAttributes.fallbackCount + 1 : 1;
+				attributesManager.setSessionAttributes(sessionAttributes);
+			} else {
+				if (sessionAttributes.fallbackCount) {
+					delete sessionAttributes.fallbackCount;
+					attributesManager.setSessionAttributes(sessionAttributes);
+				}
+			}
+			
+		} // if intentRequest
+	} // process()
+}
+
+/**
+ * Generic response interceptor runs tasks before every response that goes out to Alexa
+ */
+const GenericResponseInterceptor = {
+	process(handlerInput, response) {
+		const directive = response.directives && response.directives[0];
+		if (directive && directive.type === 'Dialog.ElicitSlot') {
+			const { attributesManager } = handlerInput;
+			const sessionAttributes = attributesManager.getSessionAttributes();
+			sessionAttributes.isElicitingSlot = true;
+			sessionAttributes.responseToRestore = response;
+			attributesManager.setSessionAttributes(sessionAttributes);
+		} else {
+			const { attributesManager } = handlerInput;
+			const sessionAttributes = attributesManager.getSessionAttributes();
+			sessionAttributes.isElicitingSlot = false;
+			if (sessionAttributes.responseToRestore){
+				delete sessionAttributes.responseToRestore;
+			}
+			if (sessionAttributes.elicitCount) {
+				delete sessionAttributes.elicitCount;
+			}
+			attributesManager.setSessionAttributes(sessionAttributes);
+		}
+		// console.log("ResponseInterceptor: " + JSON.stringify(response, null, 2));
+	}		
+}
 
 /**
  * This request interceptor looks to see if the current intent has any saved
@@ -463,25 +623,6 @@ const LocalisationRequestInterceptor = {
 };
 
 
-/**
- * When a new session starts, this interceptor loads the persistent attributes
- * from DynamoDB into the session attributes.
-*/
-const NewSessionInterceptor = {
-	async process(handlerInput) {
-		if (handlerInput.requestEnvelope.session.new) {
-			const { attributesManager } = handlerInput;
-			const persistentAttributes = await attributesManager.getPersistentAttributes();
-			const sessionAttributes = attributesManager.getSessionAttributes();
-			sessionAttributes.caseNumber = persistentAttributes.caseNumber;
-			console.log("persistentAttributes loaded into sessionAttributes: " + JSON.stringify(persistentAttributes, null, 2));
-			attributesManager.setSessionAttributes(sessionAttributes);
-		}
-	}
-};
-
-
-
 
 /*****************************************************************************/
 /*                        DEV ENVIRONMENT SETUP                              */
@@ -542,7 +683,9 @@ var requestHandlers = [
 	ReportAnIssueIntentHandler,
 	yn_AnythingElseIntentHandler,
 	yn_RetryIntentHandler,
+	yn_SubmitGenericServiceRequestIntentHandler,
 	checkCaseStatus.GetPreviousCaseIntentHandler,
+	genericServiceRequest.GenericServiceRequestIntentHandler,
 	abandonedVehicle.StartedAbandonedVehicleIntentHandler,
 	getLocation.SIPGetLocationFromUserIntentHandler,
 	getLocation.yn_IsAddressCorrectIntentHandler,
@@ -567,7 +710,6 @@ var requestHandlers = [
 	KnowledgeBaseIntent.StartedKBPayJunkPickupIntentHandler,
 	KnowledgeBaseIntent.StartedKBReplacementContainerIntentHandler,
 	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
-	genericDescription.GetGenericDescriptionFromUserIntentHandler,
 	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
 	cloggedStormDrain.StartedCloggedStormDrainIntentHandler,
 	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler
@@ -575,6 +717,7 @@ var requestHandlers = [
 
 var requestInterceptors = [
 	NewSessionInterceptor,
+	GenericRequestInterceptor,
 	LocalisationRequestInterceptor,
 	RestoreDummyValuesRequestInterceptor, // This might have to be before ContextSwitchingRequestInterceptor
 	ContextSwitchingRequestInterceptor,
@@ -582,11 +725,16 @@ var requestInterceptors = [
 	SetIntentFlagsRequestInterceptor,
 ]
 
+var responseInterceptors = [
+	GenericResponseInterceptor,
+]
+
 const skillBuilder = Alexa.SkillBuilders.custom();
 
 skillBuilder
 	.addRequestHandlers(...requestHandlers)
 	.addRequestInterceptors(...requestInterceptors)
+	.addResponseInterceptors(...responseInterceptors)
 	.withApiClient(new Alexa.DefaultApiClient()) // TODO: No longer using address API. Remove?
 	.addErrorHandlers(ErrorHandler)
 	.withCustomUserAgent("BigDino")

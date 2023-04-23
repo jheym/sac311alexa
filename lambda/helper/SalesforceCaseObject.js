@@ -100,7 +100,7 @@ class Salesforce_Case_object {
 	 * @param {string} case_id 
 	 * @param {string} Address 
 	 * @param {string} service_name 
-	 * @param {object} user_json 
+	 * @param {object} user_json
 	 * @param {bool} update_case 
 	 * @param {int} threshold 
 	 * @returns {object} case number, http status code of the PATCH request

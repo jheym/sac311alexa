@@ -87,30 +87,17 @@ function getTimeOfDay() {
 	const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
 	const currentHour = new Date(utcTime + (3600000*-7));
 
-	// Set the morning, afternoon, evening, and night hours
-
-	const morningStart = 5;
-	const morningEnd = 11;
-	const afternoonStart = 12;
-	const afternoonEnd = 17;
-	const eveningStart = 18;
-	const eveningEnd = 22;
-  
-	// Determine the time of day
-	let timeOfDay;
-	const localHour = currentHour.getHours();
-	if (localHour >= morningStart && localHour <= morningEnd) {
-	  timeOfDay = 'morning';
-	} else if (localHour >= afternoonStart && localHour <= afternoonEnd) {
-	  timeOfDay = 'afternoon';
-	} else if (localHour >= eveningStart && localHour <= eveningEnd) {
-	  timeOfDay = 'evening';
-	} else {
-	  timeOfDay = 'night';
+	const timeOfDay = {
+		'morning' : [ 4, 5, 6, 7, 8, 9, 10, 11 ],
+		'afternoon' : [ 12, 13, 14, 15, 16, 17 ],
+		'evening' : [ 18, 19, 20, 21, 22, 23, 0, 1, 2, 3 ]
 	}
-  
-	// Return the time of day
-	return timeOfDay;
+
+	for (const key in timeOfDay) {
+		if (timeOfDay[key].includes(currentHour.getHours())) {
+			return key;
+		}
+	}
   }
 
 

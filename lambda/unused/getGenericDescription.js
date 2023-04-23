@@ -1,5 +1,7 @@
 const Alexa = require("ask-sdk-core")
-const helper = require("./helper/helperFunctions.js")
+const helper = require("../helper/helperFunctions.js")
+
+// TODO: Remove this whole intent. It is not going to scale well. Instead, create a slot in your own intent to capture a generic description.
 
 const GetGenericDescriptionFromUserIntentHandler = {
 	canHandle(handlerInput) {
