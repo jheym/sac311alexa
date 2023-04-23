@@ -80,15 +80,12 @@ const yn_IsAddressCorrectIntentHandler = {
 			await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
 			const token = await helper.getOAuthToken();
 			const caseObj = new sfCase(token);
-			if (unconfirmedValidatorRes.Validated) 
-				caseObj.addr_resp = unconfirmedValidatorRes.geocoderResponse.internal_geocoder; // TODO: Only do this if there is an internal_geocoder response
-			else
+			if (unconfirmedValidatorRes.Validated) {
+				caseObj.addr_resp = unconfirmedValidatorRes.geocoderResponse.internal_geocoder;
+				await caseObj.get_gis_attribute(); // TODO: Only do this if there is an internal_geocoder response
+			} else {
 				caseObj.addr_resp = unconfirmedValidatorRes;
-			// let string_caseObj = JSON.stringify(caseObj, null, 2);
-			// console.log(`In yn_IsAddressCorrectIntentHandler before get_gis_attribute(): caseObj = ${string_caseObj}`);
-			await caseObj.get_gis_attribute();
-			// string_caseObj = JSON.stringify(caseObj, null, 2);
-			// console.log(`In yn_IsAddressCorrectIntentHandler after get_gis_attribute(): caseObj = ${string_caseObj}`);
+			}
 			sessionAttributes.caseObj = caseObj;
 			sessionAttributes.confirmedValidatorRes = unconfirmedValidatorRes;
 			delete sessionAttributes.unconfirmedValidatorRes;

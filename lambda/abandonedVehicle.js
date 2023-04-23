@@ -73,8 +73,9 @@ const InProgressAbandonedVehicleIntentHandler = {
 			// Replace "for" with "4", "one" with "1", and "ate" with "8"
 			const replacements = {
 			  'FOR': '4',
-			  'ONE': '1',
-			  'ATE': '8'
+			  'ATE': '8',
+			  'TO' : '2',
+			  'TOO' : '2'
 			};
 		  
 			slots.licensePlate.value = slots.licensePlate.value.replace(/(FOR|ONE|ATE)/g, (match) => {
@@ -155,7 +156,8 @@ const CompletedAbandonedVehicleIntentHandler = {
 		const caseId = sessionAttributes.caseId;
 
 
-		if (!sessionAttributes.confirmedValidatorRes) {
+		if (!sessionAttributes.confirmedValidatorRes.geocoderReponse &&
+			!sessionAttributes.confirmedValidatorRes.geocoderReponse.internal_address) {
 			// TODO: Submit generic case with unvalidated location
 			console.log('Creating generic case')
 			helper.setQuestion(handlerInput, "AnythingElse?")

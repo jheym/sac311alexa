@@ -94,13 +94,29 @@ const StartedFoundLostDogIntentHandler = {
 		const intentConfirmationStatus = currentIntent.confirmationStatus;
 		
 		const address = sessionAttributes.confirmedValidatorRes;
-		const worldAddressCandidate = await helper.getWorldAddress(address.Address);
-		const internalRes = await helper.getInternalAddress(worldAddressCandidate.data.candidates[0]);
+		const worldAddressCandidate = await helper.getWorldAddress(address.Address); // TODO: Redundant. Address was already collected in addressCollectionFlow and stored in SessionAttributes.
+		const internalRes = await helper.getInternalAddress(worldAddressCandidate.data.candidates[0]); // Address was already checked in addressCollectionFlow.
 		console.log("Address within city:");
 		console.log(address.Within_City);
 
+		const getPhoneNumberIntent = {
+			name: 'GetPhoneNumberIntent',
+			confirmationStatus: 'NONE',
+			slots: {
+				userGivenPhoneNumber: {
+					name: 'userGivenPhoneNumber',
+					confirmationStatus: 'NONE',
+					value: null
+		}}}
+
+		if (!sessionAttributes.confirmedPhoneNumber) {
+			return responseBuilder
+				.addDelegateDirective(getPhoneNumberIntent)
+				.getResponse();
+		}
+
 		var speechOutput = '';
-        if(address.Within_City)
+        if(address.Within_City) // TODO: We are still supposed to submit a case even if the address is not within the city.
         {
             speechOutput = 'If you see a loose dog in a busy area, its best not to try to catch them, as they may run into traffic. They will likely wander into a quieter area, or someones yard where they can be safely secured.'
 			speechOutput += ' If you have already captured the dog, the best possible thing you can do for the dog is to keep them in your home and take a few days to try to find the owner before bringing them to a shelter.'
@@ -181,14 +197,24 @@ const CompletedFoundLostDogServiceRequest = {
 		helper.setQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		let phoneNumber = '9169166969' //Need to get phone number
+		
+		//TODO: Read back the description to the user and confirm if that's what they would like to submit before submitting the case.
+		
+		// let phoneNumber = '9169166969' //Need to get phone number
         const token = await helper.getOAuthToken();
         const myCaseObj = new sfCase(token);
         var address = sessionAttributes.confirmedValidatorRes.Address;
         const userResponses = {
 		    'GenericDescription': sessionAttributes.FoundLostDogIntent.slots.foundLostDogInfo.value
 		}
-		const create_case_response = await helper.createGenericCase(myCaseObj, 'LostDog', userResponses, null, address, phoneNumber);
+		
+		if (sessionAttributes.confirmedPhoneNumber && sessionAttributes.confirmedPhoneNumber !== 'FAILED') {
+			var phoneNumber = sessionAttributes.confirmedPhoneNumber;
+		} else {
+			var phoneNumber = null;
+		}
+
+		const create_case_response = await helper.createGenericCase(handlerInput, myCaseObj, 'LostDog', userResponses, null, address, phoneNumber);
 		console.log(userResponses);
 		const update_case_response = await helper.updateGenericCase(myCaseObj, 'LostDog', userResponses, create_case_response.case_id, address, phoneNumber);
         console.log(update_case_response);

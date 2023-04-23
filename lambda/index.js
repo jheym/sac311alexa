@@ -37,7 +37,7 @@ const KnowledgeBaseIntent = require("./helper/KnowledgeBaseIntent.js");
 
 /**
  * This handler is triggered when the user says "Alexa, open Sacramento 311"
- */5
+ */
 const LaunchRequestHandler = {
 	canHandle(handlerInput) {
 		return (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest");

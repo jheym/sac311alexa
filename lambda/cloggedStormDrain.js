@@ -45,11 +45,29 @@ const InProgressCloggedStormDrainIntentHandler = {
 		)
 	},
 	async handle(handlerInput) {
+		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+		const getPhoneNumberIntent = {
+			name: 'GetPhoneNumberIntent',
+			confirmationStatus: 'NONE',
+			slots: {
+				userGivenPhoneNumber: {
+					name: 'userGivenPhoneNumber',
+					confirmationStatus: 'NONE',
+					value: null
+		}}}
+		
+		if (!sessionAttributes.confirmedPhoneNumber) {
+			return responseBuilder
+				.addDelegateDirective(getPhoneNumberIntent)
+				.getResponse();
+		}
+
+
         helper.setQuestion(handlerInput, null)
         helper.setQuestion(handlerInput, 'finishClogged?')
 
-        const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.intentToRestore = 'CloggedStormDrainIntent';
         attributesManager.setSessionAttributes(sessionAttributes);
 
@@ -75,7 +93,7 @@ const CompletedCloggedStormDrainIntentHandler = {
 		return (
 			Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
 			Alexa.getIntentName(handlerInput.requestEnvelope) === 'CloggedStormDrainIntent' &&
-            handlerInput.attributesManager.getSessionAttributes().questionAsked === 'finishClogged?'
+            handlerInput.attributesManager.getSessionAttributes().questionAsked === 'finishClogged?' // TODO: Unecessary. questionAsked is only useful for yes/no intents.
 		);
 	},
     async handle(handlerInput) {
@@ -83,7 +101,7 @@ const CompletedCloggedStormDrainIntentHandler = {
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 
-        let phoneNumber = '9169166969'
+		// TODO: Read back the description message to the Skill user and get their confirmation first.
         const token = await helper.getOAuthToken();
         const myCaseObj = new sfCase(token);
         var address = sessionAttributes.confirmedValidatorRes.Address;
@@ -91,7 +109,14 @@ const CompletedCloggedStormDrainIntentHandler = {
         const userResponses = {
 		    'GenericDescription': sessionAttributes.CloggedStormDrainIntent.GenericDescription
 		}
-		const create_case_response = await helper.createGenericCase(myCaseObj, 'Curb/Gutter', userResponses, null, address, phoneNumber);
+		
+		if (sessionAttributes.confirmedPhoneNumber && sessionAttributes.confirmedPhoneNumber !== 'FAILED') {
+			var phoneNumber = sessionAttributes.confirmedPhoneNumber;
+		} else {
+			var phoneNumber = null;
+		}
+
+		const create_case_response = await helper.createGenericCase(handlerInput, myCaseObj, 'Curb/Gutter', userResponses, null, address, phoneNumber);
 		console.log(userResponses);
 
 		const update_case_response = await helper.updateGenericCase(myCaseObj, 'Curb/Gutter', userResponses, create_case_response.case_id, address, phoneNumber);

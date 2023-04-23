@@ -176,7 +176,7 @@ async function updateIntegratedCase(handlerInput, slots, caseId, SalesforceCaseO
  * @returns {object} case_response - response from the Salesforce API containing
  * {case_number, case_id}
  */
-async function createGenericCase(SalesforceCaseObject, serviceName, userResponses, address=null, phoneNumber=null) {
+async function createGenericCase(handlerInput, SalesforceCaseObject, serviceName, userResponses, address=null, phoneNumber=null) {
 	const json_input = {}
 	if (address) {json_input.address = address}
 	if (phoneNumber) {json_input.contacted_number = phoneNumber}
