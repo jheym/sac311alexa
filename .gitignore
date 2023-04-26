@@ -2,7 +2,6 @@ ask-resources.json
 .ask/
 .env
 shared-local-instance.db
-.vscode/
 lambda/node_modules/
 lambda/package-lock.json
 lambda/local-debugger.js

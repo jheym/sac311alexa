@@ -1,0 +1,30 @@
+{
+    // This launch.json should work for most setups after logging in with the
+    // ASK-SDK Toolkit Extension for VSCode. 
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Alexa Skill (Node.js)",
+            "type": "node",
+            "request": "launch",
+            "program": "${command:ask.debugAdapterPath}",
+            "args": [
+                "--accessToken",
+                "\"${command:ask.accessToken}\"",
+                "--skillId",
+                "${command:ask.skillIdFromWorkspace}",
+                "--handlerName",
+                "handler",
+                "--skillEntryFile",
+                "${workspaceFolder}/lambda/index.js",
+                "--region",
+                "NA"
+            ],
+            "cwd": "${workspaceFolder}/lambda",
+            "skipFiles": [
+                "<node_internals>/**",
+                "${workspaceFolder}/lambda/node_modules/**"
+              ]
+        }
+    ]
+}

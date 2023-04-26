@@ -26,7 +26,6 @@ const trashPickupDay = require("./trashPickupDay.js");
 const foundLostDog = require("./foundLostDog.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
 const cloggedStormDrain = require("./cloggedStormDrain.js");
-const genericDescription = require("./unused/getGenericDescription.js");
 const KnowledgeBaseIntent = require("./helper/KnowledgeBaseIntent.js");
 const genericServiceRequest = require("./genericServiceRequest.js");
 
