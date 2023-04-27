@@ -58,8 +58,14 @@ const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
 
 		if (userGivenAddress) {
 			let token = await helper.getOAuthToken();
+			// console.log('In GetLocationFromUserIntentHandler. Token = ' + token + '.')
 			let caseObj = new sfCase(token);
-			var res = await caseObj.address_case_validator(format.formatInput(userGivenAddress));
+			// const string_caseObj = JSON.stringify(caseObj, null, 2);
+			// console.log(`In GetLocationFromUserIntentHandler: caseObj = ${string_caseObj}`);
+			const formattedAddr = format.formatInput(userGivenAddress);
+			// console.log('In GetLocationFromUserIntentHandler. formattedAddr = ' + formattedAddr + '.');
+			var res = await caseObj.address_case_validator(formattedAddr);
+			// console.log('address_case_validator completed. res = ' + JSON.stringify(res, null, 2) + '.');
 		} else {
 			console.log('Error: userGivenAddress is undefined.')
 			return responseBuilder
@@ -105,8 +111,15 @@ const yn_IsAddressCorrectIntentHandler = {
 			await helper.sendProgressiveResponse(handlerInput, prSpeechOutput);
 			const token = await helper.getOAuthToken();
 			const caseObj = new sfCase(token);
-			caseObj.addr_resp = unconfirmedValidatorRes.geocoderResponse.internal_geocoder; // TODO: Only do this if there is an internal_geocoder response
+			if (unconfirmedValidatorRes.Validated) 
+				caseObj.addr_resp = unconfirmedValidatorRes.geocoderResponse.internal_geocoder; // TODO: Only do this if there is an internal_geocoder response
+			else
+				caseObj.addr_resp = unconfirmedValidatorRes;
+			// let string_caseObj = JSON.stringify(caseObj, null, 2);
+			// console.log(`In yn_IsAddressCorrectIntentHandler before get_gis_attribute(): caseObj = ${string_caseObj}`);
 			await caseObj.get_gis_attribute();
+			// string_caseObj = JSON.stringify(caseObj, null, 2);
+			// console.log(`In yn_IsAddressCorrectIntentHandler after get_gis_attribute(): caseObj = ${string_caseObj}`);
 			sessionAttributes.caseObj = caseObj;
 			sessionAttributes.confirmedValidatorRes = unconfirmedValidatorRes;
 			delete sessionAttributes.unconfirmedValidatorRes;

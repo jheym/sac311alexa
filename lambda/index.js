@@ -22,7 +22,12 @@ const abandonedVehicle = require("./abandonedVehicle.js")
 const getLocation = require("./addressCollectionFlow")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./trashPickupDay.js");
+const foundLostDog = require("./foundLostDog.js");
 const checkCaseStatus = require("./checkCaseStatus.js");
+const cloggedStormDrain = require("./cloggedStormDrain.js");
+const genericDescription = require("./getGenericDescription.js");
+const KnowledgeBaseIntent = require("./helper/KnowledgeBaseIntent.js");
+
 
 
 /*****************************************************************************/
@@ -44,12 +49,6 @@ const LaunchRequestHandler = {
 		let persistentAttributes = (await attributesManager.getPersistentAttributes()) || {};
 		console.log("persistentAttributes: " + JSON.stringify(persistentAttributes));
 
-		var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
-
-		persistentAttributes.counter = counter + 1;
-		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
-		await attributesManager.savePersistentAttributes(); // and then save
-
 		// ***************************CREATING A GENERIC CASE************************** //
 		
 		// Normally you will create the userResponses object from the slot values in handlerInput
@@ -57,7 +56,7 @@ const LaunchRequestHandler = {
 		// You will get the address using the address collection.
 		// Address can be unverified, in which case you should first check if ValidatedAddressRes exists in sessionAttributes, otherwise use UnvalidatedAddressRes
 		
-		// // Create a salesforce case object to be passed to createGenericCase()
+		// Create a salesforce case object to be passed to createGenericCase()
 		// const token = await helper.getOAuthToken();
 		// const myCaseObj = new sfCase(token);
 		
@@ -83,8 +82,8 @@ const LaunchRequestHandler = {
 
 		// ****************************END CREATING A GENERIC CASE EXAMPLE*************************** //
 
-
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
+
 		function getTimeOfDay() {
  
 			const currentDate = new Date();  // this is the current date and time in UTC time zone
@@ -150,9 +149,31 @@ const LaunchRequestHandler = {
 		// call the function to get the time of day.
 		const greeting = getTimeOfDay();
 
-		const speechOutput = `<speak> Good ${greeting} ! Thank you for using the City of Sacramento Alexa skill. 
-							I can help you make service requests to the city or answer any city related questions you may have. To hear my full 
-							list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
+		
+
+
+		let speechOutput = 
+			`<speak> Hello! Thank you for using the City of Sacramento Alexa skill. 
+			I can help you make service requests or answer any city related questions you may have. To hear my full 
+			list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
+
+		let personId = 	requestEnvelope.context.System.person &&
+						requestEnvelope.context.System.person.personId;
+
+		if (personId && persistentAttributes.hasOwnProperty("counter")) {
+			let firstName = `<alexa:name type="first" personId="${personId}"/>`
+			speechOutput = 
+			`<speak> Hi ${firstName}, welcome back. Thank you for using the City of Sacramento Alexa skill. 
+			I can help you make service requests or answer any city related questions you may have. To hear my full 
+			list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
+		}
+
+		// Save Skill visit count to DynamoDB
+		var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
+		persistentAttributes.counter = counter + 1;
+		attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
+		await attributesManager.savePersistentAttributes(); // and then save
+		
 		return handlerInput.responseBuilder
 			.speak(speechOutput)
 			.withShouldEndSession(false) // keep the session open
@@ -338,7 +359,7 @@ const SessionEndedRequestHandler = {
 			let message = handlerInput.requestEnvelope.request.error.message;
 			console.log(`SessionEnded Error: ${type}: ${message}`);
 		}
-		console.log("Session ended");
+		console.log("Session ended"); //this is run everytime the skill is loaded
 
 		return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
 	},
@@ -470,7 +491,8 @@ const SetIntentFlagsRequestInterceptor = {
 const RestoreDummyValuesRequestInterceptor = {
 	process(handlerInput) {
 		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) {
+			handlerInput.attributesManager.getSessionAttributes().hasDummyValues) 
+		{	
 			const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 			handlerInput.requestEnvelope.request.dialogState = "IN_PROGRESS";
 			const dummyIntent = handlerInput.requestEnvelope.request.intent;
@@ -510,16 +532,14 @@ const LocalisationRequestInterceptor = {
 */
 const LoadPersistentAttributesInterceptor = {
 	async process(handlerInput) {
-		if (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-		) {
+		if (handlerInput.requestEnvelope.session.new) {
 			const attributesManager = handlerInput.attributesManager;
 			const persistentAttributes = await attributesManager.getPersistentAttributes();
 			const sessionAttributes = attributesManager.getSessionAttributes();
 			if (sessionAttributes.caseNumber = persistentAttributes.caseNumber)
 				attributesManager.setSessionAttributes(sessionAttributes);
 		}
-	},
+	}
 };
 
 
@@ -599,7 +619,20 @@ var requestHandlers = [
 	abandonedVehicle.yn_ConfirmLicensePlateIntentHandler,
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
-	trashPickupDay.InProgressTrashPickupDayIntentHandler
+	trashPickupDay.InProgressTrashPickupDayIntentHandler,
+	foundLostDog.StartedFoundLostDogIntentHandler,
+	foundLostDog.InProgressFoundLostDogIntentHandler,
+	foundLostDog.yn_SubmitLostDogServiceRequestIntentHandler,
+	foundLostDog.CompletedFoundLostDogServiceRequest,
+	KnowledgeBaseIntent.StartedKBTrashCanIntentHandler,
+	KnowledgeBaseIntent.StartedKBJunkPickUpIntentHandler,
+	KnowledgeBaseIntent.StartedKBPayJunkPickupIntentHandler,
+	KnowledgeBaseIntent.StartedKBReplacementContainerIntentHandler,
+	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
+	genericDescription.GetGenericDescriptionFromUserIntentHandler,
+	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.StartedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler
 ]
 
 var requestInterceptors = [
@@ -632,7 +665,7 @@ if (process.env.ENVIRONMENT === "dev") {
 	skillBuilder.withPersistenceAdapter(
 		new dynamoDbPersistenceAdapter.DynamoDbPersistenceAdapter({
 			tableName: process.env.DYNAMODB_PERSISTENCE_TABLE_NAME,
-			createTable: true,
+			createTable: false,
 			dynamoDBClient: new AWS.DynamoDB({
 				apiVersion: "latest",
 				region: process.env.DYNAMODB_PERSISTENCE_REGION,
