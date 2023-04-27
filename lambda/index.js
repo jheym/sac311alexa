@@ -91,12 +91,7 @@ const LaunchRequestHandler = {
 			const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
 			const currentHour = new Date(utcTime + (3600000*-7));
 
-
-			
-
-
 			// Set the morning, afternoon, evening, and night hours
-
 			const morningStart = 5;
 			const morningEnd = 11;
 			const afternoonStart = 12;
