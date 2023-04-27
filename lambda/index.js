@@ -86,22 +86,52 @@ const LaunchRequestHandler = {
 
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 		function getTimeOfDay() {
-			// Get the current hour
-			const now = new Date();
-			const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-			const currentHour = new Date(utcTime + (3600000*-7));
-
-			// Set the morning, afternoon, evening, and night hours
+ 
+			const currentDate = new Date();  // this is the current date and time in UTC time zone
+		  
+			const pacificOffset = -7 ; // Pacific Daylight Time (PDT) UTC-7 for sacramento california
+		  
+			// The following function is used to determine if the current date is in daylight saving time or not 
+			const isDaylightSavingTime = (date) => {
+			  const year = date.getUTCFullYear();
+			  const start_year = new Date(Date.UTC(year, 2, 14, 10)); // 2 = March 14 = 14th day of the month 10 = 10am of UTC time which is 2am of pacific time
+			  const end_year = new Date(Date.UTC(year, 10, 7, 9));   // 10 = November 7 = 7th day of the month 9 = 9am of UTC time which is 1am of pacific time
+		  
+			  const current = date.getTime();
+		  
+			  return current >= start_year.getTime() && current < end_year.getTime();
+			};
+		  
+			// Determine the current offset for Pacific Time 
+			let currentOffset;
+		  
+			console.log ("isDaylightSavingTime: "+isDaylightSavingTime(currentDate));
+			if (isDaylightSavingTime(currentDate)) {
+			  currentOffset = pacificOffset + 1;
+			} else {
+			  currentOffset = pacificOffset;
+			}
+		  
+			const currentUTC = currentDate.getTime() // this is the current date and time in UTC time zone
+			  
+			const currentUTC_offset = currentUTC + (currentOffset * 60 * 60 * 1000);  // 60 * 60 * 1000 = 3600000 which is 1 hour in milliseconds 
+		  
+			const currentLocalTime = new Date(currentUTC_offset);  // this is the current local time in sacramento california
+		  
+		  
+		  
+		  
 			const morningStart = 5;
 			const morningEnd = 11;
 			const afternoonStart = 12;
 			const afternoonEnd = 17;
 			const eveningStart = 18;
 			const eveningEnd = 22;
-		  
+			
 			// Determine the time of day
 			let timeOfDay;
-			const localHour = currentHour.getHours();
+			const localHour = currentLocalTime.getHours();
+		  
 			if (localHour >= morningStart && localHour <= morningEnd) {
 			  timeOfDay = 'morning';
 			} else if (localHour >= afternoonStart && localHour <= afternoonEnd) {
@@ -111,10 +141,10 @@ const LaunchRequestHandler = {
 			} else {
 			  timeOfDay = 'night';
 			}
-		  
+			
 			// Return the time of day
 			return timeOfDay;
-		  }
+			}
 		  
 		
 		// call the function to get the time of day.
