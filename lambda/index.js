@@ -104,7 +104,6 @@ const LaunchRequestHandler = {
 			// Determine the current offset for Pacific Time 
 			let currentOffset;
 		  
-			console.log ("isDaylightSavingTime: "+isDaylightSavingTime(currentDate));
 			if (isDaylightSavingTime(currentDate)) {
 			  currentOffset = pacificOffset + 1;
 			} else {
