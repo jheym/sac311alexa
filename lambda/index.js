@@ -44,8 +44,7 @@ const LaunchRequestHandler = {
 	},
 	async handle(handlerInput) {
 		const { attributesManager, requestEnvelope } = handlerInput;
-		// const sessionAttributes = attributesManager.getSessionAttributes() || {}; //NOTE: Function definitions can be contained in the event object (handlerInput)
-		let persistentAttributes = (await attributesManager.getPersistentAttributes()) || {};
+		let persistentAttributes = (await attributesManager.getPersistentAttributes()) || {}; // get user-associated data from DynamoDB
 		
 		// call the function to get the time of day.
 		const greeting = helper.getTimeOfDay();
@@ -65,12 +64,6 @@ const LaunchRequestHandler = {
 			I can help you make service requests or answer any city related questions you may have. To hear my full 
 			list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
 		}
-
-		// Save Skill visit count to DynamoDB
-		// var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
-		// persistentAttributes.counter = counter + 1;
-		// attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
-		// await attributesManager.savePersistentAttributes(); // and then save
 		
 		return handlerInput.responseBuilder
 			.speak(speechOutput)
@@ -91,8 +84,6 @@ const ReportAnIssueIntentHandler = {
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
 			Alexa.getIntentName(handlerInput.requestEnvelope) === "ReportAnIssueIntent"
 		);
-
-
 	},
 	handle(handlerInput) {
 

@@ -177,7 +177,6 @@ async function createGenericCase(handlerInput, SalesforceCaseObject, serviceName
 }
 
 /**
- *
  * @param {object} SalesforceCaseObject - case object created from
  * SalesForceCaseObject class
  * @param {string} serviceName - name of the service required

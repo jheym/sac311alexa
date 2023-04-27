@@ -2,7 +2,6 @@ const Alexa = require('ask-sdk-core')
 const helper = require("./helper/helperFunctions.js")
 const format = require('./helper/formatAddress.js')
 const sfCase = require('./helper/SalesforceCaseObject.js')
-const { default: axios } = require('axios')
 
 
 const SIPGetLocationFromUserIntentHandler = { // SIP = Started / In Progress
