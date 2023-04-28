@@ -23,8 +23,8 @@
  *An appointment is highly recommended. Would you like to submit a service request to be reviewed by someone at City of Sacramento?
  */
 const Alexa = require("ask-sdk-core")
-const helper = require("./helper/helperFunctions.js")
-const sfCase = require('./helper/SalesforceCaseObject.js')
+const helper = require("../helper/helperFunctions.js")
+const sfCase = require('../helper/SalesforceCaseObject.js')
 const axios = require("axios")
 const iso8601 = require('iso8601-duration');
 

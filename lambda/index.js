@@ -18,16 +18,19 @@ require('dotenv').config() // TODO: Will this work on lambda env?
 const sfCase = require("./helper/SalesforceCaseObject.js")
 const helper = require("./helper/helperFunctions.js")
 const languageStrings = require("./helper/nsCommon.json")
-const abandonedVehicle = require("./abandonedVehicle.js")
+const abandonedVehicle = require("./serviceRequestIntents/abandonedVehicle.js")
 const getLocation = require("./addressCollectionFlow")
 const getPhoneNumber = require("./phoneNumberCollection.js")
 const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
-const trashPickupDay = require("./trashPickupDay.js");
-const foundLostDog = require("./foundLostDog.js");
-const checkCaseStatus = require("./checkCaseStatus.js");
-const cloggedStormDrain = require("./cloggedStormDrain.js");
-const KnowledgeBaseIntent = require("./helper/KnowledgeBaseIntent.js");
-const genericServiceRequest = require("./genericServiceRequest.js");
+const trashPickupDay = require("./informationalIntents/trashPickupDay.js");
+const getPoliceBeat = require("./informationalIntents/getPoliceBeat.js");
+const getCouncilDistrict = require("./informationalIntents/getCouncilDistrict.js");
+const foundLostDog = require("./serviceRequestIntents/foundLostDog.js");
+const checkCaseStatus = require("./informationalIntents/checkCaseStatus.js");
+const cloggedStormDrain = require("./serviceRequestIntents/cloggedStormDrain.js");
+const KnowledgeBaseIntent = require("./informationalIntents/KnowledgeBaseIntent.js");
+const genericServiceRequest = require("./serviceRequestIntents/genericServiceRequest.js");
+
 
 
 
@@ -691,6 +694,12 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
+	getPoliceBeat.StartedGetPoliceBeatIntentHandler,
+	getPoliceBeat.InProgressGetPoliceBeatIntentHandler,
+	getPoliceBeat.yn_UseHomeAddressForPoliceBeatIntentHandler,
+	getCouncilDistrict.StartedGetCouncilDistrictIntentHandler,
+	getCouncilDistrict.InProgressGetCouncilDistrictIntentHandler,
+	getCouncilDistrict.yn_UseHomeAddressForCouncilDistrictIntentHandler,
 	foundLostDog.StartedFoundLostDogIntentHandler,
 	foundLostDog.InProgressFoundLostDogIntentHandler,
 	foundLostDog.yn_SubmitLostDogServiceRequestIntentHandler,

@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core");
-const helper = require("./helper/helperFunctions.js");
-const sfCase = require("./helper/SalesforceCaseObject.js");
+const helper = require("../helper/helperFunctions.js");
+const sfCase = require("../helper/SalesforceCaseObject.js");
 
 
 // This is the generic service request intent handler triggered by the fallback intent

@@ -1,4 +1,4 @@
-const helper = require("./helperFunctions.js")
+const helper = require("../helper/helperFunctions.js")
 
 
 // The purpose of this function is to prepare a data structure that will be used by any intent handler just before creating a case in Salesforce.

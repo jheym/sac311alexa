@@ -1,7 +1,7 @@
 
 const Alexa = require("ask-sdk-core")
-const helper = require("./helper/helperFunctions.js")
-const sfCase = require("./helper/SalesforceCaseObject.js")
+const helper = require("../helper/helperFunctions.js")
+const sfCase = require("../helper/SalesforceCaseObject.js")
 const iso8601 = require('iso8601-duration');
 
 // Started

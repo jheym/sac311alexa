@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk");
-const helper = require("./helper/helperFunctions.js")
+const helper = require("../helper/helperFunctions.js")
 // TODO: Notes for Ronald
 // Convert caseDateISO to a month and day (e.g. "May 1st")
 // Create a map for serviceName to a more human-readable name (e.g. "I found a case for abandoned vehicle' instead of 'I found a case for Vehicle On Street")

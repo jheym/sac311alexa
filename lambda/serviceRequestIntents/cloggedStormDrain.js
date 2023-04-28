@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core")
-const helper = require("./helper/helperFunctions.js")
-const sfCase = require("./helper/SalesforceCaseObject.js")
+const helper = require("../helper/helperFunctions.js")
+const sfCase = require("../helper/SalesforceCaseObject.js")
 
 //Started
 const StartedCloggedStormDrainIntentHandler = {
