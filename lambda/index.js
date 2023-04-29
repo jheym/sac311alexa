@@ -293,6 +293,7 @@ const FallbackIntentHandler = {
 			
 			return handlerInput.responseBuilder
 			.speak(outputSpeech.ssml)
+			.reprompt(outputSpeech.ssml)
 			.addDirective(directives[0])
 			.getResponse();
 		}
@@ -317,7 +318,10 @@ const FallbackIntentHandler = {
 			speechOutput = `Hmm, I'm not sure I understand, could you repeat that?`;
 			repromptOutput = `I didnt understand what you said, can you repeat that?`;
 
-			if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
+			if (sessionAttributes.questionAsked === 'AnythingElse?' && sessionAttributes.questionAskedSSML) {
+				speechOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
+				repromptOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
+			} else if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
 				let ynQuestion = sessionAttributes.questionAskedSSML;
 				ynQuestion = ynQuestion.replace(/<\/?speak>/g, ''); // remove ssml speak tags
 				speechOutput = `I'm sorry, I didn't quite catch that. ${ynQuestion}`
@@ -335,10 +339,13 @@ const FallbackIntentHandler = {
 			speechOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
 			repromptOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
 			
-			if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
+			
+			if (sessionAttributes.questionAsked === 'AnythingElse?' && sessionAttributes.questionAskedSSML) {
+				speechOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
+				repromptOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
+			} else if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
 				let ynQuestion = sessionAttributes.questionAskedSSML;
 				ynQuestion = ynQuestion.replace(/<\/?speak>/g, ''); // remove ssml speak tags
-				// ynQuestion = ynQuestion.replace(/I'm sorry, I didn't quite catch that. /g, '');
 				speechOutput = ynQuestion;
 				repromptOutput = ynQuestion;
 			}

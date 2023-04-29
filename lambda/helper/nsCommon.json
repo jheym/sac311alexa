@@ -25,7 +25,7 @@
             "TRASH_THANKS": "Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
 
             "ABANDONED_VEHICLE_CONFIRMATION": "Just to confirm, are you reporting an abandoned vehicle?",
-            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near {{location}}. <break time=\"0.5s\"/> We'll dispatch someone to the incident as soon as we can. To check the status of your case, you can always check back here and say, check case status. Is there anything else I can help you with?</speak>",
+            "ABANDONED_VEHICLE_THANKS": "<speak>Thank you for reporting the abandoned {{color}} {{make}} {{model}} located near <say-as interpret-as=\"address\">{{location}}</say-as>. To check the status of your case, you can always check back here and say, check case status. Is there anything else I can help you with?</speak>",
             "ABANDONED_VEHICLE_72Q": "Has the vehicle been abandoned for more than seventy-two hours?",
             "ABANDONED_VEHICLE_72A": "Unfortunately we cannot take action until the vehicle has been abandoned for more than 72 hours. Is there anything else I can help you with?",
 

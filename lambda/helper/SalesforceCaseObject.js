@@ -271,7 +271,7 @@ class Salesforce_Case_object {
 					'Content-Type': 'application/json',
 					'Accept-Encoding': 'application/json'
 				},
-				data: case_body + 'error lol'
+				data: case_body
 			})
 			if (![200, 201, 204].includes(case_resp.status)) {
 				console.log('Error creating case');

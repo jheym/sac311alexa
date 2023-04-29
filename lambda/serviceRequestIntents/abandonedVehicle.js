@@ -190,7 +190,7 @@ const CompletedAbandonedVehicleIntentHandler = {
 		var make = Alexa.getSlotValue(handlerInput.requestEnvelope, 'make');
 		var model = Alexa.getSlotValue(handlerInput.requestEnvelope, 'model');
 		var color = Alexa.getSlotValue(handlerInput.requestEnvelope, 'color');
-		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${address}`, caseNumber: `${basic_res.case_number}` })
+		speakOutput = handlerInput.t('ABANDONED_VEHICLE_THANKS', { color: `${color}`, make: `${make}`, model: `${model}`, location: `${address}` })
 		
 		helper.clearContextIntent(handlerInput, sessionAttributes.AbandonedVehicleIntent.name)
 		helper.setQuestion(handlerInput, 'AnythingElse?')
@@ -215,7 +215,6 @@ const yn_IsAbandonedVehicleIntentHandler = {
 		helper.setQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-		const currentIntent = requestEnvelope.request.intent;
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 
@@ -251,6 +250,7 @@ const yn_IsAbandonedVehicleIntentHandler = {
 					}
 				}
 			}
+
 			return responseBuilder
 				.speak(speechOutput)
 				.withShouldEndSession(false)

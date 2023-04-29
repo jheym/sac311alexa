@@ -60,7 +60,7 @@ const serviceNameMap = {
 
 const caseStatusMap = {
 	'NEW': 'new, in other words, it is still waiting to be reviewed',
-	'IN PROGRESS' : 'in progress, in other words, it is has been reviewed and is being worked on',
+	'IN PROGRESS' : 'in progress, in other words, it has been reviewed and is being worked on',
 	'CLOSED' : 'closed, in other words, it has been serviced and completed'
 }
 
