@@ -316,18 +316,37 @@ const FallbackIntentHandler = {
 		if (sessionAttributes.fallbackCount == 1) {
 			speechOutput = `Hmm, I'm not sure I understand, could you repeat that?`;
 			repromptOutput = `I didnt understand what you said, can you repeat that?`;
+
+			if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
+				let ynQuestion = sessionAttributes.questionAskedSSML;
+				ynQuestion = ynQuestion.replace(/<\/?speak>/g, ''); // remove ssml speak tags
+				speechOutput = `I'm sorry, I didn't quite catch that. ${ynQuestion}`
+				repromptOutput = `I'm sorry, I didn't quite catch that. ${ynQuestion}`
+			}
+
 			return handlerInput.responseBuilder
 				.speak(speechOutput)
 				.reprompt(repromptOutput)
+				.withShouldEndSession(false)
 				.getResponse();
 		}
 
 		if (sessionAttributes.fallbackCount == 2) {
 			speechOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
 			repromptOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
+			
+			if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
+				let ynQuestion = sessionAttributes.questionAskedSSML;
+				ynQuestion = ynQuestion.replace(/<\/?speak>/g, ''); // remove ssml speak tags
+				// ynQuestion = ynQuestion.replace(/I'm sorry, I didn't quite catch that. /g, '');
+				speechOutput = ynQuestion;
+				repromptOutput = ynQuestion;
+			}
+			
 			return handlerInput.responseBuilder
 				.speak(speechOutput)
 				.reprompt(repromptOutput)
+				.withShouldEndSession(false)
 				.getResponse();
 		}
 		
@@ -370,14 +389,29 @@ const SessionEndedRequestHandler = {
 		);
 	},
 	async handle(handlerInput) {
+		const { attributesManager, responseBuilder } = handlerInput;
+		let sessionAttributes = attributesManager.getSessionAttributes();
+
 		if (handlerInput.requestEnvelope.request.error) {
 			let type = handlerInput.requestEnvelope.request.error.type;
 			let message = handlerInput.requestEnvelope.request.error.message;
 			console.log(`SessionEnded Error: ${type}: ${message}`);
 		}
-		console.log("Session ended"); //this is run everytime the skill is loaded
 
-		return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
+		if (handlerInput.requestEnvelope.request.reason === 'EXCEEDED_MAX_REPROMPTS' &&
+			sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML)
+		{
+			const repromptQuestion = sessionAttributes.questionAskedSSML;
+			return responseBuilder
+			.speak(`I'm sorry, I didn't quite catch that. ${repromptQuestion}`)
+			.withShouldEndSession(false)
+			.getResponse();
+
+		}
+
+		console.log("Session ended");
+
+		return responseBuilder.getResponse(); // notice we send an empty response
 	},
 };
 
@@ -416,9 +450,13 @@ const ErrorHandler = {
 		console.log(`~~~~ Error handled ~~~~`);
 		console.log(error);
 
+		if (error)
+
+		helper.setQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
 			.speak(handlerInput.t("ERROR_MSG"))
 			.reprompt(handlerInput.t("ERROR_MSG"))
+			.withShouldEndSession(false)
 			.getResponse();
 	},
 }
@@ -480,16 +518,16 @@ const GenericRequestInterceptor = {
  */
 const GenericResponseInterceptor = {
 	process(handlerInput, response) {
+		
 		const directive = response.directives && response.directives[0];
+		const { attributesManager } = handlerInput;
+		let sessionAttributes = attributesManager.getSessionAttributes();
+		
 		if (directive && directive.type === 'Dialog.ElicitSlot') {
-			const { attributesManager } = handlerInput;
-			const sessionAttributes = attributesManager.getSessionAttributes();
 			sessionAttributes.isElicitingSlot = true;
 			sessionAttributes.responseToRestore = response;
 			attributesManager.setSessionAttributes(sessionAttributes);
 		} else {
-			const { attributesManager } = handlerInput;
-			const sessionAttributes = attributesManager.getSessionAttributes();
 			sessionAttributes.isElicitingSlot = false;
 			if (sessionAttributes.responseToRestore){
 				delete sessionAttributes.responseToRestore;
@@ -500,7 +538,17 @@ const GenericResponseInterceptor = {
 			attributesManager.setSessionAttributes(sessionAttributes);
 		}
 		// console.log("ResponseInterceptor: " + JSON.stringify(response, null, 2));
-	}		
+
+		if (sessionAttributes.questionAsked && response && response.outputSpeech && response.outputSpeech.ssml) {
+			sessionAttributes.questionAskedSSML = response.outputSpeech.ssml;
+			attributesManager.setSessionAttributes(sessionAttributes);
+		} else {
+			if (sessionAttributes.questionAskedSSML) {
+				delete sessionAttributes.questionAskedSSML;
+			}
+			attributesManager.setSessionAttributes(sessionAttributes);
+		}
+	}
 }
 
 /**
@@ -538,7 +586,7 @@ const ContextSwitchingRequestInterceptor = {
 			}
 
 			// Regardless of whether we've seen this intent before, we need to let
-			// future ContextSwitchingRequestInterceptor known that this intent has
+			// future ContextSwitchingRequestInterceptor know that this intent has
 			// been invoked before
 			sessionAttributes[currentIntent.name] = currentIntent;
 			attributesManager.setSessionAttributes(sessionAttributes);

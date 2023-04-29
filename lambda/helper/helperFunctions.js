@@ -485,7 +485,8 @@ async function getInternalAddressCandidate(potentialCandidate) {
 	}
 
 	try {
-		const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+		const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates`
+		const response = await axios.get(url, {
 			params: {
 				Street: potentialCandidate.attributes.ShortLabel,
 				City: potentialCandidate.attributes.City,
@@ -520,7 +521,8 @@ async function getInternalAddress(candidate) {
 	}
 
 	try {
-		const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+		const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates`
+		const response = await axios.get(url, {
 			params: {
 				Street: candidate.attributes.ShortLabel,
 				City: candidate.attributes.City,
@@ -818,7 +820,8 @@ async function getInternalAddressCandidate(potentialCandidate) {
 	}
 
 	try {
-		const response = await axios.get(process.env.INTERNAL_GEOCODER_URL, {
+		const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates`
+		const response = await axios.get(url, {
 			params: {
 				Street: potentialCandidate.attributes.ShortLabel,
 				City: potentialCandidate.attributes.City,

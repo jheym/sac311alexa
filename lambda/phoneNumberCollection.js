@@ -105,7 +105,7 @@ const GetPhoneNumberIntentHandler = {
 
 			const phoneNumberString = `<say-as interpret-as="telephone">${devicePhoneNumber}</say-as>`
 			return responseBuilder
-			.speak(`<speak>I found a phone number associated with your Amazon account. The number is ${phoneNumberString}. Would you like to use this number?</speak>`)
+			.speak(`<speak>I found a phone number associated with your Amazon account. The number is ${phoneNumberString}. Would you like to use this number for your service request?</speak>`)
 			.addConfirmSlotDirective('userGivenPhoneNumber', updatedIntent)
 			.getResponse();
 		}

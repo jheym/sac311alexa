@@ -84,7 +84,7 @@ const InProgressGetPoliceBeatIntentHandler = {
 			const layerDefsString = JSON.stringify(layerDefs)
 			const geometryString = JSON.stringify(geometry)
 
-			const url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=${layerDefsString}&geometry=${geometryString}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
+			const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=${layerDefsString}&geometry=${geometryString}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
 
 			try {
 				var res = await axios.get(encodeURI(url), {

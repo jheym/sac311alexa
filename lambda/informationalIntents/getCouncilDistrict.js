@@ -84,7 +84,7 @@ const InProgressGetCouncilDistrictIntentHandler = {
 			const layerDefsString = JSON.stringify(layerDefs)
 			const geometryString = JSON.stringify(geometry)
 
-			const url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=${layerDefsString}&geometry=${geometryString}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
+			const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=${layerDefsString}&geometry=${geometryString}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
 
 			try {
 				var res = await axios.get(encodeURI(url), {
@@ -104,7 +104,7 @@ const InProgressGetCouncilDistrictIntentHandler = {
 				const distNum = districtLayer.features[0].attributes.DISTNUM; // TODO: Find where police beat is in the response
 				const distNumSSML = `<say-as interpret-as="spell-out">${distNum}</say-as>`
 				const distMember = districtLayer.features[0].attributes.NAME;
-				speechOutput = `The council district for the location you gave is ${distNumSSML}. The district member is ${distMember}. `
+				speechOutput = `The council district for the location you gave is district ${distNumSSML}, and the district member is ${distMember}.`
 
 			} catch (error) {
 				console.log(error);
@@ -200,7 +200,7 @@ const layerDefs = [
     },
     {
         "layerId": 8,
-        "outFields": "DISTNUM"
+        "outFields": "DISTNUM, NAME"
     },
     {
         "layerId": 9,

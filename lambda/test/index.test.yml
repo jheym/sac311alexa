@@ -1,9 +1,0 @@
----
-configuration:
-     locales: en-US
----
-- Alexa, open sacramento three one one:  "Thank you for contacting Sacramento Three One One. How can I help you today?:*"
-
----
-- test: Launch and ask for help 
-- AMAZON.HelpIntent: "You can say hello to me! How can I help?"

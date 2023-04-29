@@ -164,18 +164,6 @@ class Salesforce_Case_object {
 		this.b = new Date(Date.now()).toISOString(); // TODO: Does this date get submitted to the database? Where? Also, it might be in the wrong format and it is not in local time.
 		await this.create_case_questions();
 
-		// try {
-		// 	this.case_resp = await sendPatchRequest(`${this.sf_url}/sobjects/Case/${this.case_id}`, this.token, case_body);
-		// } catch (error) {
-		// 	console.log(error);
-		// 	throw new Error(error);
-		// }
-
-
-
-
-		
-
 		try {
 			this.case_resp = await axios({
 				url: `${this.sf_url}/sobjects/Case/${this.case_id}`,
@@ -225,20 +213,34 @@ class Salesforce_Case_object {
 		this.case_ans = this.service_question_mapper(user_json);
 		case_body.Description = `Initial Case description: \n ${this.case_ans.Description}`;
 		case_body.Email_Web_Notes__c = this.case_ans.Description;
-		let case_resp = await axios ({
-			url: `${this.sf_url}/sobjects/Case`,
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${this.token}`,
-				'Content-Type': 'application/json',
-				'Accept-Encoding': 'application/json'
-			},
-			data: case_body
-		})
-		if (![200, 201, 204].includes(case_resp.status)) {
-			console.log('Error creating case');
-			console.log(case_resp.data);
+		let case_resp;
+		try {
+			case_resp = await axios ({
+				url: `${this.sf_url}/sobjects/Case`,
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${this.token}`,
+					'Content-Type': 'application/json',
+					'Accept-Encoding': 'application/json'
+				},
+				data: case_body
+			})
+			if (![200, 201, 204].includes(case_resp.status)) {
+				console.log('Error creating case');
+				console.log(case_resp.data);
+			}
+		} catch(error) {
+			if (error.response) {
+				console.log(`Error creating case - Response: ${error.response.status}`);
+				console.log(error.response);
+				throw new Error(error);
+			} else {
+				console.log("Error creating case");
+				console.log(error);
+				throw new Error(error);
+			}
 		}
+
 		this.case_id = case_resp.data.id;
 		await this.get_case_number();
 		return {'case_number' : this.case_number, 'case_id' : this.case_id};
@@ -259,21 +261,34 @@ class Salesforce_Case_object {
 		case_body.Status = "NEW";
 		case_body.Description = `Case Details: \n ${this.case_ans.Description}`;
 		case_body.Email_Web_Notes__c = this.case_ans.Description;
-		let case_resp = await axios ({
-			url: `${this.sf_url}/sobjects/Case/${this.case_id}`,
-			method: 'PATCH',
-			headers: {
-				'Authorization': `Bearer ${this.token}`,
-				'Content-Type': 'application/json',
-				'Accept-Encoding': 'application/json'
-			},
-			data: case_body
-		})
-		if (![200, 201, 204].includes(case_resp.status)) {
-			console.log('Error creating case');
-			console.log(case_resp.data);
+
+		try {
+			let case_resp = await axios ({
+				url: `${this.sf_url}/sobjects/Case/${this.case_id}`,
+				method: 'PATCH',
+				headers: {
+					'Authorization': `Bearer ${this.token}`,
+					'Content-Type': 'application/json',
+					'Accept-Encoding': 'application/json'
+				},
+				data: case_body + 'error lol'
+			})
+			if (![200, 201, 204].includes(case_resp.status)) {
+				console.log('Error creating case');
+				console.log(case_resp.data);
+			}
+			return { 'case_id' : case_id, 'status_code' : case_resp.status }
+		} catch(error) {
+			if (error.response) {
+				console.log(`Error creating case - Response: ${error.response.status}`);
+				console.log(error.response);
+				throw new Error(error);
+			} else {
+				console.log("Error creating case");
+				console.log(error);
+				throw new Error(error);
+			}
 		}
-		return { 'case_id' : case_id, 'status_code' : case_resp.status }
 	}
 
 
@@ -475,7 +490,7 @@ class Salesforce_Case_object {
 		// console.log(Address.length)
 		if (Address.length > 0) { // TODO: Test many addresses. We may have to change the slot type back to AMAZON.SearchQuery.
 			// FIXME: Doesn't work when someone says "seven zero one forty-first street" we get "70 141st street" Should we just collect street number and street name separately?
-			let regex = /(\d)[\s,]+(?=\d(?!\d*(?:st|nd|rd|th)\b))/g; // This regex matches a space or comma followed by a number that is not followed by a number and a suffix (e.g. 1st, 2nd, 3rd, 4th, etc.)
+			let regex = /(\d)[\s,]+(?=\d(?!\d*(?:st|nd|rd|th|ST|ND|RD|TH)\b))/g; // This regex matches a space or comma followed by a number that is not followed by a number and a suffix (e.g. 1st, 2nd, 3rd, 4th, etc.)
 			Address = Address.replace(regex, '$1')
 			let addr = Address.replace(" USA",'');
 			// console.log(`In world_address_verification: ${addr}`)
@@ -504,7 +519,7 @@ class Salesforce_Case_object {
 			} else {
 				console.log('In world_address_verification (else reached)');
 				let url_address = encodeURIComponent(addr);
-				let city_geocoder_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates?SingleLine=${url_address}&category=&outFields=*&outSR=4326&searchExtent=&location=&distance=&magicKey=&f=pjson`;
+				let city_geocoder_url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates?SingleLine=${url_address}&category=&outFields=*&outSR=4326&searchExtent=&location=&distance=&magicKey=&f=pjson`;
 				let city_response = await axios.get(city_geocoder_url)
 				if (city_response.status == 200 && city_response.data['candidates'].length > 0) {
 					internal_response = internal_verifier(city_response.data, threshold);
@@ -650,9 +665,9 @@ class Salesforce_Case_object {
 			// console.log(x, y);
 			var dtpr_flag = await this.check_dtpr(x, y);
 			if (dtpr_flag)
-				overlay_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG,+RECYCLE_WEEK,+OP_AREA"},{"layerId":2,"outFields":"DISTRICT"},{"layerId":3,"outFields":"ZIP5"},{"layerId":4,"outFields":"NAME"},{"layerId":5,"outFields":"CITY_NAME"},{"layerId":6,"outFields":"BEAT"},{"layerId":7,"outFields":"DISTRICT"},{"layerId":8,"outFields":"DISTNUM"},{"layerId":9,"outFields":"DISTRICT"},{"layerId":10,"outFields":"PAGE,TB_ROW,TB_COL"},{"layerId":11,"outFields":"OFFICER"},{"layerId":12,"outFields":"OFFICER"},{"layerId":13,"outFields":"RAINA"},{"layerId":14,"outFields":"RAINB"},{"layerId":15,"outFields":"NAME"},{"layerId":16,"outFields":"TILENUM"},{"layerId":17,"outFields":"DISTRICT"},{"layerId":18,"outFields":"NAME"},{"layerId":19,"outFields":"BEAT_NUM"},{"layerId":25,"outFields":"MAINTSUP"},{"layerId":34,"outFields":"ZI_OFFICER"},{"layerId":35,"outFields":"VA_OFFICER"},{"layerId":36,"outFields":"H_OFFICER"},{"layerId":38,"outFields":"SW_OFFICER"},{"layerId":39,"outFields":"NSA"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
+				overlay_url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG,+RECYCLE_WEEK,+OP_AREA"},{"layerId":2,"outFields":"DISTRICT"},{"layerId":3,"outFields":"ZIP5"},{"layerId":4,"outFields":"NAME"},{"layerId":5,"outFields":"CITY_NAME"},{"layerId":6,"outFields":"BEAT"},{"layerId":7,"outFields":"DISTRICT"},{"layerId":8,"outFields":"DISTNUM"},{"layerId":9,"outFields":"DISTRICT"},{"layerId":10,"outFields":"PAGE,TB_ROW,TB_COL"},{"layerId":11,"outFields":"OFFICER"},{"layerId":12,"outFields":"OFFICER"},{"layerId":13,"outFields":"RAINA"},{"layerId":14,"outFields":"RAINB"},{"layerId":15,"outFields":"NAME"},{"layerId":16,"outFields":"TILENUM"},{"layerId":17,"outFields":"DISTRICT"},{"layerId":18,"outFields":"NAME"},{"layerId":19,"outFields":"BEAT_NUM"},{"layerId":25,"outFields":"MAINTSUP"},{"layerId":34,"outFields":"ZI_OFFICER"},{"layerId":35,"outFields":"VA_OFFICER"},{"layerId":36,"outFields":"H_OFFICER"},{"layerId":38,"outFields":"SW_OFFICER"},{"layerId":39,"outFields":"NSA"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
 			else
-				overlay_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG,+SERVICE_DAY+,+RECYCLE_WEEK,+ROUTE,+OP_AREA"},{"layerId":2,"outFields":"DISTRICT"},{"layerId":3,"outFields":"ZIP5"},{"layerId":4,"outFields":"NAME"},{"layerId":5,"outFields":"CITY_NAME"},{"layerId":6,"outFields":"BEAT"},{"layerId":7,"outFields":"DISTRICT"},{"layerId":8,"outFields":"DISTNUM"},{"layerId":9,"outFields":"DISTRICT"},{"layerId":10,"outFields":"PAGE,TB_ROW,TB_COL"},{"layerId":11,"outFields":"OFFICER"},{"layerId":12,"outFields":"OFFICER"},{"layerId":13,"outFields":"RAINA"},{"layerId":14,"outFields":"RAINB"},{"layerId":15,"outFields":"NAME"},{"layerId":16,"outFields":"TILENUM"},{"layerId":17,"outFields":"DISTRICT"},{"layerId":18,"outFields":"NAME"},{"layerId":19,"outFields":"BEAT_NUM"},{"layerId":25,"outFields":"MAINTSUP"},{"layerId":28,"outFields":"ROUTE"},{"layerId":29,"outFields":"ROUTE"},+{"layerId":34,"outFields":"ZI_OFFICER"},{"layerId":35,"outFields":"VA_OFFICER"},{"layerId":36,"outFields":"H_OFFICER"},{"layerId":38,"outFields":"SW_OFFICER"},{"layerId":39,"outFields":"NSA"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
+				overlay_url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG,+SERVICE_DAY+,+RECYCLE_WEEK,+ROUTE,+OP_AREA"},{"layerId":2,"outFields":"DISTRICT"},{"layerId":3,"outFields":"ZIP5"},{"layerId":4,"outFields":"NAME"},{"layerId":5,"outFields":"CITY_NAME"},{"layerId":6,"outFields":"BEAT"},{"layerId":7,"outFields":"DISTRICT"},{"layerId":8,"outFields":"DISTNUM"},{"layerId":9,"outFields":"DISTRICT"},{"layerId":10,"outFields":"PAGE,TB_ROW,TB_COL"},{"layerId":11,"outFields":"OFFICER"},{"layerId":12,"outFields":"OFFICER"},{"layerId":13,"outFields":"RAINA"},{"layerId":14,"outFields":"RAINB"},{"layerId":15,"outFields":"NAME"},{"layerId":16,"outFields":"TILENUM"},{"layerId":17,"outFields":"DISTRICT"},{"layerId":18,"outFields":"NAME"},{"layerId":19,"outFields":"BEAT_NUM"},{"layerId":25,"outFields":"MAINTSUP"},{"layerId":28,"outFields":"ROUTE"},{"layerId":29,"outFields":"ROUTE"},+{"layerId":34,"outFields":"ZI_OFFICER"},{"layerId":35,"outFields":"VA_OFFICER"},{"layerId":36,"outFields":"H_OFFICER"},{"layerId":38,"outFields":"SW_OFFICER"},{"layerId":39,"outFields":"NSA"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
 			
 			const res = await axios.get(encodeURI(overlay_url));
 
@@ -664,7 +679,7 @@ class Salesforce_Case_object {
 
 	async check_dtpr(x, y) {
 		var dtpr_flag = false;
-		var url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
+		var url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/query?layerDefs=[{"layerId":0,"outFields":"DTPR_FLAG"}]&geometry={"x":' + ${x} + ',"y":' + ${y} + '}&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&inSR=4326&returnDistinctValues=false&returnGeometry=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnTrueCurves=false&sqlFormat=none&f=json`
 		// console.log(url);
 		
 		const res = await axios.get(encodeURI(url))
@@ -692,7 +707,7 @@ class Salesforce_Case_object {
 			fields_to_capture = fields_to_capture.concat(['GARBAGE_DAY','RECYCLE_DAY','RECYCLE_ROUTE','GARBAGE_ROUTE','LAWN_DAY','LAWN_ROUTE'])
 		}
 		let fields = fields_to_capture.join(',');
-		let addr_url=`https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/37/query?where=ADDRESSID=${address_id}&outFields=${fields}&f=pjson`
+		let addr_url=`${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/37/query?where=ADDRESSID=${address_id}&outFields=${fields}&f=pjson`
 		const res = await axios.get(encodeURI(addr_url));
 
 		const day_mapping = {'SUN': 'Sunday', 'MON': 'Monday', 'TUE': 'Tuesday', 'WED': 'Wednesday', 'THU': 'Thursday', 'FRI': 'Friday', 'SAT': 'Saturday'};
@@ -714,7 +729,7 @@ class Salesforce_Case_object {
 
 	async get_street_id(address_id) {
 		const layer_id = 22;
-		const gis_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/${layer_id}/query?where=ADDRESSID = ${address_id}&outFields=*&returnGeometry=true&f=pjson`
+		const gis_url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/${layer_id}/query?where=ADDRESSID = ${address_id}&outFields=*&returnGeometry=true&f=pjson`
 		let res = await axios.get(encodeURI(gis_url));
 		res.data.id = layer_id;
 		return res.data
@@ -724,7 +739,7 @@ class Salesforce_Case_object {
 		const layer_id = 23;
 		const fields_to_capture = ['C1STRNAME','C2STRNAME','PRIVATE'];
 		const fields = fields_to_capture.join(', ');
-		const gis_url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/${layer_id}/query?where=UNIQUE_ID = ${street_id}&outFields=${fields}&f=pjson`;
+		const gis_url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/${layer_id}/query?where=UNIQUE_ID = ${street_id}&outFields=${fields}&f=pjson`;
 		let res = await axios.get(encodeURI(gis_url));
 		res.data.id = layer_id;
 		return res.data;
@@ -1116,11 +1131,11 @@ class Salesforce_Case_object {
 		}
 	}
 
+
 	_postQuestion(json_in) {
-		// delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
-		// delete json_out.Portal_Question_Label__c;
+
 		try {
-			let case_resp = axios({ // TODO: Don't await here. Send all the requests at once and await them all at the end
+			let case_resp = axios({
 				url: `${this.sf_url}/sobjects/Case_Questions__c`,
 				method: 'POST',
 				headers: { 
@@ -1131,17 +1146,13 @@ class Salesforce_Case_object {
 				data: json_in
 			});
 
-			// if (![200, 201, 204, 203].includes(case_resp.status)) {
-			// 	console.log('Error updating case questions');
-			// 	console.log(case_resp.data);
-			// }
 			return case_resp;
+		
 		} catch(error) {
 			console.error("Error creating basic case");
 			console.log(error);
 			throw error;
 		}
-		// resp.push(case_resp.data);
 	}
 
 	  

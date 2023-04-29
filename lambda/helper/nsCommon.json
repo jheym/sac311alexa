@@ -12,7 +12,7 @@
             "FALLBACK_MSG_REPROMPT": "Please try again.",
             "FALLBACK_STILL_MSG": "I'm sorry, I'm still having trouble understanding you. Would you like me to transfer you to a live agent?",
             "FALLBACK_STILL_MSG_REPROMPT": "Would you like me to transfer you to a live agent?",
-            "ERROR_MSG": "Sorry, I had trouble doing what you asked. Please try again.",
+            "ERROR_MSG": "I'm sorry. Something went wrong on my end. Please try again or contact customer service at 3-1-1. Is there anything else I can help you with?",
             "UNKNOWN_MSG": "Sorry about that. If you try phrasing your issue differently, I may be able to understand. I'll wait.",
             "UNKNOWN_MSG_REPROMPT": "I'm still here. Do you want to try reporting your issue again?",
             "INTENT_REFLECTOR": "You just triggered {{intentName}}",

@@ -22,6 +22,8 @@ const StartedTrashPickupDayIntentHandler = {
 			if (addressLine1.length > 0) {
 				const token = await helper.getOAuthToken(handlerInput);
 				const myCaseObj = new sfCase(token);
+				sessionAttributes.caseObj = myCaseObj;
+				attributesManager.setSessionAttributes(sessionAttributes);
 				var validatorObj = await myCaseObj.address_case_validator(addressLine1);
 			}
 		}
@@ -64,62 +66,105 @@ const InProgressTrashPickupDayIntentHandler = {
 		)
 	},
 	async handle(handlerInput) {
-		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
+		const { attributesManager, responseBuilder } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 		const address = sessionAttributes.confirmedValidatorRes;
 		const { internal_geocoder } = address.geocoderResponse;
-	
-		if(!address.Within_City) {
-			speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address")
-		}
-		else {
-			const user_fld = internal_geocoder.candidates[0].attributes.User_fld;
-			const url = `https://sacgis311.cityofsacramento.org/arcgis/rest/services/GenericOverlay/FeatureServer/37/query?where=ADDRESSID = ${user_fld}&outFields=GARBAGE_DAY&f=pjson`
+		var speechOutput;
 
-			try {
-				var res = await axios.get(encodeURI(url), {
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-					"Accept" : "application/json",
-				}
-			});
-				console.log(res);
-			} catch(error) {
-				console.log(error);
-			}
-			console.log(res);
-			try {
-				const garbage_day = res.data.features[0].attributes.GARBAGE_DAY;
-				console.log(garbage_day);
-				if(garbage_day === 'MON-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Monday.")
-				}
-				else if(garbage_day === 'TUE-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Tuesday.")
-				}
-				else if(garbage_day === 'WED-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Wednesday.")
-				}
-				else if(garbage_day === 'THU-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Thursday.")
-				}
-				else if(garbage_day === 'FRI-GARB') {
-					speakOutput = handlerInput.t("Your trash pickup day is Friday.")
-				}
-				else {
-					speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address.")
-				}
-			} catch(error) {
-				console.log(error);
-				speakOutput = handlerInput.t("Sorry, I cannot retrieve a pickup day for your address.")
-			}
-			
+		if(!address.Within_City) {
+			let speechOutput = `I'm sorry, I wasn't able to find a service day for that address.`;
+			speechOutput += ` Is there anything else I can help you with?`;
+			helper.setQuestion(handlerInput, 'AnythingElse?')
+			return responseBuilder
+			.withShouldEndSession(false)
+			.speak(speechOutput)
+			.getResponse();
 		}
-		speakOutput += handlerInput.t(" Is there anything else I can help you with?")
+		
+		const caseObj = sessionAttributes.caseObj;
+		const myCaseObj = new sfCase(caseObj.token); // Reconstruct the case object
+		for (let [key, value] of Object.entries(caseObj)) { myCaseObj[key] = value; };
+		const { out_json, dtpr } = await myCaseObj.overlay(internal_geocoder);
+
+		if (dtpr) {
+
+			if (!(internal_geocoder.candidates[0].attributes.Addr_type === 'Address')) {
+				let speechOutput = `I'm sorry, I cannot retrieve a pickup day for that address.`;
+				speechOutput += ` Is there anything else I can help you with?`;
+				helper.setQuestion(handlerInput, 'AnythingElse?');
+				return responseBuilder
+				.withShouldEndSession(false)
+				.speak(speechOutput)
+				.getResponse();
+			}
+
+			const user_fld = internal_geocoder.candidates[0].attributes.User_fld;
+			const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/GenericOverlay/FeatureServer/37/query?where=ADDRESSID = ${user_fld}&outFields=*&f=pjson`
+			let res;
+			
+			try {
+				res = await axios.get(encodeURI(url), {
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						"Accept" : "application/json",
+					}
+				});
+			} catch(error) {
+				if (error.response) {
+					console.log(error.response.data);
+					console.log(error.response.status);
+					throw new Error(error.response.data);
+				} else {
+					console.log(error);
+					throw new Error(error);
+				}
+			}
+
+			const dtprDayMap = {
+				"MON": "Monday",
+				"TUE": "Tuesday",
+				"WED": "Wednesday",
+				"THU": "Thursday",
+				"FRI": "Friday",
+			}
+
+			const garbageDay = res?.data?.features[0]?.attributes?.GARBAGE_DAY.split('-')[0]
+			const recycleDay = res?.data?.features[0]?.attributes?.RECYCLE_DAY.split('-')[0];
+			const recycleRoute = res?.data?.features[0]?.attributes?.RECYCLE_ROUTE;
+			console.log('test');
+
+			const garbageDayString =  dtprDayMap.hasOwnProperty(garbageDay) ? dtprDayMap[garbageDay] : null;
+			const recycleDayString =  dtprDayMap.hasOwnProperty(recycleDay) ? dtprDayMap[recycleDay] : null;
+
+			if (garbageDayString || recycleDayString) {
+				
+				if (garbageDayString) {
+					speechOutput = `Your garbage service day is every ${garbageDayString}. `;
+				}
+
+				if (recycleDayString) {
+					speechOutput += `Your recycling service day is every other ${recycleDayString}. `;
+				}
+						
+			} else {
+				speechOutput = `I'm sorry, I wasn't able to find a service day for that address. `;
+			}
+
+		}
+
+		if (!dtpr) {
+			const layer0 = out_json?.data?.layers?.find(layer => layer.id === 0);
+			const garbageDay = layer0?.features[0]?.attributes?.SERVICE_DAY;
+			const recycleWeek = layer0?.features[0]?.attributes?.RECYCLE_WEEK;
+			speechOutput = `Your garbage service day is every ${garbageDay}. Your recycling service day is every other ${garbageDay}. `
+		}
+	
+		speechOutput += `Is there anything else I can help you with?`;
 		helper.setQuestion(handlerInput, 'AnythingElse?')
-		return handlerInput.responseBuilder
+		return responseBuilder
 		.withShouldEndSession(false)
-		.speak(speakOutput)
+		.speak(speechOutput)
 		.getResponse();
 	}
 }
@@ -168,6 +213,12 @@ const yn_UseHomeAddressForGarbageDayIntentHandler = {
 		}
 	}
 }
+
+const dtprRecycleMap = {
+
+}
+
+
 
 module.exports = {
     StartedTrashPickupDayIntentHandler,
