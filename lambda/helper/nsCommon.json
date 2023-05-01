@@ -21,7 +21,10 @@
             "CRITICAL_ERROR_MSG": "I'm sorry, something went wrong on our end. Please try again later.",
             "LIVEAGENT_CONFIRM": "Calling customer service",
             "LIVEAGENT_PROBLEM": "Sorry, I am having a problem right now.",
-            "ANYTHING_ELSE_MSG": "I'm sorry about that. Is there anything else I can help you with?",
+            "ANYTHING_ELSE_MSG": "Is there anything else I can help you with today?",
+            "GENERAL_DESC": "Can you give me a general description of your case.",
+            "REPEAT_DESC": "Is your description {{desc}}?",
+            "GENERIC_CASE_THANKS": "Thank you for submitting the service request. Is there anything else I can help you with?",
             "TRASH_THANKS": "Thank you for reporting the {{trashType}} trash. We'll dispatch someone to the incident as soon as we can. Is there anything else I can help you with?",
 
             "ABANDONED_VEHICLE_CONFIRMATION": "Just to confirm, are you reporting an abandoned vehicle?",
@@ -56,9 +59,11 @@
             "CONTINUE_PHONE_MSG" : "Im sorry, I wasn't able to get your phone number. Please report your issue.",
             "PHONE_NUMBER_ERROR": "I'm sorry, I didn't get your phone number. Please try again.",
 
-            "CLOGGED_INTRO": "Where is the location of the clogged drain? You can give a nearby address or cross street.",
-            "CLOGGED_DESC": "Please provide a generic description of the clogged drain.",
-            "CLOGGED_THANKS": "Thank you for alerting us to the clogged street drain. We will send out a crew to resolve the issue as soon as possible. Is there anything else we can help you with."
+            "LOSTDOG_CONFIRM": "Are you concerned about a lost dog?",
+            "LOSTDOG_ADDRESS": "Can you tell me where the dog was found? I can check any address within the city of Sacramento. What address should I check?",
+            "CLOGGED_CONFIRM": "Are you calling regarding a clogged storm drain or gutter?",
+            "CLOGGED_ADDRESS": "Where is the location of the clogged drain? You can give a nearby address or cross street.",
+            "CLOGGED_INFO": "Drains usually get clogged by leaves. In the future try to keep leaves out of the gutter. Would you like to submit a service request?"
         }
     },
     "es": {

@@ -756,17 +756,20 @@ var requestHandlers = [
 	getCouncilDistrict.InProgressGetCouncilDistrictIntentHandler,
 	getCouncilDistrict.yn_UseHomeAddressForCouncilDistrictIntentHandler,
 	foundLostDog.StartedFoundLostDogIntentHandler,
+	foundLostDog.yn_StartedFoundLostDogIntentHandler,
 	foundLostDog.InProgressFoundLostDogIntentHandler,
 	foundLostDog.yn_SubmitLostDogServiceRequestIntentHandler,
-	foundLostDog.CompletedFoundLostDogServiceRequest,
+	foundLostDog.yn_CompletedFoundLostDogServiceRequest,
 	KnowledgeBaseIntent.StartedKBTrashCanIntentHandler,
 	KnowledgeBaseIntent.StartedKBJunkPickUpIntentHandler,
 	KnowledgeBaseIntent.StartedKBPayJunkPickupIntentHandler,
 	KnowledgeBaseIntent.StartedKBReplacementContainerIntentHandler,
 	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
-	cloggedStormDrain.CompletedCloggedStormDrainIntentHandler,
 	cloggedStormDrain.StartedCloggedStormDrainIntentHandler,
-	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler
+	cloggedStormDrain.yn_StartedCloggedStormDrainIntentHandler,
+	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler,
+	cloggedStormDrain.yn_SubmitCloggedDrainServiceRequestIntentHandler,
+	cloggedStormDrain.yn_CompletedCloggedStormDrainServiceRequest
 ]
 
 var requestInterceptors = [
