@@ -50,17 +50,29 @@ To test your skill, we recommend using the [simulator](https://developer.amazon.
 
 # ASK SDK Basics
 
-Towards the end of the `index.js` file, the [SkillBuilders object](https://developer.amazon.com/en-US/docs/alexa/alexa-skills-kit-sdk-for-nodejs/construct-skill-instance.html#skill-builders) is responsible for constructing the Skill instance. ![Pasted image 20230425211147](resources/Pasted%20image%2020230425211147.png)
+Towards the end of the `index.js` file, the [SkillBuilders object](https://developer.amazon.com/en-US/docs/alexa/alexa-skills-kit-sdk-for-nodejs/construct-skill-instance.html#skill-builders) is responsible for constructing the Skill instance. 
+
+<img src="resources/Pasted%20image%2020230425211147.png" width="600"/>
+
 The `addrequestHandlers()`, `addRequestInterceptors()`, and `addResponseInterceptors()` methods register all of the event handlers defined across the project. Whenever you create a new handler, it must be registered in one of the handler arrays above.
-![Pasted image 20230425211541](resources/Pasted%20image%2020230425211541.png)
+
+
+<!-- <img align="right" src="resources/Pasted%20image%2020230425211541.png" width="300" style="padding: 10px" /> -->
+
+<img src="resources/Pasted%20image%2020230425211541.png" width="400" style="padding: 10px">
+
 [Request handlers](https://developer.amazon.com/en-US/docs/alexa/alexa-skills-kit-sdk-for-nodejs/handle-requests.html#request-handlers) are responsible for handling one or more types of incoming requests. When a Skill user is in a session with our Skill and says `Report an abandoned vehicle`, the user's device sends the voice data to the Alexa Voice Service for natural language processing, where the Skill user's utterance is compared with our custom interaction model, using our defined utterances as "hints" for Alexa to decide which intent it should match to. 
+
+<br>
 
 ![Pasted image 20230425214544](resources/Pasted%20image%2020230425214544.png)
 
 Since we have a similar utterance in our interaction model, Alexa confidently resolves the voice data to the `AbandonedVehicleIntent` defined in the interaction model, and sends a request to our Skill.
 
 Our Skill receives the request and and in turn checks each handler in the **requestHandlers\[\] array** until a handler is found. Since we have a handler for `AbandonedVehicleIntent`, the request gets handled.
-![Pasted image 20230425213230](resources/Pasted%20image%2020230425213230.png)
+
+<img src="resources/Pasted%20image%2020230425213230.png" width="600">
+
 In the above example, the `StartedAbandonedVehicleIntentHandler` runs the request against the `canHandle()` function. If the `canHandle` function returns true, the `handle()` function will process the request. Since the request has **type** `IntentRequest`, and the **intent name** is `AbandonedVehicleIntent`, and since the **dialog state** of the request is `STARTED`, the request will be processed.  
 
 
