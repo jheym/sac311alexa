@@ -1,5 +1,9 @@
 # Maintenance Manual
 
+
+<img align="right" src="resources/Pasted%20image%2020230501202651.png" width="300" style="padding: 20px">
+<img align="right" src="resources/ECS_formal_hor_stack_1p_1c_gold_hires%201.png" width="300" style="padding: 20px">
+
 ## Jump-to
 [Developer environment setup](#developer-environment-setup) \
 [ASK SDK basics](#ask-sdk-basics) \
@@ -8,7 +12,7 @@
 [Slots & dialog management](#slots--dialog-management) \
 [Session attributes](#session-attributes) \
 [Localization](#localization) \
-<br>
+<br><br><br>
 # Developer environment setup
 
 ### Requirements
