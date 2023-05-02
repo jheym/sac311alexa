@@ -162,7 +162,7 @@ The main entry point for the skill code is in the `index.js` file. It contains t
 
 ## Environment Variables
 The `.env` file contains the environment variables that get loaded into `process.env` when the code is run by the debugger. The following environment variables should all be set.
-```json
+```js
 ENVIRONMENT="dev"
 SF_AUTH_URL=${OAuth_Authorization_Endpoint}
 SF_CLIENT_ID=${OAuth_Client_Id}
