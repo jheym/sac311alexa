@@ -1,4 +1,4 @@
-# Maintenance Manual
+# Maintenance Manual: Sacramento 311 Alexa Skill 
 
 
 <img align="right" src="resources/Pasted%20image%2020230501202651.png" width="300" style="padding: 20px">
@@ -27,8 +27,9 @@
 Unfortunately, VSCode is the only IDE which has integrated support for locally running and debugging Alexa Skills. If VSCode is not an option, you will have to refer to the official [documentation](https://github.com/alexa/alexa-skills-kit-sdk-for-nodejs/blob/2.0.x/ask-sdk-local-debug/README.md) for the Node.js ASK SDK Local Debugger and set up [LWA Token](https://developer.amazon.com/docs/login-with-amazon/conceptual-overview.html) authentication manually.
 
 Before continuing, ensure you've installed Node.js and Java properly by checking if their commands work in your terminal, whether it's powershell, cmd, or bash.
-	`node --version`
-	`java --version`
+> `node --version` \
+> `java --version`
+
 Also, you should already have an Alexa Developer account with a configured Skill ==TODO: refer to other docs to set that up first==
 
 ## Setting up VSCode Environment
