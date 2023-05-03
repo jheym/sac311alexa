@@ -84,75 +84,118 @@ const LaunchRequestHandler = {
 
 		// speechOutput = handlerInput.t('WELCOME_MSG', { counter: counter });
 
-		function getTimeOfDay() {
- 
-			const currentDate = new Date();  // this is the current date and time in UTC time zone
+		function Greeting()  {
+			
 		  
-			const pacificOffset = -7 ; // Pacific Daylight Time (PDT) UTC-7 for sacramento california
+		  const nowUTC = Date.UTC(
+			  new Date().getUTCFullYear(),
+			  new Date().getUTCMonth(),
+			  new Date().getUTCDate(),
+			  new Date().getUTCHours(),
+			  new Date().getUTCMinutes(),
+			  new Date().getUTCSeconds(),
+			  new Date().getUTCMilliseconds()
+			);
 		  
-			// The following function is used to determine if the current date is in daylight saving time or not 
-			const isDaylightSavingTime = (date) => {
-			  const year = date.getUTCFullYear();
-			  const start_year = new Date(Date.UTC(year, 2, 14, 10)); // 2 = March 14 = 14th day of the month 10 = 10am of UTC time which is 2am of pacific time
-			  const end_year = new Date(Date.UTC(year, 10, 7, 9));   // 10 = November 7 = 7th day of the month 9 = 9am of UTC time which is 1am of pacific time
 		  
-			  const current = date.getTime();
+		  const currentUTCDate = new Date(nowUTC);
+		  console.log("current utc date "+currentUTCDate.toUTCString());
 		  
-			  return current >= start_year.getTime() && current < end_year.getTime();
-			};
+		  console.log("UTC date and time " + currentUTCDate.toUTCString());
 		  
-			// Determine the current offset for Pacific Time 
-			let currentOffset;
+		  var pacificOffset = 6; // 6 hours behind UTC time
 		  
-			if (isDaylightSavingTime(currentDate)) {
-			  currentOffset = pacificOffset + 1;
-			} else {
-			  currentOffset = pacificOffset;
-			}
-		  
-			const currentUTC = currentDate.getTime() // this is the current date and time in UTC time zone
+		  function isDaylightSavingTime(date) {
+				  const year = date.getUTCFullYear();
+				  const start_year = new Date(Date.UTC(year, 2, 14, 10)); // 2 = March 14 = 14th day of the month 10 = 10am of UTC time which is 2am of pacific time
+				  const end_year = new Date(Date.UTC(year, 10, 7, 9));   // 10 = November 7 = 7th day of the month 9 = 9am of UTC time which is 1am of pacific time
+				  
 			  
-			const currentUTC_offset = currentUTC + (currentOffset * 60 * 60 * 1000);  // 60 * 60 * 1000 = 3600000 which is 1 hour in milliseconds 
+				  const current = date.getTime();
+			  
+				  return current >= start_year.getTime() && current < end_year.getTime();
+				};
+		  console.log("is daylight saving time " + isDaylightSavingTime(currentUTCDate));
+		   if (isDaylightSavingTime(currentUTCDate)) {
+				  pacificOffset = pacificOffset + 1;
+				} else {
+				  pacificOffset = pacificOffset ;
+				}
+			  
+		  UtchoursToLocalHours =currentUTCDate.getUTCHours()-pacificOffset;   // 6 hours behind UTC time convert to pacific time
 		  
-			const currentLocalTime = new Date(currentUTC_offset);  // this is the current local time in sacramento california
+		  var time24Hours = 0;
+		  
+		  if (UtchoursToLocalHours < 0) {
+			  UtchoursToLocalHours = UtchoursToLocalHours + 24; 
+			  console.log("time24hours less than zero now  " + time24Hours);
+			  time24Hours= UtchoursToLocalHours;
+			  UtchoursToLocalHours = UtchoursToLocalHours - 12;
+			  console.log("time24hours less than zero now  after deducting 12" + time24Hours);
+		   
+		  }
+		   
+
+		  else if (UtchoursToLocalHours == 0) {
+			  UtchoursToLocalHours = 12;
+		  }
+		  
+		  else if (UtchoursToLocalHours > 12) {
+			  time24Hours= UtchoursToLocalHours;
+			  UtchoursToLocalHours = UtchoursToLocalHours - 12;
+		  }
+		  
+		  if (UtchoursToLocalHours < 10 && UtchoursToLocalHours > 0) {
+			 UtchoursToLocalHours  = "0" + UtchoursToLocalHours;
+		  }
+		  //determining AM or PM  
+		  if (time24Hours < 12) {
+			  UTChoursTOLocalHours= UtchoursToLocalHours + ":" + currentUTCDate.getUTCMinutes() + ":" + currentUTCDate.getUTCSeconds() + " AM"
+				//Todo: add AM or PM to the time at the end of the time
+		  } else  {UTChoursTOLocalHours= UtchoursToLocalHours + ":" + currentUTCDate.getUTCMinutes() + ":" + currentUTCDate.getUTCSeconds()+ " PM"
+		  }
 		  
 		  
 		  
 		  
-			const morningStart = 5;
-			const morningEnd = 11;
-			const afternoonStart = 12;
-			const afternoonEnd = 17;
-			const eveningStart = 18;
-			const eveningEnd = 22;
-			
-			// Determine the time of day
-			let timeOfDay;
-			const localHour = currentLocalTime.getHours();
+		  const morningStart = 5;
+					  const morningEnd = 11;
+					  const afternoonStart = 12;
+					  const afternoonEnd = 17;
+					  const eveningStart = 18;
+					  const eveningEnd = 22;
+					  
+					  // Determine the time of day
+					  let timeOfDay;
+					  //const localHour = currentLocalTime.getHours();
+					
+					  if (time24Hours >= morningStart && time24Hours <= morningEnd) {
+						timeOfDay = 'morning';
+					  } else if (time24Hours >= afternoonStart && time24Hours <= afternoonEnd) {
+						timeOfDay = 'afternoon';
+					  } else if (time24Hours >= eveningStart && time24Hours <= eveningEnd) {
+						timeOfDay = 'evening';
+					  } else {
+						timeOfDay = 'night';
+					  }
+		  // 				// Return the time of day
 		  
-			if (localHour >= morningStart && localHour <= morningEnd) {
-			  timeOfDay = 'morning';
-			} else if (localHour >= afternoonStart && localHour <= afternoonEnd) {
-			  timeOfDay = 'afternoon';
-			} else if (localHour >= eveningStart && localHour <= eveningEnd) {
-			  timeOfDay = 'evening';
-			} else {
-			  timeOfDay = 'night';
-			}
-			
-			// Return the time of day
-			return timeOfDay;
-			}
+		
+		  return 	timeOfDay;
+				  
+		  }
+		  
+
 		  
 		
 		// call the function to get the time of day.
-		const greeting = getTimeOfDay();
+		const greeting = Greeting();
 
 		
 
 
 		let speechOutput = 
-			`<speak> Hello! Thank you for using the City of Sacramento Alexa skill. 
+			`<speak> Good ${greeting}! Thank you for using the City of Sacramento Alexa skill. 
 			I can help you make service requests or answer any city related questions you may have. To hear my full 
 			list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
 
