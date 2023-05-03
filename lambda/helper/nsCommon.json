@@ -44,7 +44,7 @@
             "LOCATION_RETRY_REDIRECT": "Apologies, we're having trouble finding your location. Would you like to speak to a live agent?",
             "LOCATION_REPEAT_ADDRESS": "<speak>Is the location near <say-as interpret-as='address'>{{address}}</say-as>?</speak>",
 
-            "LOCATION_RETRY": "Okay, let's try that again. What's the address?",
+            "LOCATION_RETRY": "Okay, let's try that again. If you want, you may spell out the street name instead. What's the address including street name and street number?",
             "LOCATION_GET_LOCATION": "What's the location? You can give an address or nearest cross street.",
             "CONFIRM_ADDRESS_MSG": "I found an address at {{address}}. Is this the correct address?",
             "INACCURATE_GEO_MSG": "Geo location is too inaccurate to use. Would you like to try another address?",

@@ -69,10 +69,10 @@ const InProgressTrashPickupDayIntentHandler = {
 		const { attributesManager, responseBuilder } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 		const address = sessionAttributes.confirmedValidatorRes;
-		const { internal_geocoder } = address.geocoderResponse;
+		const internal_geocoder = address?.geocoderResponse?.internal_geocoder ? address.geocoderResponse.internal_geocoder : null;
 		var speechOutput;
 
-		if(!address.Within_City) {
+		if(!address.Within_City || !internal_geocoder) {
 			let speechOutput = `I'm sorry, I wasn't able to find a service day for that address.`;
 			speechOutput += ` Is there anything else I can help you with?`;
 			helper.setQuestion(handlerInput, 'AnythingElse?')

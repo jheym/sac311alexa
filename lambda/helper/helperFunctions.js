@@ -306,7 +306,9 @@ function toDays(iso8601duration) {
 }
 
 /**
- * Sets sessionAttributes.questionAsked to the given question.
+ * WARNING - Only use this function for Yes/No questions. Sets
+ * sessionAttributes.questionAsked so that the next Yes/No intent invocation can
+ * be handled.
  * @param {object} handlerInput 
  * @param {string} questionAsked 
  * @returns {void}

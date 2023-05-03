@@ -4,7 +4,7 @@ const helper = require("../helper/helperFunctions.js")
 const sfCase = require("../helper/SalesforceCaseObject.js")
 const iso8601 = require('iso8601-duration');
 
-// Started
+
 const StartedAbandonedVehicleIntentHandler = {
 	canHandle(handlerInput) {
 		return (
@@ -21,11 +21,12 @@ const StartedAbandonedVehicleIntentHandler = {
 		return handlerInput.responseBuilder
 			.withShouldEndSession(false)
 			.speak(speakOutput)
+			.reprompt(repromptOutput)
 			.getResponse();
 	}
 };
 
-// In Progress
+
 const InProgressAbandonedVehicleIntentHandler = {
 	canHandle(handlerInput) {
 		return (
@@ -39,8 +40,6 @@ const InProgressAbandonedVehicleIntentHandler = {
 		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const currentIntent = requestEnvelope.request.intent;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		const dialogState = Alexa.getDialogState(requestEnvelope);
-		const intentConfirmationStatus = currentIntent.confirmationStatus;
 		const slots = currentIntent.slots;
 		const getPhoneNumberIntent = {
 			name: 'GetPhoneNumberIntent',
@@ -83,7 +82,7 @@ const InProgressAbandonedVehicleIntentHandler = {
 			});
 		  
 			// Slow down the speech when speaking the license plate number
-			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <prosody rate="75%"><say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as></prosody>?</speak>`;
+			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as>?</speak>`;
 			helper.setQuestion(handlerInput, 'IsLicensePlateCorrect?');
 			return responseBuilder
 			  .speak(speechOutput)
