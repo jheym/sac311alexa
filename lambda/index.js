@@ -103,7 +103,6 @@ const ReportAnIssueIntentHandler = {
 
 /**
  * This handler is for handling if the user wants to try reprasing their intent
- * //TODO: Investigate if this is necessary
  */
 const yn_RetryIntentHandler = {
 	canHandle(handlerInput) {
@@ -248,7 +247,7 @@ const CancelAndStopIntentHandler = {
  * FallbackIntent triggers when a customer says something that doesn’t map to
  * any intents in your skill It must also be defined in the language model (if
  * the locale supports it) This handler can be safely added but will be
- * ingnored in locales that do not support it yet
+ * ignored in locales that do not support it yet
  * */
 const FallbackIntentHandler = {
 	canHandle(handlerInput) {
@@ -360,26 +359,6 @@ const FallbackIntentHandler = {
 		throw new Error('Unhandled case in FallbackIntent');
 
 	}
-
-	// 	if (!sessionAttributes.fallbackCount) {
-	// 		sessionAttributes.fallbackCount = 1;
-	// 	} else {
-	// 		sessionAttributes.fallbackCount++;
-	// 		if (sessionAttributes.fallbackCount >= 3) {
-	// 			handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-	// 			return handlerInput.responseBuilder
-	// 				.speak(handlerInput.t("FALLBACK_STILL_MSG"))
-	// 				.reprompt(handlerInput.t("FALLBACK_STILL_MSG_REPROMPT"))
-	// 				.getResponse();
-	// 		}
-	// 	}
-
-	// 	handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-	// 	return handlerInput.responseBuilder
-	// 		.speak(handlerInput.t("FALLBACK_MSG"))
-	// 		.reprompt(handlerInput.t("FALLBACK_MSG_REPROMPT"))
-	// 		.getResponse();
-	// },
 }
 
 
@@ -424,7 +403,7 @@ const SessionEndedRequestHandler = {
 
 /* *
  * The intent reflector is used for interaction model testing and debugging.
- * It will simply repeat the intent the user said. You can create custom handlers for your intents
+ * It will simply repeat the intent that was triggered. You can create custom handlers for your intents
  * by defining them above, then also adding them to the request handler chain below
  * */
 const IntentReflectorHandler = {
@@ -497,7 +476,7 @@ const NewSessionInterceptor = {
 };
 
 /**
- * Generic request interceptor runs tasks on every request that comes in from Alexa
+ * Generic request interceptor runs tasks on every intent request that comes in from Alexa
  */
 const GenericRequestInterceptor = {
 	process(handlerInput) {
@@ -676,7 +655,6 @@ const LocalisationRequestInterceptor = {
 /*                        DEV ENVIRONMENT SETUP                              */
 /*****************************************************************************/
 
-// Flag for checking if we are running in the Alexa-Hosted Lambda Environment
 var ddbClient;
 
 if (process.env.ENVIRONMENT === "dev") {
@@ -687,7 +665,7 @@ if (process.env.ENVIRONMENT === "dev") {
 
 	console.log("Starting local dynamoDB server...")
 	exec('java -D"java.library.path=../local_dynamodb/DynamoDBLocal_lib" -jar \
-  ../local_dynamodb/DynamoDBLocal.jar -sharedDb', (err, stdout, stderr) => {
+  		../local_dynamodb/DynamoDBLocal.jar -sharedDb', (err, stdout, stderr) => {
 		if (err) {
 			console.log(`error: ${err.message}`);
 			return;
@@ -714,14 +692,8 @@ if (process.env.ENVIRONMENT === "dev") {
 /*                        ALEXA HANDLER EXPORTS                              */
 /*****************************************************************************/
 
-/**
- * This handler acts as the entry point for your skill, routing all request and response
- * payloads to the handlers above. Make sure any new handlers or interceptors you've
- * defined are included below. The order matters - they're processed top to bottom
- * */
-//arrays can be created prior and passed using ... but there an unintended consequences
-//for now place new Handlers and Interceptors manually, order matters!
 
+// All new handlers must be added to their respective arrays
 var requestHandlers = [
 	LaunchRequestHandler,
 	SessionEndedRequestHandler,
@@ -783,16 +755,17 @@ var responseInterceptors = [
 	GenericResponseInterceptor,
 ]
 
+// Building the skill and adding all the handlers
 const skillBuilder = Alexa.SkillBuilders.custom();
 
 skillBuilder
 	.addRequestHandlers(...requestHandlers)
 	.addRequestInterceptors(...requestInterceptors)
 	.addResponseInterceptors(...responseInterceptors)
-	.withApiClient(new Alexa.DefaultApiClient()) // TODO: No longer using address API. Remove?
 	.addErrorHandlers(ErrorHandler)
 	.withCustomUserAgent("BigDino")
 
+// Adding the persistence adapter to the skill builder depending on the environment
 if (process.env.ENVIRONMENT === "dev") {
 	console.log("Setting up persistence adapter for dev environment...")
 	skillBuilder.withPersistenceAdapter(
@@ -816,6 +789,11 @@ if (process.env.ENVIRONMENT === "dev") {
 	)
 }
 
+/**
+ * This handler acts as the entry point for your skill, routing all request and response
+ * payloads to the handlers above. Make sure any new handlers or interceptors you've
+ * defined are included below. The order matters - they're processed top to bottom
+ * */
 exports.handler = skillBuilder.lambda();
 
 
