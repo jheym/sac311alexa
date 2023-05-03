@@ -15,8 +15,8 @@ const GetPreviousCaseIntentHandler = {
 	},
 	async handle(handlerInput) {
 		const { responseBuilder, attributesManager } = handlerInput;
-		const sessionAttributes = attributesManager.getSessionAttributes();
-		const caseNumber = sessionAttributes.lastCaseSubmitted || null;
+		const persistentAttributes = await attributesManager.getPersistentAttributes();
+		const caseNumber = persistentAttributes.caseNumber;
 
 		if (!caseNumber) {
 			return responseBuilder
@@ -52,7 +52,7 @@ const GetPreviousCaseIntentHandler = {
 	}
 }
 
-
+// TODO: Add regex to match service name in Description field for generic cases
 const serviceNameMap = {
 	'Vehicle On Street': 'I found a case for an abandoned vehicle',
 	'IVR Review' : 'I found a generic case'

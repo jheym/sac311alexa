@@ -83,7 +83,7 @@ const InProgressAbandonedVehicleIntentHandler = {
 			});
 		  
 			// Slow down the speech when speaking the license plate number
-			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <prosody rate="75%"><say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as></prosody>?</speak>`;
+			let speechOutput = `<speak>Just to confirm, did you say the license plate number is <say-as interpret-as="spell-out">${slots.licensePlate.value}</say-as>?</speak>`;
 			helper.setQuestion(handlerInput, 'IsLicensePlateCorrect?');
 			return responseBuilder
 			  .speak(speechOutput)

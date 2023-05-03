@@ -69,13 +69,13 @@ const InProgressGetPoliceBeatIntentHandler = {
 		const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 		const address = sessionAttributes.confirmedValidatorRes;
-		const { internal_geocoder } = address.geocoderResponse;
+		const internal_geocoder = address?.geocoderResponse?.internal_geocoder ? address.geocoderResponse.internal_geocoder : null;
+		let speechOutput;
 
-		if (!address.Within_City) {
-			speakOutput = handlerInput.t("Sorry, I cannot retrieve a police beat for your the location you gave, as it is not within the City of Sacramento.")
+		if (!address.Within_City || !internal_geocoder) {
+			speakOutput = handlerInput.t("Sorry, I cannot retrieve a police beat for the location you gave, as it is not within the City of Sacramento.")
 		}
 		else {
-			const user_fld = internal_geocoder.candidates[0].attributes.User_fld;
 			const geometry = {
 				"x": internal_geocoder.candidates[0].location.x,
 				"y": internal_geocoder.candidates[0].location.y
@@ -112,7 +112,7 @@ const InProgressGetPoliceBeatIntentHandler = {
 		}
 		speechOutput += handlerInput.t(" Is there anything else I can help you with?")
 		helper.setQuestion(handlerInput, 'AnythingElse?')
-		return handlerInput.responseBuilder
+		return responseBuilder
 			.withShouldEndSession(false)
 			.speak(`<speak>${speechOutput}</speak>`)
 			.getResponse();
