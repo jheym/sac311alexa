@@ -98,9 +98,6 @@ const LaunchRequestHandler = {
 		  
 		  
 		  const currentUTCDate = new Date(nowUTC);
-		  console.log("current utc date "+currentUTCDate.toUTCString());
-		  
-		  console.log("UTC date and time " + currentUTCDate.toUTCString());
 		  
 		  var pacificOffset = 6; // 6 hours behind UTC time
 		  
@@ -109,12 +106,11 @@ const LaunchRequestHandler = {
 				  const start_year = new Date(Date.UTC(year, 2, 14, 10)); // 2 = March 14 = 14th day of the month 10 = 10am of UTC time which is 2am of pacific time
 				  const end_year = new Date(Date.UTC(year, 10, 7, 9));   // 10 = November 7 = 7th day of the month 9 = 9am of UTC time which is 1am of pacific time
 				  
-			  
 				  const current = date.getTime();
-			  
+
 				  return current >= start_year.getTime() && current < end_year.getTime();
 				};
-		  console.log("is daylight saving time " + isDaylightSavingTime(currentUTCDate));
+		 
 		   if (isDaylightSavingTime(currentUTCDate)) {
 				  pacificOffset = pacificOffset + 1;
 				} else {
@@ -127,11 +123,8 @@ const LaunchRequestHandler = {
 		  
 		  if (UtchoursToLocalHours < 0) {
 			  UtchoursToLocalHours = UtchoursToLocalHours + 24; 
-			  console.log("time24hours less than zero now  " + time24Hours);
 			  time24Hours= UtchoursToLocalHours;
 			  UtchoursToLocalHours = UtchoursToLocalHours - 12;
-			  console.log("time24hours less than zero now  after deducting 12" + time24Hours);
-		   
 		  }
 		   
 
@@ -175,21 +168,17 @@ const LaunchRequestHandler = {
 					  } else {
 						timeOfDay = 'night';
 					  }
-		  // 				// Return the time of day
-		  
+						
 		
 		  return 	timeOfDay;
 				  
 		  }
-		  
-
-		  
+		
 		
 		// call the function to get the time of day.
 		const greeting = Greeting();
 
 		
-
 
 		let speechOutput = 
 			`<speak> Good ${greeting}! Thank you for using the City of Sacramento Alexa skill. 
@@ -206,7 +195,7 @@ const LaunchRequestHandler = {
 			I can help you make service requests or answer any city related questions you may have. To hear my full 
 			list of capabilities, you can say help. What can I do for you this ${greeting}?</speak>`
 		}
-
+t
 		// Save Skill visit count to DynamoDB
 		var counter = persistentAttributes.hasOwnProperty("counter") ? persistentAttributes.counter : 1;
 		persistentAttributes.counter = counter + 1;
