@@ -86,7 +86,6 @@ const LaunchRequestHandler = {
 
 		function Greeting()  {
 			
-		  
 		  const nowUTC = Date.UTC(
 			  new Date().getUTCFullYear(),
 			  new Date().getUTCMonth(),
@@ -155,9 +154,7 @@ const LaunchRequestHandler = {
 		  } else  {UTChoursTOLocalHours= UtchoursToLocalHours + ":" + currentUTCDate.getUTCMinutes() + ":" + currentUTCDate.getUTCSeconds()+ " PM"
 		  }
 		  
-		  
-		  
-		  
+		
 		  const morningStart = 5;
 					  const morningEnd = 11;
 					  const afternoonStart = 12;
