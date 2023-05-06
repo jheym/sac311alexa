@@ -31,7 +31,7 @@ const StartedGetPoliceBeatIntentHandler = {
 			sessionAttributes.confirmedValidatorRes = validatorObj;
 			attributesManager.setSessionAttributes(sessionAttributes);
 			let speechOutput = `Sure! I found a city address associated with your Amazon account. Would you like to use it to check your police beat?`;
-			helper.setQuestion(handlerInput, 'UseHomeAddressPoliceBeat?')
+			helper.setYNQuestion(handlerInput, 'UseHomeAddressPoliceBeat?')
 			return responseBuilder
 				.speak(speechOutput)
 				.withShouldEndSession(false)
@@ -100,7 +100,7 @@ const InProgressGetPoliceBeatIntentHandler = {
 			console.log(res);
 			try {
 				const beatLayer = res.data.layers.find(x => x.id === 6);
-				const policeBeat = beatLayer.features[0].attributes.BEAT; // TODO: Find where police beat is in the response
+				const policeBeat = beatLayer.features[0].attributes.BEAT;
 				const policeBeatSSML = `<say-as interpret-as="spell-out">${policeBeat}</say-as>`
 				speechOutput = `The police beat for the location you gave is ${policeBeatSSML}.`
 
@@ -111,7 +111,7 @@ const InProgressGetPoliceBeatIntentHandler = {
 
 		}
 		speechOutput += handlerInput.t(" Is there anything else I can help you with?")
-		helper.setQuestion(handlerInput, 'AnythingElse?')
+		helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		return responseBuilder
 			.withShouldEndSession(false)
 			.speak(`<speak>${speechOutput}</speak>`)
@@ -124,15 +124,15 @@ const yn_UseHomeAddressForPoliceBeatIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
-		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const ynQuestionAsked = handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked;
 		return (
 			requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === "UseHomeAddressPoliceBeat?"
+			ynQuestionAsked === "UseHomeAddressPoliceBeat?"
 		);
 	},
 	async handle(handlerInput) {
-		helper.setQuestion(handlerInput, null)
+		helper.setYNQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder } = handlerInput;
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {

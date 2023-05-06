@@ -33,7 +33,7 @@ class Salesforce_Case_object {
 		const sessionAttributes = attributesManager.getSessionAttributes();
 
 		// Getting json_input values from session attributes
-		this.json_input.phone_number = sessionAttributes.phoneNumber; // TODO: Should phone number be in json_input?
+		this.json_input.phone_number = sessionAttributes.phoneNumber;
 		this.json_input.address = sessionAttributes.confirmedValidatorRes.Address; 
 		
 		for (const slot of Object.entries(slots)) {
@@ -61,7 +61,7 @@ class Salesforce_Case_object {
 			"Status": "NEW", 
 			"Service_Type__c": this.service_id,
 			"Origin": "AmazonAlexa",
-			"contactId": this.contact_id, // TODO: Can this be null?
+			"contactId": this.contact_id,
 			"Description": `Initial Case description : \n ${this.case_ans['Description']}`,
 			"Email_Web_Notes__c": this.case_ans['Description'],
 		};
@@ -147,7 +147,7 @@ class Salesforce_Case_object {
 		if (user_json) { this.case_ans = this.service_question_mapper(user_json, false); } // 
 		case_body.Status = 'NEW';
 		case_body.Sub_Service_Type__c = this.service_type_id;
-		case_body.Subject = `${this.service_name}-${this.user_name}`; //TODO: user_name is undefined
+		case_body.Subject = `${this.service_name}-${this.user_name}`;
 		case_body.Service_Type__c = this.service_id;
 		case_body.Anonymous_Contact__c = this.contact_id ? "false" : "true";
 		if (this.contact_id) { case_body.contactId = this.contact_id; }
@@ -200,7 +200,6 @@ class Salesforce_Case_object {
 	};
 
 
-	// TODO: Write create_generic_case and update_generic_case
 	async create_generic_case(service_name, user_json) {
 		await this.get_service_details("IVR");
 		const case_body = {};
@@ -447,7 +446,7 @@ class Salesforce_Case_object {
 				// const response = await fetch(`${sf_url}/query/?q=${query_string}`, {
 				// 	headers: { "Authorization": `Bearer ${this.token}` }
 				// });
-				if (response.data.records.length) { // FIXME: Breaks here on getting trash pickup day
+				if (response.data.records.length) {
 					const similarCases = {};
 					response.data.records.forEach(record => {
 					  similarCases[record.CaseNumber] = record.Subject;
@@ -488,7 +487,7 @@ class Salesforce_Case_object {
 	async world_address_verification(Address="915 I Street", threshold=80) {
 		let output = {};
 		// console.log(Address.length)
-		if (Address.length > 0) { // TODO: Test many addresses. We may have to change the slot type back to AMAZON.SearchQuery.
+		if (Address.length > 0) {
 			// FIXME: Doesn't work when someone says "seven zero one forty-first street" we get "70 141st street" Should we just collect street number and street name separately?
 			let regex = /(\d)[\s,]+(?=\d(?!\d*(?:st|nd|rd|th|ST|ND|RD|TH)\b))/g; // This regex matches a space or comma followed by a number that is not followed by a number and a suffix (e.g. 1st, 2nd, 3rd, 4th, etc.)
 			Address = Address.replace(regex, '$1')
@@ -620,12 +619,12 @@ class Salesforce_Case_object {
 						out.Field_Name_in_Service__c = field.name;
 
 						if (field.name === 'DTPR_FLAG') {
-							out.Value__c = layer.features[0].attributes.hasOwnProperty(field.name) ? "Yes" : "No"; // TODO: Is this correct?
+							out.Value__c = layer.features[0].attributes.hasOwnProperty(field.name) ? "Yes" : "No";
 						} else {
-							out.Value__c = layer.features[0].attributes[field.name]; // TODO: Is this working right?
+							out.Value__c = layer.features[0].attributes[field.name];
 							// console.log(out.Value__c);
 						}
-						if (field.name === 'GARBAGE_DAY') { // TODO: Why did this execute when name wasn't garbage day
+						if (field.name === 'GARBAGE_DAY') {
 							let out2 = JSON.parse(JSON.stringify(out)); // Deep copy
 							out.Label__c = this.mapped[layer.id][field.name][0];
 							out2.Label__c = this.mapped[layer.id][field.name][1];
@@ -637,7 +636,7 @@ class Salesforce_Case_object {
 					}}}
 		} // layer loop
 
-		this.gis_json = JSON.stringify(temp); // TODO: Compare this format to already created cases
+		this.gis_json = JSON.stringify(temp);
 			
 	} // get_gis_attribute
 		
@@ -653,7 +652,7 @@ class Salesforce_Case_object {
 			if (!typeof(out_json.internal_geocoder) === 'object') {
 				var resp_json = out_json.internal_geocoder;
 			} else {
-				resp_json = out_json.world_geocoder; // TODO: Is world geocoder response not an object?
+				resp_json = out_json.world_geocoder;
 			}
 		} else {
 			resp_json = address_json;
@@ -756,7 +755,7 @@ class Salesforce_Case_object {
 		const case_question_sequence = {	
 			"vehicle on":[
 				"Vehicle Color","Vehicle Make",
-				"Vehicle Model","License Plate Number", // TODO: Does this need to be spelled "licence"?
+				"Vehicle Model","License Plate Number",
 				"# of Days Abandoned","ACTIVITY","ASSIGN TO",
 				"CASE STATUS","CITIZENSERVE CATEGORY",
 				"DEPARTMENT","FILE TYPE","PRIORITY",
@@ -853,43 +852,8 @@ class Salesforce_Case_object {
 			}
 		}
 		
-		caseq = new_seq; // TODO: Confirm new_seq has expected output
+		caseq = new_seq;
 		this.caseq = caseq;
-
-		// ** OLD CODE ** //
-		// if (this.update_case) {
-		// 	const resp = [];
-		// 	let start_time = new Date().getTime();
-		// 	for (let json_out of caseq) {
-		// 		delete json_out.Integration_Type__c; // TODO: Delete these lines. They are temporary until permissions are fixed
-		// 		delete json_out.Portal_Question_Label__c;
-		// 		try {
-		// 			var case_resp = await axios({ // TODO: Don't await here. Send all the requests at once and await them all at the end
-		// 				url: `${this.sf_url}/sobjects/Case_Questions__c`,
-		// 				method: 'POST',
-		// 				headers: { 
-		// 					'Authorization': `Bearer ${this.token}`,
-		// 					'Content-Type': 'application/json',
-		// 					'Accept-Encoding': 'application/json'
-		// 				},
-		// 				data: json_out
-		// 			});
-
-		// 			if (![200, 201, 204, 203].includes(case_resp.status)) {
-		// 				console.log('Error updating case questions');
-		// 				console.log(case_resp.data);
-		// 			}
-		// 		} catch(error) {
-		// 			console.error("Error creating basic case");
-		// 			console.log(error);
-		// 			throw error;
-		// 		}
-		// 		resp.push(case_resp.data);
-		// 	} // Done posting data
-		// 	this.case_question_details = resp;
-		// 	let end_time = new Date().getTime();
-		// 	console.log(`Old code time: ${end_time - start_time}`);
-		// }
 
 		// ** OPTIMIZED CODE ** //
 		if (this.update_case) {
@@ -1111,7 +1075,6 @@ class Salesforce_Case_object {
 			"Integration_Tag__c" :"Asset Id"
 			}]
 		
-		// TODO: Is it okay I added "vehicle on street" to the map here?
 		let subject_map = {'dead animal':Dead_Right_of_Way,"dead":Dead_Right_of_Way,
 						'abandoned vehicle':Vehicle_On_Street,"vehicle on":Vehicle_On_Street,"vehicle":Vehicle_On_Street,"vehicle on street":Vehicle_On_Street,
 						'relamp':Relamp, 'concern':homeless_concern, 'homeless camp- trash':homeless_trash_concern, 'homeless encampment blocking sidewalk':homeless_sidewalk}

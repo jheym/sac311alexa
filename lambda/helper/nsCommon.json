@@ -47,9 +47,6 @@
             "LOCATION_RETRY": "Okay, let's try that again. If you want, you may spell out the street name instead. What's the address including street name and street number?",
             "LOCATION_GET_LOCATION": "What's the location? You can give an address or nearest cross street.",
             "CONFIRM_ADDRESS_MSG": "I found an address at {{address}}. Is this the correct address?",
-            "INACCURATE_GEO_MSG": "Geo location is too inaccurate to use. Would you like to try another address?",
-            "UNAUTHORIZED_GEO_MSG": "Sacramento311 would like to use your current location. To turn on location sharing, please go to your Alexa app, and follow the instructions.",
-            "UNAVAILABLE_GEO_MSG": "This device is stationary so geoLocation is unavaible. Would you like to use your home address instead?",
 
             "PHONE_GET_NUMBER": "What is your phone number?",
             "PHONE_CONFIRM": "Is your phone number {{phone}}?",

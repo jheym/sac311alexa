@@ -20,7 +20,7 @@ const GetPhoneNumberIntentHandler = {
 		if (userGivenPhoneNumberSlot.value && userGivenPhoneNumberSlot.confirmationStatus === 'CONFIRMED' ) {
 			sessionAttributes.confirmedPhoneNumber = userGivenPhoneNumberSlot.value;
 			handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-			const updatedIntent = helper.switchIntent(handlerInput, sessionAttributes.intentToRestore);
+			const updatedIntent = helper.skipAutodelegation(handlerInput, sessionAttributes.intentToRestore);
 			return responseBuilder
 				.addDelegateDirective(updatedIntent)
 				.getResponse()
@@ -33,7 +33,7 @@ const GetPhoneNumberIntentHandler = {
 			if (helper.getFailCounter(handlerInput) >= 2) {
 				helper.clearFailCounter(handlerInput);
 				sessionAttributes.confirmedPhoneNumber = 'FAILED'
-				const updatedIntent = helper.switchIntent(handlerInput, sessionAttributes.intentToRestore);
+				const updatedIntent = helper.skipAutodelegation(handlerInput, sessionAttributes.intentToRestore);
 				helper.sendProgressiveResponse(handlerInput, `I'm sorry, I'm having trouble understanding your phone number. We can continue without it. <break time="1s"/>`)
 				return responseBuilder
 					.addDelegateDirective(updatedIntent)

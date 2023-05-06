@@ -33,7 +33,7 @@ const StartedTrashPickupDayIntentHandler = {
 			sessionAttributes.confirmedValidatorRes = validatorObj;
 			attributesManager.setSessionAttributes(sessionAttributes);
 			let speechOutput = `Sure! I found a city address associated with your Amazon account. Would you like to use it to check your garbage day?`;
-			helper.setQuestion(handlerInput, 'UseHomeAddressForGarbage?')
+			helper.setYNQuestion(handlerInput, 'UseHomeAddressForGarbage?')
 			return responseBuilder
 				.speak(speechOutput)
 				.withShouldEndSession(false)
@@ -75,7 +75,7 @@ const InProgressTrashPickupDayIntentHandler = {
 		if(!address.Within_City || !internal_geocoder) {
 			let speechOutput = `I'm sorry, I wasn't able to find a service day for that address.`;
 			speechOutput += ` Is there anything else I can help you with?`;
-			helper.setQuestion(handlerInput, 'AnythingElse?')
+			helper.setYNQuestion(handlerInput, 'AnythingElse?')
 			return responseBuilder
 			.withShouldEndSession(false)
 			.speak(speechOutput)
@@ -92,7 +92,7 @@ const InProgressTrashPickupDayIntentHandler = {
 			if (!(internal_geocoder.candidates[0].attributes.Addr_type === 'Address')) {
 				let speechOutput = `I'm sorry, I cannot retrieve a pickup day for that address.`;
 				speechOutput += ` Is there anything else I can help you with?`;
-				helper.setQuestion(handlerInput, 'AnythingElse?');
+				helper.setYNQuestion(handlerInput, 'AnythingElse?');
 				return responseBuilder
 				.withShouldEndSession(false)
 				.speak(speechOutput)
@@ -161,7 +161,7 @@ const InProgressTrashPickupDayIntentHandler = {
 		}
 	
 		speechOutput += `Is there anything else I can help you with?`;
-		helper.setQuestion(handlerInput, 'AnythingElse?')
+		helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		return responseBuilder
 		.withShouldEndSession(false)
 		.speak(speechOutput)
@@ -174,15 +174,15 @@ const yn_UseHomeAddressForGarbageDayIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
-		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const ynQuestionAsked = handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked;
 		return (
 			requestType === "IntentRequest" && 
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === "UseHomeAddressForGarbage?"
+			ynQuestionAsked === "UseHomeAddressForGarbage?"
 		);
 	},
 	async handle(handlerInput) {
-		helper.setQuestion(handlerInput, null)
+		helper.setYNQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {

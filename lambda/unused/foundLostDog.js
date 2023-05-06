@@ -8,6 +8,8 @@
  * if no, ask if there is anything else we can help with
  */
 
+
+
 /* Information from call:
  *If you see a loose dog in a busy area, its best not to try to catch them, as they may run into traffic. They will likely wander into a quieter area, or someone's yard where they can be safely secured.
  *If you've already captured the dog, the best possible thing you can do for the dog is to keep them in your home and take a few days to try to find the owner before bringing them to a shelter.
@@ -20,6 +22,13 @@
  *between 12pm to 5pm seven days a week. However, there may be a long late time as we prioritize emergencies and citizens with existing appointments.
  *An appointment is highly recommended. Would you like to submit a service request to be reviewed by someone at City of Sacramento?
  */
+
+
+// FIXME: The Description confirmation does not work for this intent. Use
+// addConfirmSlotDirective. Additionally, you are not supposed to use the
+// setYNQuestion() function for anything other than yes/no intents. Doing so may
+// cause unintended behavior. 
+
 
 const Alexa = require("ask-sdk-core")
 const helper = require("../helper/helperFunctions.js")
@@ -38,8 +47,8 @@ const StartedFoundLostDogIntentHandler = {
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 		sessionAttributes.intentToRestore = 'FoundLostDogIntent';
 		attributesManager.setSessionAttributes(sessionAttributes);
-		helper.setQuestion(handlerInput, null);
-		helper.setQuestion(handlerInput, 'confirmLostDog?');
+		helper.setYNQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, 'confirmLostDog?');
 
 		return responseBuilder
 			.speak(handlerInput.t('LOSTDOG_CONFIRM'))
@@ -54,14 +63,14 @@ const yn_StartedFoundLostDogIntentHandler = {
             Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
             (Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent" ||
 				Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent") &&
-            handlerInput.attributesManager.getSessionAttributes().questionAsked === 'confirmLostDog?'
+            handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'confirmLostDog?'
         )
     },
     async handle(handlerInput) {
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 		attributesManager.setSessionAttributes(sessionAttributes);
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			let GetLocationFromUserIntent = {
@@ -79,7 +88,7 @@ const yn_StartedFoundLostDogIntentHandler = {
 				.getResponse();
 		}
 		else {
-			helper.setQuestion(handlerInput, 'AnythingElse?')
+			helper.setYNQuestion(handlerInput, 'AnythingElse?')
 			return responseBuilder
 				.speak(handlerInput.t('ANYTHING_ELSE_MSG'))
 				.withShouldEndSession(false)
@@ -99,7 +108,7 @@ const InProgressFoundLostDogIntentHandler = {
     async handle(handlerInput) {
         const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 
 		const getPhoneNumberIntent = {
 			name: 'GetPhoneNumberIntent',
@@ -118,7 +127,7 @@ const InProgressFoundLostDogIntentHandler = {
 		}
 
 		if (sessionAttributes.FoundLostDogIntent.slots.foundLostDogInfo.value) {
-			helper.setQuestion(handlerInput, 'submitDogTicket?')
+			helper.setYNQuestion(handlerInput, 'submitDogTicket?')
 			let desc = Alexa.getSlotValue(handlerInput.requestEnvelope, 'foundLostDogInfo');
 			return responseBuilder
 				.speak(handlerInput.t('REPEAT_DESC',{desc: `${desc}`}))
@@ -136,7 +145,7 @@ const InProgressFoundLostDogIntentHandler = {
 		speechOutput += ' If neither you or anyone you know can care for the dog for a few days, you can make an appointment to bring the dog to the shelter by.... You can also bring the dog to the shelter without an appointment' 
 		speechOutput += ' between 12pm to 5pm seven days a week. However, there may be a long late time as we prioritize emergencies and citizens with existing appointments.'
 		speechOutput += ' An appointment is highly recommended. Would you like to submit a service request to be reviewed by someone at City of Sacramento?'
-		helper.setQuestion(handlerInput, 'LostDogServiceRequestCorrect?')
+		helper.setYNQuestion(handlerInput, 'LostDogServiceRequestCorrect?')
 
 		return responseBuilder
             .speak(speechOutput)
@@ -152,11 +161,11 @@ const yn_SubmitLostDogServiceRequestIntentHandler = {
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
 			(Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent" ||
 				Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent") &&
-			handlerInput.attributesManager.getSessionAttributes().questionAsked === 'LostDogServiceRequestCorrect?'
+			handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'LostDogServiceRequestCorrect?'
 		);
 	},
 	handle(handlerInput) {
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -168,7 +177,7 @@ const yn_SubmitLostDogServiceRequestIntentHandler = {
 				.getResponse();
 		} 
 		else {
-			helper.setQuestion(handlerInput, 'AnythingElse?')
+			helper.setYNQuestion(handlerInput, 'AnythingElse?')
 			return responseBuilder
 				.speak(handlerInput.t('ANYTHING_ELSE_MSG'))
 				.withShouldEndSession(false)
@@ -183,11 +192,11 @@ const yn_CompletedFoundLostDogServiceRequest = {
 			Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
 			(Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent" ||
 				Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent") &&
-            handlerInput.attributesManager.getSessionAttributes().questionAsked === 'submitDogTicket?'
+            handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'submitDogTicket?'
 		);
 	},
 	async handle(handlerInput) {
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 		
@@ -207,7 +216,7 @@ const yn_CompletedFoundLostDogServiceRequest = {
 		const create_case_response = await helper.createGenericCase(handlerInput, myCaseObj, 'LostDog', userResponses, null, address, phoneNumber);
 		const update_case_response = await helper.updateGenericCase(myCaseObj, 'LostDog', userResponses, create_case_response.case_id, address, phoneNumber);
         console.log(update_case_response);
-        helper.setQuestion(handlerInput, 'AnythingElse?')
+        helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
 		    .speak(handlerInput.t('GENERIC_CASE_THANKS'))
 			.withShouldEndSession(false)

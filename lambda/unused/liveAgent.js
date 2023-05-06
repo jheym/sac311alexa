@@ -3,6 +3,11 @@ const index = require("./index.js")
 const axios = require('axios');
 const { v4: uuid } = require('uuid');
 
+// This file provides an example of how to use the Alexa Communications API to
+// initiate a phone call session from the Skill. AWS Chime SDK is required.
+// Refer to the following article for additional details:
+// https://docs.aws.amazon.com/chime-sdk/latest/dg/alexa-calling.html
+
 const LiveAgentIntentHandler = {
   canHandle(handlerInput) {
     return (

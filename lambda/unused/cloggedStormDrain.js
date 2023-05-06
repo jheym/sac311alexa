@@ -2,6 +2,12 @@ const Alexa = require("ask-sdk-core")
 const helper = require("../helper/helperFunctions.js")
 const sfCase = require("../helper/SalesforceCaseObject.js")
 
+
+// FIXME: The Description confirmation does not work for this intent. Use
+// addConfirmSlotDirective. Additionally, you are not supposed to use the
+// setYNQuestion() function for anything other than yes/no intents. Doing so may
+// cause unintended behavior. 
+
 const StartedCloggedStormDrainIntentHandler = {
     canHandle(handlerInput) {
         return (
@@ -15,8 +21,8 @@ const StartedCloggedStormDrainIntentHandler = {
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 		sessionAttributes.intentToRestore = 'CloggedStormDrainIntent';
 		attributesManager.setSessionAttributes(sessionAttributes);
-		helper.setQuestion(handlerInput, null);
-		helper.setQuestion(handlerInput, 'confirmCloggedDrain?');
+		helper.setYNQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, 'confirmCloggedDrain?');
 
 		return responseBuilder
 			.speak(handlerInput.t('CLOGGED_CONFIRM'))
@@ -31,14 +37,14 @@ const yn_StartedCloggedStormDrainIntentHandler = {
             Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
             (Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent" ||
 				Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent") &&
-				handlerInput.attributesManager.getSessionAttributes().questionAsked === 'confirmCloggedDrain?'
+				handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'confirmCloggedDrain?'
         )
     },
     async handle(handlerInput) {
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 		attributesManager.setSessionAttributes(sessionAttributes);
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			let GetLocationFromUserIntent = {
@@ -56,7 +62,7 @@ const yn_StartedCloggedStormDrainIntentHandler = {
 				.getResponse();
 		}
 		else {
-			helper.setQuestion(handlerInput, 'AnythingElse?')
+			helper.setYNQuestion(handlerInput, 'AnythingElse?')
 			return responseBuilder
 				.speak(handlerInput.t('ANYTHING_ELSE_MSG'))
 				.withShouldEndSession(false)
@@ -76,7 +82,7 @@ const InProgressCloggedStormDrainIntentHandler = {
     async handle(handlerInput) {
         const { attributesManager, requestEnvelope, responseBuilder } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 
 		const getPhoneNumberIntent = {
 			name: 'GetPhoneNumberIntent',
@@ -95,7 +101,7 @@ const InProgressCloggedStormDrainIntentHandler = {
 		}
 
 		if (sessionAttributes.CloggedStormDrainIntent.slots.cloggedStormDrainInfo.value) {
-			helper.setQuestion(handlerInput, 'submitCloggedTicket?')
+			helper.setYNQuestion(handlerInput, 'submitCloggedTicket?')
 			let desc = Alexa.getSlotValue(handlerInput.requestEnvelope, 'cloggedStormDrainInfo');
 			return responseBuilder
 				.speak(handlerInput.t('REPEAT_DESC',{desc: `${desc}`}))
@@ -103,7 +109,7 @@ const InProgressCloggedStormDrainIntentHandler = {
 				.getResponse();
 		}
 
-		helper.setQuestion(handlerInput, 'CloggedDrainServiceRequestCorrect?')
+		helper.setYNQuestion(handlerInput, 'CloggedDrainServiceRequestCorrect?')
 		return responseBuilder
             .speak(handlerInput.t('CLOGGED_INFO')) //normally gets rerouted to live agent
             .withShouldEndSession(false)
@@ -117,11 +123,11 @@ const yn_SubmitCloggedDrainServiceRequestIntentHandler = {
 			Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
 			(Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent" ||
 				Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent") &&
-			handlerInput.attributesManager.getSessionAttributes().questionAsked === 'CloggedDrainServiceRequestCorrect?'
+			handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'CloggedDrainServiceRequestCorrect?'
 		);
 	},
 	handle(handlerInput) {
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -133,7 +139,7 @@ const yn_SubmitCloggedDrainServiceRequestIntentHandler = {
 				.getResponse();
 		} 
 		else {
-			helper.setQuestion(handlerInput, 'AnythingElse?')
+			helper.setYNQuestion(handlerInput, 'AnythingElse?')
 			return responseBuilder
 				.speak(handlerInput.t('ANYTHING_ELSE_MSG'))
 				.withShouldEndSession(false)
@@ -148,11 +154,11 @@ const yn_CompletedCloggedStormDrainServiceRequest = {
 			Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
 			(Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent" ||
 				Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent") &&
-            handlerInput.attributesManager.getSessionAttributes().questionAsked === 'submitCloggedTicket?'
+            handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'submitCloggedTicket?'
 		);
 	},
 	async handle(handlerInput) {
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 		const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
 		const sessionAttributes = attributesManager.getSessionAttributes();
 		
@@ -172,7 +178,7 @@ const yn_CompletedCloggedStormDrainServiceRequest = {
 		const create_case_response = await helper.createGenericCase(handlerInput, myCaseObj, 'Curb/Gutter', userResponses, null, address, phoneNumber);
 		const update_case_response = await helper.updateGenericCase(myCaseObj, 'Curb/Gutter', userResponses, create_case_response.case_id, address, phoneNumber);
         console.log(update_case_response);
-        helper.setQuestion(handlerInput, 'AnythingElse?')
+        helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
 		    .speak(handlerInput.t('GENERIC_CASE_THANKS'))
 			.withShouldEndSession(false)

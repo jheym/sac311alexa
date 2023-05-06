@@ -6,7 +6,7 @@
         {
             "name": "Debug Alexa Skill (Node.js)",
             "type": "node",
-            "runtimeVersion": "16.20.0",
+            "runtimeVersion": "16.20.0", // Recommended: Use NVM to install the same version of Node.js as your Lambda runtime
             "request": "launch",
             "program": "${command:ask.debugAdapterPath}",
             "args": [

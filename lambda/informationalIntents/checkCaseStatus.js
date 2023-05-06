@@ -1,10 +1,5 @@
 const Alexa = require("ask-sdk");
 const helper = require("../helper/helperFunctions.js")
-// TODO: Notes for Ronald
-// Convert caseDateISO to a month and day (e.g. "May 1st")
-// Create a map for serviceName to a more human-readable name (e.g. "I found a case for abandoned vehicle' instead of 'I found a case for Vehicle On Street")
-// Create a map for caseStatus to a more human-readable value (e.g. "It's status is still waiting to be assigned" instead of "It's status is currently NEW")
-// Use both maps in the code below to replace the original values with the human-readable values in the speech output.
 
 const GetPreviousCaseIntentHandler = {
 	canHandle(handlerInput) {
@@ -42,7 +37,7 @@ const GetPreviousCaseIntentHandler = {
 		let date = dateObj.getDate();
 		let month = dateObj.getMonth() + 1;
 		let year = dateObj.getFullYear();
-		helper.setQuestion(handlerInput, 'AnythingElse?')
+		helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		
 		const dateString = `<say-as interpret-as="date" format="mdy">${month}-${date}-${year}</say-as>`
 		return responseBuilder

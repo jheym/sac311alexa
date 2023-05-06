@@ -23,7 +23,7 @@ const GenericServiceRequestIntentHandler = {
 			I can collect a description of your issue and submit it to the \
 			city to be reviewed by a service agent later. Would you like to \
 			submit a generic case? You can say yes or no.`;
-            helper.setQuestion(handlerInput, 'SubmitGenericServiceRequest?');
+            helper.setYNQuestion(handlerInput, 'SubmitGenericServiceRequest?');
             return responseBuilder
                 .speak(speechOutput)
                 .withShouldEndSession(false)
@@ -49,7 +49,7 @@ const GenericServiceRequestIntentHandler = {
                 helper.clearFailCounter(handlerInput);
                 const speechOutput = `I'm sorry we are unable to submit your service request. If you need to submit a service request you can always call \
                 3-1-1 or visit the city's website at 311.cityofsacramento.org. Is there anything else I can help you with?`;
-                helper.setQuestion(handlerInput, 'AnythingElse?');
+                helper.setYNQuestion(handlerInput, 'AnythingElse?');
                 return responseBuilder
                     .speak(speechOutput)
                     .withShouldEndSession(false)
@@ -67,7 +67,7 @@ const GenericServiceRequestIntentHandler = {
         if (slots.genericServiceDescription.confirmationStatus === 'CONFIRMED' && !sessionAttributes.confirmedValidatorRes) {
             
             if (helper.isGeolocationAvailable(handlerInput) === "supported") {
-				helper.setQuestion(handlerInput, 'UseGeolocation?')
+				helper.setYNQuestion(handlerInput, 'UseGeolocation?')
 				let speechOutput = `It helps if I have a location for your service request. Would you like to use your current location to submit your service request?`;
                 return responseBuilder
 					.speak(speechOutput)
@@ -78,7 +78,7 @@ const GenericServiceRequestIntentHandler = {
                 if (addressLine1.length > 0) {
                     const addressString = `<say-as interpret-as="address">${addressLine1}</say-as>`
                     let speechOutput = `<speak>It helps if I have a location for your service request. We found a home address associated with your account at ${addressString}, do you want to use it for your service request?</speak>`;
-                    helper.setQuestion(handlerInput, 'UseHomeAddress?')
+                    helper.setYNQuestion(handlerInput, 'UseHomeAddress?')
                     return responseBuilder
                         .speak(speechOutput)
                         .withShouldEndSession(false)
@@ -136,7 +136,7 @@ const GenericServiceRequestIntentHandler = {
 			const create_case_res = await helper.createGenericCase(handlerInput, myCaseObj, 'unknown', userResponses, address, phoneNumber);
 			await helper.updateGenericCase(myCaseObj, 'unknown', userResponses, create_case_res.case_id, address, phoneNumber);
             const speechOutput = `Thank you for submitting your service request. You can always call 3-1-1 or visit the city's website at 3-1-1.cityofsacramento.org. Is there anything else I can help you with?`;
-            helper.setQuestion(handlerInput, 'AnythingElse?');
+            helper.setYNQuestion(handlerInput, 'AnythingElse?');
             console.log(`Case submitted. Case Number: ${create_case_res.case_number}`);
             return responseBuilder
                 .speak(speechOutput)

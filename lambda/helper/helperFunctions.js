@@ -2,7 +2,7 @@ const axios = require("axios")
 const iso8601 = require("iso8601-duration");
 
 
-/** //TODO: Get this working on a lambda environment
+/**
  * This function gets an OAuth token for use with the Salesforce API.
  * It returns a new token and should be used in every request to the Salesforce API.
  * Be sure to have a valid .env file containing the following variables:
@@ -157,9 +157,9 @@ async function updateIntegratedCase(handlerInput, slots, caseId, SalesforceCaseO
  * SalesForceCaseObject class
  * @param {string} serviceName - name of the service required
  * @param {obj} genericDescription - description of the issue from the user
- * @param {string} address - optional address //TODO: Is this optional?
+ * @param {string} address - optional address
  * @param {string} phoneNumber - Optional phone number for service agent to
- * reach back out. Must be 9 digits no spaces or symbols.  //TODO: Is this true?
+ * reach back out. Must be 9 digits no spaces or symbols.
  * @returns {object} case_response - response from the Salesforce API containing
  * {case_number, case_id}
  */
@@ -184,9 +184,9 @@ async function createGenericCase(handlerInput, SalesforceCaseObject, serviceName
  * case description. Generally, you should create this object from the
  * handlerInput slot values.
  * @param {string} caseId - the caseId of the case you want to update
- * @param {string} address - optional address //TODO: Is this optional?
+ * @param {string} address - optional address
  * @param {string} phoneNumber - Optional phone number for service agent to
- * reach back out. Must be 9 digits no spaces or symbols.  //TODO: Is this true?
+ * reach back out. Must be 9 digits no spaces or symbols.
  * @returns {object} { case_id, http_response_status }
  */
 async function updateGenericCase(SalesforceCaseObject, serviceName, userResponses, caseId, address=null, phoneNumber=null, checkContact=false) {
@@ -307,15 +307,15 @@ function toDays(iso8601duration) {
 
 /**
  * WARNING - Only use this function for Yes/No questions. Sets
- * sessionAttributes.questionAsked so that the next Yes/No intent invocation can
+ * sessionAttributes.ynQuestionAsked so that the next Yes/No intent invocation can
  * be handled.
  * @param {object} handlerInput 
- * @param {string} questionAsked 
+ * @param {string} ynQuestionAsked 
  * @returns {void}
  */
-function setQuestion(handlerInput, questionAsked) {
+function setYNQuestion(handlerInput, ynQuestionAsked) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-	sessionAttributes.questionAsked = questionAsked;
+	sessionAttributes.ynQuestionAsked = ynQuestionAsked;
 	handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 }
 
@@ -396,7 +396,7 @@ function createIntentFromSlots(intentName, slots) {
  * A hacky way to re-enter a previously invoked intent without Alexa taking over
  * dialog management. It works by replacing the slot values with dummy values,
  * tricking Alexa into immediately sending back the intent with a dialog state
- * of COMPLETED. ContextSwitchingRequestInterceptor is also required as it is
+ * of COMPLETED. ContextSwitchingRequestInterceptor is also involved as it is
  * responsible for saving intent objects from previously-entered intents
  *
  * Sets the sessionAttributes.hasDummyValues flag so the complementary
@@ -409,21 +409,21 @@ function createIntentFromSlots(intentName, slots) {
  * @example
  * handle(handlerInput) {
  *     return handlerInput.responseBuilder
- *     .addDelegateDirective(switchIntent(handlerInput, 'MyIntent')) 
+ *     .addDelegateDirective(helper.skipAutodelegation(handlerInput, 'MyIntent')) 
  *     .getResponse();
  * }
  */
-function switchIntent(handlerInput, intentName) {
+function skipAutodelegation(handlerInput, intentName) {
 	const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 	
 	if (!(intentName in sessionAttributes))
-		throw new Error(`switchIntent Error: Intent ${intentName} not found in session attributes. Intent must have already been invoked previously.`);
+		throw new Error(`skipAutodelegation Error: Intent ${intentName} not found in session attributes. Intent must have already been invoked previously.`);
 	
 	const { attributesManager } = handlerInput;
 	const updatedIntent = JSON.parse(JSON.stringify(sessionAttributes[intentName])); // Deep copy
 	for (let k in updatedIntent.slots)
 	
-		updatedIntent.slots[k].value = 'dummy';
+	updatedIntent.slots[k].value = 'dummy';
 	sessionAttributes.hasDummyValues = true; // Set flag for RestoreDummyValuesRequestInterceptor
 	attributesManager.setSessionAttributes(sessionAttributes);
 	return updatedIntent
@@ -646,7 +646,7 @@ function PhoneNumberFormat(phoneNum) {
 module.exports = {
 	getOAuthToken,
 	querySFDB,
-	setQuestion,
+	setYNQuestion,
 	clearContextIntent,
 	clearSlots,
 	reverseGeocode,
@@ -656,7 +656,7 @@ module.exports = {
 	isHomeAddressAvailable,
 	isGeolocationAvailable,
 	createIntentFromSlots,
-	switchIntent,
+	skipAutodelegation,
 	getGeolocation,
 	getHomeAddress,
 	getWorldAddress,
@@ -771,7 +771,6 @@ function getQA(handlerInput, currentIntent) {
 /**
  * Gets the highest scoring address candidate from the ArcGIS world geocoder.
  * The returned address will be used to query the sac311gis API for more details.
- * TODO: Find out which return address we should be using from the response.
  * @param {string} address 
  * @returns {Promise<string|boolean>} Returns the address if found, otherwise false.
  */

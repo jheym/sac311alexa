@@ -31,7 +31,7 @@ const StartedGetCouncilDistrictIntentHandler = {
 			sessionAttributes.confirmedValidatorRes = validatorObj;
 			attributesManager.setSessionAttributes(sessionAttributes);
 			let speechOutput = `Sure! I found a city address associated with your Amazon account. Would you like to use it to check your council district?`;
-			helper.setQuestion(handlerInput, 'UseHomeAddressCouncilDistrict?')
+			helper.setYNQuestion(handlerInput, 'UseHomeAddressCouncilDistrict?')
 			return responseBuilder
 				.speak(speechOutput)
 				.withShouldEndSession(false)
@@ -101,7 +101,7 @@ const InProgressGetCouncilDistrictIntentHandler = {
 			try {
 				console.log(JSON.stringify(res.data, null, 2))
 				const districtLayer = res.data.layers.find(x => x.id === 8);
-				const distNum = districtLayer.features[0].attributes.DISTNUM; // TODO: Find where police beat is in the response
+				const distNum = districtLayer.features[0].attributes.DISTNUM;
 				const distNumSSML = `<say-as interpret-as="spell-out">${distNum}</say-as>`
 				const distMember = districtLayer.features[0].attributes.NAME;
 				speechOutput = `The council district for the location you gave is district ${distNumSSML}, and the district member is ${distMember}.`
@@ -113,7 +113,7 @@ const InProgressGetCouncilDistrictIntentHandler = {
 
 		}
 		speechOutput += handlerInput.t(" Is there anything else I can help you with?")
-		helper.setQuestion(handlerInput, 'AnythingElse?')
+		helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		return responseBuilder
 			.withShouldEndSession(false)
 			.speak(`<speak>${speechOutput}</speak>`)
@@ -126,15 +126,15 @@ const yn_UseHomeAddressForCouncilDistrictIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
-		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const ynQuestionAsked = handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked;
 		return (
 			requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === "UseHomeAddressCouncilDistrict?"
+			ynQuestionAsked === "UseHomeAddressCouncilDistrict?"
 		);
 	},
 	async handle(handlerInput) {
-		helper.setQuestion(handlerInput, null)
+		helper.setYNQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder } = handlerInput;
 
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {

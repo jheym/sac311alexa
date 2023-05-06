@@ -11,24 +11,19 @@ const AWS = require("aws-sdk")
 const dynamoDbPersistenceAdapter = require("ask-sdk-dynamodb-persistence-adapter")
 const i18n = require("i18next")
 const axios = require("axios")
-require('dotenv').config() // TODO: Will this work on lambda env?
+require('dotenv').config()
 
 
 // Local modules
-const sfCase = require("./helper/SalesforceCaseObject.js")
 const helper = require("./helper/helperFunctions.js")
 const languageStrings = require("./helper/nsCommon.json")
 const abandonedVehicle = require("./serviceRequestIntents/abandonedVehicle.js")
 const getLocation = require("./addressCollectionFlow")
 const getPhoneNumber = require("./phoneNumberCollection.js")
-const intentFlagsFile = require("./helper/intentFlags.js"); const intentFlags = intentFlagsFile.intentFlags;
 const trashPickupDay = require("./informationalIntents/trashPickupDay.js");
 const getPoliceBeat = require("./informationalIntents/getPoliceBeat.js");
 const getCouncilDistrict = require("./informationalIntents/getCouncilDistrict.js");
-const foundLostDog = require("./serviceRequestIntents/foundLostDog.js");
 const checkCaseStatus = require("./informationalIntents/checkCaseStatus.js");
-const cloggedStormDrain = require("./serviceRequestIntents/cloggedStormDrain.js");
-const KnowledgeBaseIntent = require("./informationalIntents/KnowledgeBaseIntent.js");
 const genericServiceRequest = require("./serviceRequestIntents/genericServiceRequest.js");
 
 
@@ -90,7 +85,7 @@ const ReportAnIssueIntentHandler = {
 	},
 	handle(handlerInput) {
 
-		helper.setQuestion(handlerInput, null);
+		helper.setYNQuestion(handlerInput, null);
 		return (
 			handlerInput.responseBuilder
 				.speak(handlerInput.t('REPORT_ISSUE'))
@@ -108,13 +103,13 @@ const yn_RetryIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope)
-		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const ynQuestionAsked = handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked;
 		return (requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === "TryAgain?");
+			ynQuestionAsked === "TryAgain?");
 	},
 	handle(handlerInput) {
-		helper.setQuestion(handlerInput, null) // Remember to clear the questionAsked field for other y/n questions in same session
+		helper.setYNQuestion(handlerInput, null) // Remember to clear the ynQuestionAsked field for other y/n questions in same session
 		const { requestEnvelope, responseBuilder } = handlerInput;
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			return responseBuilder
@@ -134,13 +129,13 @@ const yn_AnythingElseIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope)
-		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const ynQuestionAsked = handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked;
 		return (requestType === "IntentRequest" &&
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === "AnythingElse?");
+			ynQuestionAsked === "AnythingElse?");
 	},
 	handle(handlerInput) {
-		helper.setQuestion(handlerInput, null)
+		helper.setYNQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder } = handlerInput;
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
 			return responseBuilder
@@ -161,15 +156,15 @@ const yn_SubmitGenericServiceRequestIntentHandler = {
 	canHandle(handlerInput) {
 		const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
 		const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
-		const questionAsked = handlerInput.attributesManager.getSessionAttributes().questionAsked;
+		const ynQuestionAsked = handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked;
 		return (
 			requestType === "IntentRequest" && 
 			(intentName === "AMAZON.YesIntent" || intentName === "AMAZON.NoIntent") &&
-			questionAsked === 'SubmitGenericServiceRequest?'
+			ynQuestionAsked === 'SubmitGenericServiceRequest?'
 		);
 	},
 	handle(handlerInput) {
-		helper.setQuestion(handlerInput, null)
+		helper.setYNQuestion(handlerInput, null)
 		const { requestEnvelope, responseBuilder } = handlerInput;
 		
 		if (Alexa.getIntentName(requestEnvelope) === "AMAZON.YesIntent") {
@@ -199,7 +194,7 @@ const yn_SubmitGenericServiceRequestIntentHandler = {
 			City of Sacramento by calling 3-1-1 or by visiting the website at 3-1-1.cityofsacramento.org. \
 			Is there anything else I can help you with?`
 			
-			helper.setQuestion(handlerInput, 'AnythingElse?');
+			helper.setYNQuestion(handlerInput, 'AnythingElse?');
 			
 			return responseBuilder
 			.speak(speechOutput)
@@ -272,7 +267,7 @@ const FallbackIntentHandler = {
 				delete sessionAttributes.responseToRestore;
 				sessionAttributes.isElicitingSlot = false;
 				handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-				helper.setQuestion(handlerInput, 'SubmitGenericServiceRequest?')
+				helper.setYNQuestion(handlerInput, 'SubmitGenericServiceRequest?')
 				return handlerInput.responseBuilder
 					.speak(`I'm sorry, let's try something else. Would you like to describe your issue to be reviewed by a service agent later? You can say yes or no.`)
 					.withShouldEndSession(false)
@@ -306,7 +301,7 @@ const FallbackIntentHandler = {
 			I can collect a description of your issue and submit it to the \
 			city to be reviewed by a service agent later. Would you like to \
 			submit a generic case? You can say yes or no.`;
-			helper.setQuestion(handlerInput, 'SubmitGenericServiceRequest?')
+			helper.setYNQuestion(handlerInput, 'SubmitGenericServiceRequest?')
 			return handlerInput.responseBuilder
 				.speak(speechOutput)
 				.withShouldEndSession(false)
@@ -317,11 +312,11 @@ const FallbackIntentHandler = {
 			speechOutput = `Hmm, I'm not sure I understand, could you repeat that?`;
 			repromptOutput = `I didnt understand what you said, can you repeat that?`;
 
-			if (sessionAttributes.questionAsked === 'AnythingElse?' && sessionAttributes.questionAskedSSML) {
+			if (sessionAttributes.ynQuestionAsked === 'AnythingElse?' && sessionAttributes.ynQuestionAskedSSML) {
 				speechOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
 				repromptOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
-			} else if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
-				let ynQuestion = sessionAttributes.questionAskedSSML;
+			} else if (sessionAttributes.ynQuestionAsked && sessionAttributes.ynQuestionAskedSSML) {
+				let ynQuestion = sessionAttributes.ynQuestionAskedSSML;
 				ynQuestion = ynQuestion.replace(/<\/?speak>/g, ''); // remove ssml speak tags
 				speechOutput = `I'm sorry, I didn't quite catch that. ${ynQuestion}`
 				repromptOutput = `I'm sorry, I didn't quite catch that. ${ynQuestion}`
@@ -339,11 +334,11 @@ const FallbackIntentHandler = {
 			repromptOutput = `I'm sorry, I still didn't understand, let's try one more time. Maybe you could try rephrasing your question?`;
 			
 			
-			if (sessionAttributes.questionAsked === 'AnythingElse?' && sessionAttributes.questionAskedSSML) {
+			if (sessionAttributes.ynQuestionAsked === 'AnythingElse?' && sessionAttributes.ynQuestionAskedSSML) {
 				speechOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
 				repromptOutput = `I'm sorry, I didn't quite catch that. Is there anything else I can help you with?`
-			} else if (sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML) {
-				let ynQuestion = sessionAttributes.questionAskedSSML;
+			} else if (sessionAttributes.ynQuestionAsked && sessionAttributes.ynQuestionAskedSSML) {
+				let ynQuestion = sessionAttributes.ynQuestionAskedSSML;
 				ynQuestion = ynQuestion.replace(/<\/?speak>/g, ''); // remove ssml speak tags
 				speechOutput = ynQuestion;
 				repromptOutput = ynQuestion;
@@ -385,9 +380,9 @@ const SessionEndedRequestHandler = {
 		}
 
 		if (handlerInput.requestEnvelope.request.reason === 'EXCEEDED_MAX_REPROMPTS' &&
-			sessionAttributes.questionAsked && sessionAttributes.questionAskedSSML)
+			sessionAttributes.ynQuestionAsked && sessionAttributes.ynQuestionAskedSSML)
 		{
-			const repromptQuestion = sessionAttributes.questionAskedSSML;
+			const repromptQuestion = sessionAttributes.ynQuestionAskedSSML;
 			return responseBuilder
 			.speak(`I'm sorry, I didn't quite catch that. ${repromptQuestion}`)
 			.withShouldEndSession(false)
@@ -438,13 +433,13 @@ const ErrorHandler = {
 
 		if (error)
 
-		helper.setQuestion(handlerInput, 'AnythingElse?')
+		helper.setYNQuestion(handlerInput, 'AnythingElse?')
 		return handlerInput.responseBuilder
 			.speak(handlerInput.t("ERROR_MSG"))
 			.reprompt(handlerInput.t("ERROR_MSG"))
 			.withShouldEndSession(false)
 			.getResponse();
-	},
+	}
 }
 
 
@@ -483,9 +478,10 @@ const GenericRequestInterceptor = {
 		if (handlerInput.requestEnvelope.request.type === "IntentRequest") {
 			const { attributesManager } = handlerInput;
 			const sessionAttributes = attributesManager.getSessionAttributes();
+			const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
 			
 			// Increment the fallback count if the request is a fallback intent, else delete the fallbackCount if exists
-			if (handlerInput.requestEnvelope.request.intent.name === "AMAZON.FallbackIntent") {
+			if (intentName === "AMAZON.FallbackIntent") {
 				sessionAttributes.fallbackCount = sessionAttributes.fallbackCount ? sessionAttributes.fallbackCount + 1 : 1;
 				attributesManager.setSessionAttributes(sessionAttributes);
 			} else {
@@ -493,6 +489,10 @@ const GenericRequestInterceptor = {
 					delete sessionAttributes.fallbackCount;
 					attributesManager.setSessionAttributes(sessionAttributes);
 				}
+			}
+
+			if (sessionAttributes.ynQuestionAsked && !(intentName === 'AMAZON.YesIntent' || intentName === 'AMAZON.NoIntent')) {
+				helper.setYNQuestion(handlerInput, null);
 			}
 			
 		} // if intentRequest
@@ -525,12 +525,12 @@ const GenericResponseInterceptor = {
 		}
 		// console.log("ResponseInterceptor: " + JSON.stringify(response, null, 2));
 
-		if (sessionAttributes.questionAsked && response && response.outputSpeech && response.outputSpeech.ssml) {
-			sessionAttributes.questionAskedSSML = response.outputSpeech.ssml;
+		if (sessionAttributes.ynQuestionAsked && response && response.outputSpeech && response.outputSpeech.ssml) {
+			sessionAttributes.ynQuestionAskedSSML = response.outputSpeech.ssml;
 			attributesManager.setSessionAttributes(sessionAttributes);
 		} else {
-			if (sessionAttributes.questionAskedSSML) {
-				delete sessionAttributes.questionAskedSSML;
+			if (sessionAttributes.ynQuestionAskedSSML) {
+				delete sessionAttributes.ynQuestionAskedSSML;
 			}
 			attributesManager.setSessionAttributes(sessionAttributes);
 		}
@@ -583,33 +583,7 @@ const ContextSwitchingRequestInterceptor = {
 }
 
 /**
- * When one of the intents in intentFlags is invoked, this interceptor will set
- * the corresponding flags in sessionAttributes. This executes more than it
- * needs to but it the overhead is marginal. 
- * 
- * **Example usage:** the flags are useful
- * for telling the getLocation handlers whether or not to ask for geolocation or
- * home address.
- */
-const SetIntentFlagsRequestInterceptor = {
-	process(handlerInput) {
-		if (handlerInput.requestEnvelope.request.type === "IntentRequest" &&
-			handlerInput.requestEnvelope.request.intent.name in intentFlags) {
-			const { requestEnvelope, attributesManager } = handlerInput;
-			const currentIntent = requestEnvelope.request.intent;
-			const sessionAttributes = attributesManager.getSessionAttributes();
-			if (!sessionAttributes.intentFlags)
-				sessionAttributes.intentFlags = {}
-			if (currentIntent.name !== sessionAttributes.intentFlags.intentName) {
-				sessionAttributes.intentFlags = intentFlags[currentIntent.name].flags;
-				attributesManager.setSessionAttributes(sessionAttributes);
-			}
-		}
-	}
-}
-
-/**
- * This interceptor restores the slots values when the switchIntent() function
+ * This interceptor restores the slots values when the skipAutodelegation() function
  * is used.
  */
 const RestoreDummyValuesRequestInterceptor = {
@@ -660,7 +634,6 @@ var ddbClient;
 if (process.env.ENVIRONMENT === "dev") {
 	console.log("Configuring dev environment...")
 
-	// require('dotenv').config() //TODO: Restore this for prod env?
 	const { exec } = require('child_process');
 
 	console.log("Starting local dynamoDB server...")
@@ -721,27 +694,13 @@ var requestHandlers = [
 	abandonedVehicle.CompletedAbandonedVehicleIntentHandler,
 	trashPickupDay.StartedTrashPickupDayIntentHandler,
 	trashPickupDay.InProgressTrashPickupDayIntentHandler,
+	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
 	getPoliceBeat.StartedGetPoliceBeatIntentHandler,
 	getPoliceBeat.InProgressGetPoliceBeatIntentHandler,
 	getPoliceBeat.yn_UseHomeAddressForPoliceBeatIntentHandler,
 	getCouncilDistrict.StartedGetCouncilDistrictIntentHandler,
 	getCouncilDistrict.InProgressGetCouncilDistrictIntentHandler,
-	getCouncilDistrict.yn_UseHomeAddressForCouncilDistrictIntentHandler,
-	foundLostDog.StartedFoundLostDogIntentHandler,
-	foundLostDog.yn_StartedFoundLostDogIntentHandler,
-	foundLostDog.InProgressFoundLostDogIntentHandler,
-	foundLostDog.yn_SubmitLostDogServiceRequestIntentHandler,
-	foundLostDog.yn_CompletedFoundLostDogServiceRequest,
-	KnowledgeBaseIntent.StartedKBTrashCanIntentHandler,
-	KnowledgeBaseIntent.StartedKBJunkPickUpIntentHandler,
-	KnowledgeBaseIntent.StartedKBPayJunkPickupIntentHandler,
-	KnowledgeBaseIntent.StartedKBReplacementContainerIntentHandler,
-	trashPickupDay.yn_UseHomeAddressForGarbageDayIntentHandler,
-	cloggedStormDrain.StartedCloggedStormDrainIntentHandler,
-	cloggedStormDrain.yn_StartedCloggedStormDrainIntentHandler,
-	cloggedStormDrain.InProgressCloggedStormDrainIntentHandler,
-	cloggedStormDrain.yn_SubmitCloggedDrainServiceRequestIntentHandler,
-	cloggedStormDrain.yn_CompletedCloggedStormDrainServiceRequest
+	getCouncilDistrict.yn_UseHomeAddressForCouncilDistrictIntentHandler
 ]
 
 var requestInterceptors = [
@@ -751,11 +710,10 @@ var requestInterceptors = [
 	RestoreDummyValuesRequestInterceptor, // This might have to be before ContextSwitchingRequestInterceptor
 	ContextSwitchingRequestInterceptor,
 	getLocation.GetLocationRequestInterceptor,
-	SetIntentFlagsRequestInterceptor,
 ]
 
 var responseInterceptors = [
-	GenericResponseInterceptor,
+	GenericResponseInterceptor
 ]
 
 // Building the skill and adding all the handlers
@@ -766,7 +724,7 @@ skillBuilder
 	.addRequestInterceptors(...requestInterceptors)
 	.addResponseInterceptors(...responseInterceptors)
 	.addErrorHandlers(ErrorHandler)
-	.withCustomUserAgent("BigDino")
+	.withCustomUserAgent("Dino-311/1.0")
 
 // Adding the persistence adapter to the skill builder depending on the environment
 if (process.env.ENVIRONMENT === "dev") {
@@ -807,69 +765,6 @@ exports.handler = skillBuilder.lambda();
 
 
 // UNUSED CODE
-
-/**
- * This request interceptor tries to get the user's full name from the Alexa API
- * at the beginning of a session and saves it to persistent attributes
- * (dynamoDB).
- *
- * FIXME: Figure out why this was breaking for Ronald
- */
-const PersonalizationRequestInterceptor = {
-	async process(handlerInput) {
-		if (
-			Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
-		) {
-			const { attributesManager, requestEnvelope } = handlerInput;
-			const { apiAccessToken } = requestEnvelope.context.System
-				? requestEnvelope.context.System
-				: null;
-			const sessionAttributes = attributesManager.getSessionAttributes() || {};
-			let persistentAttributes =
-				(await attributesManager.getPersistentAttributes()) || {};
-			console.log(
-				"persistentAttributes: " + JSON.stringify(persistentAttributes)
-			);
-			const userFullName = persistentAttributes.hasOwnProperty("userFullName")
-				? persistentAttributes.userFullName
-				: null;
-			console.log("userFullName: " + userFullName);
-
-			// If no full name was in persistent attributes, get it from the API
-			if (!userFullName) {
-				// Axios config to set headers
-				let config = {
-					headers: {
-						Authorization: `Bearer ${apiAccessToken}`,
-					},
-				};
-
-				try {
-					res = await axios.get(
-						"https://api.amazonalexa.com/v2/accounts/~current/settings/Profile.name",
-						config
-					);
-				} catch (error) {
-					console.log("There was a problem getting the user's name");
-					console.log(error);
-				}
-
-				if (res.status === 200) {
-					persistentAttributes = { userFullName: res.data };
-					attributesManager.setPersistentAttributes(persistentAttributes); // Pay attention to these two lines: set
-					await attributesManager.savePersistentAttributes(); // and then save
-				} else {
-					console.log("There was a problem getting the user's name");
-					console.log(res);
-				}
-			} else {
-				// Else, if there was a full name in persistent attributes, set it in session attributes
-				sessionAttributes.userFullName = userFullName;
-				attributesManager.setSessionAttributes(sessionAttributes);
-			}
-		}
-	},
-};
 
 
 /**

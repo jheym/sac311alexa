@@ -17,8 +17,8 @@ const HomelessCampIntentHandler = {
     if (Alexa.getDialogState(handlerInput.requestEnvelope) === "STARTED") {
       sessionAttributes.reasonForCalling = currentIntent.name // GetAddress needs this
       const speakOutput = handlerInput.t('HOMELESS_CONFIRMATION')
-      helper.setQuestion(handlerInput, null)
-      helper.setQuestion(handlerInput, 'IsHomelessCampCorrect')
+      helper.setYNQuestion(handlerInput, null)
+      helper.setYNQuestion(handlerInput, 'IsHomelessCampCorrect')
       return (
         handlerInput.responseBuilder
           .withShouldEndSession(false)
@@ -66,9 +66,9 @@ const HomelessCampIntentHandler = {
             .getResponse()
         )
       } else {
-        helper.setQuestion(handlerInput, null)
-        helper.setQuestion(handlerInput, 'AnythingElse?')
-        console.log(sessionAttributes.questionAsked)
+        helper.setYNQuestion(handlerInput, null)
+        helper.setYNQuestion(handlerInput, 'AnythingElse?')
+        console.log(sessionAttributes.ynQuestionAsked)
         return (
           handlerInput.responseBuilder
             .speak(handlerInput.t('HOMELESS_THANKS',{homelessCamp: `${homelessCamp}`, numPeople: `${numPeople}`, propertyType: `${propertyType}`, location: `${location}`}))
@@ -85,14 +85,14 @@ const YesHomelessCampIntentHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.YesIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsHomelessCampCorrect')
+      && handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'IsHomelessCampCorrect')
   },
   handle(handlerInput) {
     const { attributesManager, responseBuilder } = handlerInput
     const sessionAttributes = attributesManager.getSessionAttributes()
     // Getting slots from the initial intent if any were included
     homelessCampSlots = sessionAttributes['HomelessCampIntent'].slots
-    helper.setQuestion(handlerInput, null)
+    helper.setYNQuestion(handlerInput, null)
 
     // // If the user provided an address with initial intent, store the address in the userProvidedAddress property
     // if (homelessCampSlots.homelessCampAddress.value) {
@@ -117,12 +117,12 @@ const NoHomelessCampIntentHandler = {
   canHandle(handlerInput) {
     return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
       && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.NoIntent'
-      && handlerInput.attributesManager.getSessionAttributes().questionAsked === 'IsHomelessCampCorrect')
+      && handlerInput.attributesManager.getSessionAttributes().ynQuestionAsked === 'IsHomelessCampCorrect')
 
   },
   handle(handlerInput) {
-    helper.setQuestion(handlerInput, null)
-    helper.setQuestion(handlerInput, 'TryAgain')
+    helper.setYNQuestion(handlerInput, null)
+    helper.setYNQuestion(handlerInput, 'TryAgain')
     return (
       handlerInput.responseBuilder
         .speak(handlerInput.t('UNKNOWN_MSG'))
