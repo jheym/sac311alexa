@@ -10,3 +10,4 @@ lambda/util.js
 jsconfig.json
 replay_sessions/
 skill-package/
+lambda/coverage/

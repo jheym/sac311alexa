@@ -909,8 +909,3 @@ const DelegateDirectiveResponseInterceptor = {
 		}
 	}
 };
-module.exports = {LaunchRequestHandler, HelpIntentHandler, yn_RetryIntentHandler, 
-	ReportAnIssueIntentHandler,yn_AnythingElseIntentHandler,yn_SubmitGenericServiceRequestIntentHandler,
-	FallbackIntentHandler, SessionEndedRequestHandler,IntentReflectorHandler,ErrorHandler, NewSessionInterceptor,
-	NewSessionInterceptor,GenericRequestInterceptor, GenericResponseInterceptor,CancelAndStopIntentHandler,
-    ContextSwitchingRequestInterceptor,SetIntentFlagsRequestInterceptor,RestoreDummyValuesRequestInterceptor,LocalisationRequestInterceptor};
