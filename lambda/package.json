@@ -13,6 +13,7 @@
     "ask-sdk-core": "^2.7.0",
     "ask-sdk-dynamodb-persistence-adapter": "^2.9.0",
     "ask-sdk-model": "^1.19.0",
+    "ask-sdk-test": "^2.7.9",
     "aws-sdk": "^2.1366.0",
     "axios": "^1.2.0",
     "dotenv": "^16.0.3",
@@ -20,6 +21,24 @@
     "iso8601-duration": "^2.1.1"
   },
   "devDependencies": {
-    "ask-sdk-local-debug": "file:ask-sdk-local-debug"
+    "ask-sdk-local-debug": "file:ask-sdk-local-debug",
+    "jest": "^29.5.0"
+
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/",
+      "..helper/SalesforceCaseObject.js",
+      "index.js",
+      "..helper/formatAddress.js",
+      "..serviceRequestIntents/genericServiceRequest.js",
+      "..helper/helperFunctions.js"
+
+    ]
   }
+
+
+  
 }

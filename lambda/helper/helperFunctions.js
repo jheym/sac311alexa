@@ -481,41 +481,41 @@ async function getWorldAddress(address) {
  * @param {object} potentialCandidate
  * @returns {Promise<string|boolean>} Returns the best candidate if found, otherwise false.
 */
-async function getInternalAddressCandidate(potentialCandidate) {
-	if (!potentialCandidate) {
-		throw new Error('No Candidate was found.');
-	}
+// async function getInternalAddressCandidate(potentialCandidate) {
+// 	if (!potentialCandidate) {
+// 		throw new Error('No Candidate was found.');
+// 	}
 
-	try {
-		const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates`
-		const response = await axios.get(url, {
-			params: {
-				Street: potentialCandidate.attributes.ShortLabel,
-				City: potentialCandidate.attributes.City,
-				ZIP: potentialCandidate.attributes.Postal,
-				SingleLine: potentialCandidate.attributes.ShortLabel,
-				outFields: '*',
-				outSR: 4326,
-				f: 'pjson'
-			}
-		});
-		const candidates = response.data.candidates;
-		let chosenCandidate = null;
-		for (let candidate of candidates) {
-			if (candidate.score === 100) {
-				chosenCandidate = candidate;
-				break;
-			}
-			if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
-				chosenCandidate = candidate;
-			}
-		}
-		return chosenCandidate ? chosenCandidate : false;
-	} catch (error) {
-		console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
-		throw new Error(`Failed to find suitable address. ${error.message}`);
-	}
-}
+// 	try {
+// 		const url = `${process.env.INTERNAL_GIS_ENDPOINT}/arcgis/rest/services/ADDRESS_AND_STREETS/GeocodeServer/findAddressCandidates`
+// 		const response = await axios.get(url, {
+// 			params: {
+// 				Street: potentialCandidate.attributes.ShortLabel,
+// 				City: potentialCandidate.attributes.City,
+// 				ZIP: potentialCandidate.attributes.Postal,
+// 				SingleLine: potentialCandidate.attributes.ShortLabel,
+// 				outFields: '*',
+// 				outSR: 4326,
+// 				f: 'pjson'
+// 			}
+// 		});
+// 		const candidates = response.data.candidates;
+// 		let chosenCandidate = null;
+// 		for (let candidate of candidates) {
+// 			if (candidate.score === 100) {
+// 				chosenCandidate = candidate;
+// 				break;
+// 			}
+// 			if (candidate.score >= 85 && (!chosenCandidate || candidate.score > chosenCandidate.score)) {
+// 				chosenCandidate = candidate;
+// 			}
+// 		}
+// 		return chosenCandidate ? chosenCandidate : false;
+// 	} catch (error) {
+// 		console.error(`Failed to find suitable address. ResponseCode: ${error.response.status}, ResponseData: ${JSON.stringify(error.response.data)}`);
+// 		throw new Error(`Failed to find suitable address. ${error.message}`);
+// 	}
+// }
 
 async function getInternalAddress(candidate) {
 	if (!candidate) {

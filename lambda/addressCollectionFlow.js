@@ -407,112 +407,112 @@ module.exports = {
 }
 
 
-/** Not currently in use */
-const GetLocationIntentHandler = { //TODO: Is this handler necessary?
-	canHandle(handlerInput) {
-		return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
-			Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent')
-	},
-	handle(handlerInput) {
-		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
-		const sessionAttributes = attributesManager.getSessionAttributes();
-		const geoLocationFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getGeolocation;
-		const homeAddressFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getHomeAddress;
-		const geolocation = sessionAttributes.getLocation && sessionAttributes.getLocation.geolocation // Set by GetLocationInterceptor
-		const homeAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.homeAddress // Set by GetLocationInterceptor
+// /** Not currently in use */
+// const GetLocationIntentHandler = { //TODO: Is this handler necessary?
+// 	canHandle(handlerInput) {
+// 		return (Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+// 			Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetLocationIntent')
+// 	},
+// 	handle(handlerInput) {
+// 		const { responseBuilder, requestEnvelope, attributesManager } = handlerInput;
+// 		const sessionAttributes = attributesManager.getSessionAttributes();
+// 		const geoLocationFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getGeolocation;
+// 		const homeAddressFlag = sessionAttributes.intentFlags && sessionAttributes.intentFlags.getHomeAddress;
+// 		const geolocation = sessionAttributes.getLocation && sessionAttributes.getLocation.geolocation // Set by GetLocationInterceptor
+// 		const homeAddress = sessionAttributes.getLocation && sessionAttributes.getLocation.homeAddress // Set by GetLocationInterceptor
 
 
 
-		if (geoLocationFlag && geolocation) {
-			// Ask user if they would like to use their current location
-			// Validate the geolocation by reverse geocoding and using sf case object
-			// Confirm validated address with the user (new yn_intent)
-			// if yes, set the sessionAttributes.confirmedLocation to the validated address
-			// if no, ask the user for an address (GetAddressFromUserIntent)
-		}
+// 		if (geoLocationFlag && geolocation) {
+// 			// Ask user if they would like to use their current location
+// 			// Validate the geolocation by reverse geocoding and using sf case object
+// 			// Confirm validated address with the user (new yn_intent)
+// 			// if yes, set the sessionAttributes.confirmedLocation to the validated address
+// 			// if no, ask the user for an address (GetAddressFromUserIntent)
+// 		}
 
 
-		if (homeAddressFlag && homeAddress) {
-			// Validate the home address by using sf case object
-			// Confirm validated address with the user (new yn_intent)
-			// if yes, set the sessionAttributes.confirmedLocation to the validated address
-			// if no, ask the user for an address (GetAddressFromUserIntent)
-		}
-	}
-}
+// 		if (homeAddressFlag && homeAddress) {
+// 			// Validate the home address by using sf case object
+// 			// Confirm validated address with the user (new yn_intent)
+// 			// if yes, set the sessionAttributes.confirmedLocation to the validated address
+// 			// if no, ask the user for an address (GetAddressFromUserIntent)
+// 		}
+// 	}
+// }
 
 
-/** 
- * Not currently using this, but leaving it here as an example of modifying the
- * response before it goes out based on whether or not the response is trying to
- * delegate to the specified intent
- **/
-const DelegateToGetLocationResponseInterceptor = {
-	async process(handlerInput, response) {
-		if (response && response.directives && response.directives[0].updatedIntent && response.directives[0].updatedIntent.name === 'GetLocationIntent' &&
-			response.directives[0].type === 'Dialog.Delegate') {
+// /** 
+//  * Not currently using this, but leaving it here as an example of modifying the
+//  * response before it goes out based on whether or not the response is trying to
+//  * delegate to the specified intent
+//  **/
+// const DelegateToGetLocationResponseInterceptor = {
+// 	async process(handlerInput, response) {
+// 		if (response && response.directives && response.directives[0].updatedIntent && response.directives[0].updatedIntent.name === 'GetLocationIntent' &&
+// 			response.directives[0].type === 'Dialog.Delegate') {
 
-			const { attributesManager, requestEnvelope, serviceClientFactory } = handlerInput
-			const sessionAttributes = attributesManager.getSessionAttributes()
+// 			const { attributesManager, requestEnvelope, serviceClientFactory } = handlerInput
+// 			const sessionAttributes = attributesManager.getSessionAttributes()
 
-			// If a GetLocation field already exists then this does not need to run again
-			if (!sessionAttributes.GetLocation) {
-				const consentToken = requestEnvelope.context.System.user.permissions
-					&& requestEnvelope.context.System.user.permissions.consentToken
-				var isGeoSupported = requestEnvelope.context.System.device.supportedInterfaces.Geolocation
-				sessionAttributes.GetLocation = {}
+// 			// If a GetLocation field already exists then this does not need to run again
+// 			if (!sessionAttributes.GetLocation) {
+// 				const consentToken = requestEnvelope.context.System.user.permissions
+// 					&& requestEnvelope.context.System.user.permissions.consentToken
+// 				var isGeoSupported = requestEnvelope.context.System.device.supportedInterfaces.Geolocation
+// 				sessionAttributes.GetLocation = {}
 
-				if (!consentToken) {
-					console.log('The user has not given any permissions')
-				}
+// 				if (!consentToken) {
+// 					console.log('The user has not given any permissions')
+// 				}
 
-				if (isGeoSupported) {
-					if (requestEnvelope.context.Geolocation) {
-						sessionAttributes.GetLocation.Geolocation = requestEnvelope.context.Geolocation;
-					}
-				}
+// 				if (isGeoSupported) {
+// 					if (requestEnvelope.context.Geolocation) {
+// 						sessionAttributes.GetLocation.Geolocation = requestEnvelope.context.Geolocation;
+// 					}
+// 				}
 
-				// Getting the home address associated with the user, if it exists
-				try {
-					const { deviceId } = requestEnvelope.context.System.device;
-					const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
-					// This is why the function is async. We wait for a response from the
-					// serviceClient API before executing the next line of code.
-					const address = await deviceAddressServiceClient.getFullAddress(deviceId);  // This is an API call to the ASC
+// 				// Getting the home address associated with the user, if it exists
+// 				try {
+// 					const { deviceId } = requestEnvelope.context.System.device;
+// 					const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
+// 					// This is why the function is async. We wait for a response from the
+// 					// serviceClient API before executing the next line of code.
+// 					const address = await deviceAddressServiceClient.getFullAddress(deviceId);  // This is an API call to the ASC
 
-					if (address.addressLine1 === null && address.stateOrRegion === null) {
-						console.log('The user does not have an address set.')
-					} else {
-						sessionAttributes.GetLocation.asc = {}
-						sessionAttributes.GetLocation.asc.address = address.addressLine1;
-						sessionAttributes.GetLocation.asc.stateOrRegion = address.stateOrRegion;
-						sessionAttributes.GetLocation.asc.postalCode = address.postalCode;
-						console.log('The address has been stored in session attributes.');
-					}
-				} catch (error) {
-					if (error.name !== 'ServiceError') {
-						console.log('Something went wrong.')
-					}
-					console.log('There was a service error getting the address ~~~~~\n', error)
-				}
-				attributesManager.setSessionAttributes(sessionAttributes);
-			}
-		}
-		// clear the current response object
-		for (let key in response) {
-			delete response[key]
-		}
-		// This is how to build a custom response from scratch in a response interceptor
-		response.outputSpeech = {}
-		response.outputSpeech.type = "PlainText"
-		response.outputSpeech.text = "Would you like to use your current location for the address of your report?"
-		response.outputSpeech.playBehavior = "REPLACE_ENQUEUED"
-		response.shouldEndSession = false
-		response.reprompt = {}
-		response.reprompt.outputSpeech = {}
-		response.reprompt.outputSpeech.type = "PlainText"
-		response.reprompt.outputSpeech.text = "Would you like to use your current location for the address of your report?"
-		helper.setQuestion(handlerInput, null)
-		helper.setQuestion(handlerInput, 'UseCurrentLocation')
-	}
-}
+// 					if (address.addressLine1 === null && address.stateOrRegion === null) {
+// 						console.log('The user does not have an address set.')
+// 					} else {
+// 						sessionAttributes.GetLocation.asc = {}
+// 						sessionAttributes.GetLocation.asc.address = address.addressLine1;
+// 						sessionAttributes.GetLocation.asc.stateOrRegion = address.stateOrRegion;
+// 						sessionAttributes.GetLocation.asc.postalCode = address.postalCode;
+// 						console.log('The address has been stored in session attributes.');
+// 					}
+// 				} catch (error) {
+// 					if (error.name !== 'ServiceError') {
+// 						console.log('Something went wrong.')
+// 					}
+// 					console.log('There was a service error getting the address ~~~~~\n', error)
+// 				}
+// 				attributesManager.setSessionAttributes(sessionAttributes);
+// 			}
+// 		}
+// 		// clear the current response object
+// 		for (let key in response) {
+// 			delete response[key]
+// 		}
+// 		// This is how to build a custom response from scratch in a response interceptor
+// 		response.outputSpeech = {}
+// 		response.outputSpeech.type = "PlainText"
+// 		response.outputSpeech.text = "Would you like to use your current location for the address of your report?"
+// 		response.outputSpeech.playBehavior = "REPLACE_ENQUEUED"
+// 		response.shouldEndSession = false
+// 		response.reprompt = {}
+// 		response.reprompt.outputSpeech = {}
+// 		response.reprompt.outputSpeech.type = "PlainText"
+// 		response.reprompt.outputSpeech.text = "Would you like to use your current location for the address of your report?"
+// 		helper.setQuestion(handlerInput, null)
+// 		helper.setQuestion(handlerInput, 'UseCurrentLocation')
+// 	}
+// }
