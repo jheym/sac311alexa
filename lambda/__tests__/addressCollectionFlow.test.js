@@ -724,7 +724,7 @@ describe('yn_UseHomeAddressIntentHandler', () => {
     expect(response.directives[0].type).toBe('Dialog.Delegate');
  
   });
-  test('yn_UseHomeAddressIntentHandler - User says NO to using home address', async () => {
+  test('yn_UseHomeAddressIntentHandler - User says NO to using home address error handler', async () => {
     
       handlerInput.requestEnvelope.request.intent = {
         name: 'AMAZON.NoIntent',
